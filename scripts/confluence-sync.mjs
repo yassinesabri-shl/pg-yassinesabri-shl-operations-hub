@@ -406,10 +406,27 @@ function stage(work) {
   if (folders.length) git(work, ['add', '-A', '--', ...folders]);
 }
 
+/**
+ * A worktree of an earlier run may still hold the branch, on a laptop that runs apply twice. A stale
+ * entry whose folder is gone is pruned. A folder that is still there is never removed: the run stops
+ * and names it, because the person may still want what is in it.
+ */
+function holdOfBranch(cwd) {
+  git(cwd, ['worktree', 'prune']);
+  const list = git(cwd, ['worktree', 'list', '--porcelain']) || '';
+  for (const block of list.split('\n\n')) {
+    const path = (block.match(/^worktree (.+)$/m) || [])[1];
+    if (path && block.includes(`branch refs/heads/${BRANCH}`)) {
+      throw new Stop(EXIT.FAIL, `the branch ${BRANCH} is checked out in ${path}, the worktree of an earlier run. Remove it with "git worktree remove ${path}", then run again`);
+    }
+  }
+}
+
 function apply({ cwd, trunk, out, level, writes, items }) {
   const work = join(out, 'worktree');
   if (existsSync(work)) throw new Stop(EXIT.USAGE, `${work} already exists; give an empty --out`);
   mkdirSync(out, { recursive: true });
+  holdOfBranch(cwd);
   git(cwd, ['worktree', 'add', '--quiet', '-B', BRANCH, work, `origin/${trunk}`]);
   for (const [path, text] of writes) {
     mkdirSync(dirname(join(work, path)), { recursive: true });
@@ -462,12 +479,17 @@ const LABELS = {
 };
 const ORDER = ['created', 'updated', 'restored', 'demoted', 'reformat', 'duplicate', 'skipped', 'orphan', 'moved', 'missing-folder', 'failed', 'ignored', 'no-file'];
 
+const ON_DISK = ['created', 'updated', 'restored', 'demoted', 'unchanged', 'orphan', 'moved'];
+/** A reason as sentences: each part that follows a full stop starts with a capital. */
+const sentence = (text) => String(text).split('. ').map((s) => (s ? s[0].toUpperCase() + s.slice(1) : s)).join('. ');
+
 function report({ conn, level, folder, items, changed }) {
   const lines = [];
   const counts = Object.fromEntries(ORDER.map((a) => [a, items.filter((i) => i.action === a).length]));
-  lines.push(`Confluence ${conn.site}, space ${conn.space}, folder ${folder}. Level: ${level}.`);
+  lines.push(`**Confluence:** ${conn.site} · **Space:** ${conn.space} · **Folder:** ${folder} · **Level:** ${level}`);
   lines.push('');
-  lines.push(ORDER.filter((a) => counts[a]).map((a) => `${counts[a]} ${LABELS[a].toLowerCase()}`).join(' · ') || 'Nothing to report.');
+  const tally = ORDER.filter((a) => counts[a]).map((a) => `${counts[a]} ${LABELS[a].toLowerCase()}`).join(' · ');
+  lines.push(tally ? `**${tally}**` : '**Nothing to report.**');
   for (const a of ORDER) {
     const list = items.filter((i) => i.action === a);
     if (!list.length || a === 'no-file') continue;
@@ -476,7 +498,9 @@ function report({ conn, level, folder, items, changed }) {
       const page = i.url ? `[${i.title || i.page}](${i.url})` : i.page ? `page ${i.page}` : '';
       const by = i.author ? `, version ${i.version} by ${i.author}` : i.version ? `, version ${i.version}` : '';
       const what = [i.id, page].filter(Boolean).join(' — ');
-      lines.push(`- ${what || i.path}${by}${i.path && what ? ` → \`${i.path}\`` : ''}${i.status ? `: ${i.status}` : ''}${i.why ? `. ${i.why}` : ''}`);
+      // A path only for a file that exists: written, demoted, or a summary with no page here.
+      const file = i.path && what && ON_DISK.includes(i.action) ? ` → \`${i.path}\`` : '';
+      lines.push(`- ${what || i.path}${by}${file}${i.status ? `: ${i.status}` : ''}${i.why ? `. ${sentence(i.why)}` : ''}`);
     }
   }
   const lost = items.filter((i) => i.lostEdit);
@@ -571,7 +595,7 @@ async function main() {
   result.worktree = done.work;
   const body = report({ conn, level: o.level, folder: tree.path, items, changed: done.changed });
   writeFileSync(join(o.out, 'job-summary.md'), `## Confluence sync\n\n${body}\n`);
-  writeFileSync(join(o.out, 'pr-body.md'), `Confluence is master for these records (PLDC-712). Merging this pull request makes the harness copy equal to the approved pages.\n\n${body}\n\n${WATERMARK}\n`);
+  writeFileSync(join(o.out, 'pr-body.md'), `${body}\n\n${WATERMARK}\n`);
   writeFileSync(join(o.out, 'result.json'), `${JSON.stringify(result, null, 2)}\n`);
   process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
   return EXIT.PASS;
@@ -603,7 +627,13 @@ if (invoked) {
   main().then((code) => process.exit(code), (err) => {
     const exit = err instanceof Stop || err instanceof ConfluenceError ? err.exit : EXIT.INTERNAL;
     process.stderr.write(`confluence-sync: ${err instanceof Stop || err instanceof ConfluenceError ? err.message : `internal fault: ${err && err.stack ? err.stack : err}`}\n`);
-    if (exit === EXIT.CANNOT_VERIFY) process.stderr.write(`REASON: ${err.reason || 'wiki-unreachable'}\nConfluence or git could not be reached, so the run changed nothing.\n`);
+    if (exit === EXIT.CANNOT_VERIFY) {
+      const reason = err.reason || 'wiki-unreachable';
+      const cause = reason.startsWith('wiki-') ? 'Confluence could not be reached'
+        : reason === 'auth-failed' || reason === 'credential-missing' ? 'Confluence did not take the credential'
+          : 'git or the remote failed';
+      process.stderr.write(`REASON: ${reason}\n${cause}, so the run changed nothing.\n`);
+    }
     process.exit(exit);
   });
 }
