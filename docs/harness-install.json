@@ -1,0 +1,2533 @@
+{
+  "schema_version": 1,
+  "note": "The install receipt: what this repository holds from the harness library, written only by `node $LIB/scripts/upgrade.mjs`. Current state, not history — the ledger (docs/harness-decisions.md) holds the history. Never edit by hand; a receipt that disagrees with the files is worse than none, because it is trusted.",
+  "library": {
+    "harnessVersion": "0.9.4",
+    "contentHash": "9ac31d2af63c449c79315aaca420f5ed09c586187aaa0fefb55fb43c92c2ad5b",
+    "libraryCommit": "d43c2c7fc6484d00eab4552abeeb8a54a8966a66",
+    "tag": null,
+    "release": false,
+    "upstreamLibraryHash": "c6f3b4427d58f7c3",
+    "chosenBy": "argument"
+  },
+  "hub": {
+    "trunk": "main",
+    "moduleType": "module"
+  },
+  "recordedOn": "2026-11-26",
+  "files": {
+    ".claude/agents/bug-investigator.md": {
+      "row": "199",
+      "source": "accelerator/agents/bug-investigator.md",
+      "mode": "adapt",
+      "sourceBlob": "c60dd15b7dd112822d741caecfd6230d23032978",
+      "installedHash": "97584d31d29a467ba8ff3aca2e30690720cb5d61ed0e0dd9cc87b69023503799",
+      "state": "installed"
+    },
+    ".claude/agents/build-error-resolver.md": {
+      "row": "68",
+      "source": "accelerator/agents/build-error-resolver.md",
+      "mode": "adapt",
+      "sourceBlob": "245fd2a6241e48cba62dde0fd089b3185e8d8222",
+      "installedHash": "925ffd5e746699371e5dc1ba1de6c55268603de9cdc34eda3dfd7defe853a363",
+      "state": "installed"
+    },
+    ".claude/agents/dual-mode-critic.md": {
+      "row": "9",
+      "source": "accelerator/agents/dual-mode-critic.md",
+      "mode": "adapt",
+      "sourceBlob": "5b2718b717faed76193bd578ae01e5af48b10b60",
+      "installedHash": "1504d3b52a47eb5320b9dc3081861925d771199cad1c94a7942bba05e5f47874",
+      "state": "installed"
+    },
+    ".claude/agents/engineer.md": {
+      "row": "8",
+      "source": "accelerator/agents/engineer.md",
+      "mode": "adapt",
+      "sourceBlob": "124ae6f75a0f07dccd06fb32f59e9be8e37d0c09",
+      "installedHash": "142c26503356222fbf9b099ee4a4898ee87b188aec3c45eb1ae554cc05cb20a6",
+      "state": "installed"
+    },
+    ".claude/agents/feature-writer.md": {
+      "row": "65",
+      "source": "accelerator/agents/feature-writer.md",
+      "mode": "adapt",
+      "sourceBlob": "4ed6bfcc19fbc524b8dbbd4989afedf1263d3302",
+      "installedHash": "25b30e9a607da67239e0c8e410f5f972c9fe7249168ad7db3b4325415654f645",
+      "state": "installed"
+    },
+    ".claude/agents/gate-runner.md": {
+      "row": "11",
+      "source": "accelerator/agents/gate-runner.md",
+      "mode": "adapt",
+      "sourceBlob": "25ef6ba024534a33053b1b96868711202b762ec6",
+      "installedHash": "1f535d18cc599c7f396940ee2b0388bccd83ae276b5d8766db385f475e2a1404",
+      "state": "installed"
+    },
+    ".claude/agents/pm-critic.md": {
+      "row": "51",
+      "source": "accelerator/agents/pm-critic.md",
+      "mode": "adapt",
+      "sourceBlob": "f05f1c5cb945401a9be0695bf61fde7ce7eb9794",
+      "installedHash": "4de4ce6203600329ed86d2a2dcc69b2d7c65b030b58b2fae04392bb57f783e25",
+      "state": "installed"
+    },
+    ".claude/agents/pr-reviewer.md": {
+      "row": "141",
+      "source": "accelerator/agents/pr-reviewer.md",
+      "mode": "adapt",
+      "sourceBlob": "a1190acbb5b83bb526e78310b23205bd57d5b8bd",
+      "installedHash": "7b9705545c70e9b4fa6228ef0851d8444c6b39c8f5fc50b62b96f9ccd3cb16f5",
+      "state": "installed"
+    },
+    ".claude/agents/pr-verifier.md": {
+      "row": "143",
+      "source": "accelerator/agents/pr-verifier.md",
+      "mode": "adapt",
+      "sourceBlob": "f052ed626de5d142870bd0a14d0a9002dfac7c7d",
+      "installedHash": "21a3deee2d506fe0ae82b5258c30bded8ddb4c6b95a1bc7b71c2da335625a75b",
+      "state": "installed"
+    },
+    ".claude/agents/product-planner.md": {
+      "row": "50",
+      "source": "accelerator/agents/product-planner.md",
+      "mode": "adapt",
+      "sourceBlob": "f71926756357c4b70f668ea5c3218ef9a1b6f708",
+      "installedHash": "3480a014937cd4d5987926c2ef0efa1c32381158da616a3f558a34662c768f43",
+      "state": "installed"
+    },
+    ".claude/agents/security-reviewer.md": {
+      "row": "52",
+      "source": "accelerator/agents/security-reviewer.md",
+      "mode": "adapt",
+      "sourceBlob": "164226ef12855bf2c58be4a62c600acc183ecab3",
+      "installedHash": "b69c8cfc9031b8c095d9d8c8a219f443650d7e13bad520526ef6de2938d92492",
+      "state": "installed"
+    },
+    ".claude/agents/service-surveyor.md": {
+      "row": "112",
+      "source": "accelerator/agents/service-surveyor.md",
+      "mode": "adapt",
+      "sourceBlob": "cef0843041f19bd47b06cbd2482d1353457262be",
+      "installedHash": "c13b4eba2957e491535abe64dec5213406401202149ada51858ebbdfe7d34c20",
+      "state": "installed"
+    },
+    ".claude/agents/sprint-orchestrator.md": {
+      "row": "7",
+      "source": "accelerator/agents/sprint-orchestrator.md",
+      "mode": "adapt",
+      "sourceBlob": "0dc0f248488e8b422c20039542cc3dcfc49e8552",
+      "installedHash": "fc57b84574df5de4ded785191d10ecef8360acff3fc6540b7505d7dbc566b802",
+      "state": "installed"
+    },
+    ".claude/agents/test-writer.md": {
+      "row": "118",
+      "source": "accelerator/agents/test-writer.md",
+      "mode": "adapt",
+      "sourceBlob": "f166c456d53a5dbe986ae0c118c51dbf68808f51",
+      "installedHash": "4e0b1392a803abdd9a1a871b9e2c6bb7e01743449f7296298e055dfe55f668a2",
+      "state": "installed"
+    },
+    ".claude/commands/add-context.md": {
+      "row": "110",
+      "source": "accelerator/commands/add-context.md",
+      "mode": "adapt",
+      "sourceBlob": "e9e115cc265e548aee378f1e2dc2a2b7232c4ca3",
+      "installedHash": "8726889ace5900041cb95e46530169a86d9471ae98d5bd4a44fb4110bcc5d6c4",
+      "state": "installed"
+    },
+    ".claude/commands/add-repo.md": {
+      "row": "76",
+      "source": "accelerator/commands/add-repo.md",
+      "mode": "adapt",
+      "sourceBlob": "af75a66b6d8dbd4fededa6b0b859fb1f77e153cd",
+      "installedHash": "38423b452025311385f367944ac22d874f73debd0ce35f5b7460fae8075a5654",
+      "state": "installed"
+    },
+    ".claude/commands/bugfix.md": {
+      "row": "201",
+      "source": "accelerator/commands/bugfix.md",
+      "mode": "verbatim",
+      "sourceBlob": "b28d297d662ad037abb282cb0dc4b12600c7c71b",
+      "installedHash": "674747a112df12efc4bf6eef9b173621531b92f3d3449e62170dc366c5870d21",
+      "state": "installed"
+    },
+    ".claude/commands/check-global.md": {
+      "row": "163",
+      "source": "accelerator/commands/check-global.md",
+      "mode": "adapt",
+      "sourceBlob": "59f21407bf622a1be3293f556487b5f4646777ad",
+      "installedHash": "690ea5c3cc6edb457b8b86e27674d1cea10cf3c2a9c6bd89d8cf894a2b44c971",
+      "state": "installed"
+    },
+    ".claude/commands/connect-confluence.md": {
+      "row": "212",
+      "source": "accelerator/commands/connect-confluence.md",
+      "mode": "verbatim",
+      "sourceBlob": "9fdf5648b0ea0b0a31f9a1e510cf241db9832c02",
+      "installedHash": "6d31331c4c1b68d1da84f6a1fddb6e69560ae161df37233642b2380a866194e9",
+      "state": "installed"
+    },
+    ".claude/commands/connect-jira.md": {
+      "row": "130",
+      "source": "accelerator/commands/connect-jira.md",
+      "mode": "adapt",
+      "sourceBlob": "8238a9200bffec12737eb960413bab932c07395d",
+      "installedHash": "ad0cfa0f5f8ca176f1b076b2cda7660be763b91a8a30232b1d639a744ebb5f94",
+      "state": "installed"
+    },
+    ".claude/commands/connect-observability-platform.md": {
+      "row": "184",
+      "source": "accelerator/commands/connect-observability-platform.md",
+      "mode": "adapt",
+      "sourceBlob": "082cc9cba4f449004872a0b94cef80ea40827309",
+      "installedHash": "9332b8fbc12e8a75c3257c184d6160780dddc552dd9a7ddb7de52909ecf33dad",
+      "state": "installed"
+    },
+    ".claude/commands/decompose.md": {
+      "row": "49",
+      "source": "accelerator/commands/decompose.md",
+      "mode": "adapt",
+      "sourceBlob": "264d411bd808649feb8ff0a2b89ccffd08c8ad2e",
+      "installedHash": "033365dce2ded4b0501655d5a0e14b04e1fa5accf62e4349156c1cd9895e8a1d",
+      "state": "installed"
+    },
+    ".claude/commands/dev-spec.md": {
+      "row": "24",
+      "source": "accelerator/commands/dev-spec.md",
+      "mode": "adapt",
+      "sourceBlob": "f639922eabd385bc26cc9f020f143a02927d8cfe",
+      "installedHash": "17126f9fa57b4e6df1b98d80d1d958e3ad72ebb5855c3dad57405162b2952ee9",
+      "state": "installed"
+    },
+    ".claude/commands/dev-sprint.md": {
+      "row": "25",
+      "source": "accelerator/commands/dev-sprint.md",
+      "mode": "adapt",
+      "sourceBlob": "e87b0fa52fb4acd07294229888546e6e4d581590",
+      "installedHash": "a3dad81e2687b8d7d574d8103dcdc9ff555f18048c6d9443708f011697eb78ee",
+      "state": "installed"
+    },
+    ".claude/commands/enrich-ticket.md": {
+      "row": "188",
+      "source": "accelerator/commands/enrich-ticket.md",
+      "mode": "verbatim",
+      "sourceBlob": "12c2145ba6c4fd499f7e3eba72cbb8209ecb7bee",
+      "installedHash": "107edb696b6b00bf9515c8ab8d72944e319a9af8122dd02342d172752d44c7b8",
+      "state": "installed"
+    },
+    ".claude/commands/estate-overview-refresh.md": {
+      "row": "110c",
+      "source": "accelerator/commands/estate-overview-refresh.md",
+      "mode": "adapt",
+      "sourceBlob": "feaf1fe046c26ee625f1b2f1baa44ae019642d02",
+      "installedHash": "dd6a17e6f2a172c5640a12d35fa6896f2c6b2ba123939ef0282f283f7184ff86",
+      "state": "installed"
+    },
+    ".claude/commands/estate-overview.md": {
+      "row": "166",
+      "source": "accelerator/commands/estate-overview.md",
+      "mode": "adapt",
+      "sourceBlob": "0b4c896256679a372ff846aa34820b8fc10cea2a",
+      "installedHash": "9eb696807f24b96f2e81b73daf3c8cd61e7c147f62ec74b2601c483bcc566b67",
+      "state": "installed"
+    },
+    ".claude/commands/feature.md": {
+      "row": "64",
+      "source": "accelerator/commands/feature.md",
+      "mode": "adapt",
+      "sourceBlob": "192b3c044d364ba0db52184ca43c9489ece98210",
+      "installedHash": "e166f80db155de9e255206b87103f537465614a79c95930dcfba3c9b541a8e2a",
+      "state": "installed"
+    },
+    ".claude/commands/feedback.md": {
+      "row": "167",
+      "source": "accelerator/commands/feedback.md",
+      "mode": "verbatim",
+      "sourceBlob": "75bec57aab52e8661432af7f63caaa7ab09a9171",
+      "installedHash": "f21908c1e7df32bdbbbc66925819bff501e963958d7626dd3a291036f33b5ad1",
+      "state": "installed"
+    },
+    ".claude/commands/from-ticket.md": {
+      "row": "187",
+      "source": "accelerator/commands/from-ticket.md",
+      "mode": "verbatim",
+      "sourceBlob": "969e10d4481fdbea60ef3ae69180b9cc3fbf2f0c",
+      "installedHash": "52ab77ee72ed2b5e1d13fc1f692a0d549e3c6733c1e1e944721dfd4166fe0a5a",
+      "state": "installed"
+    },
+    ".claude/commands/pr-review.md": {
+      "row": "146",
+      "source": "accelerator/commands/pr-review.md",
+      "mode": "adapt",
+      "sourceBlob": "e830fa44a34cde8d431a5ef1b828cb05b803317c",
+      "installedHash": "764817a20c7df35e02798f663a3b524db6c5773a0ad0213721e6f76cf3aef670",
+      "state": "installed"
+    },
+    ".claude/commands/prime-review.md": {
+      "row": "146a",
+      "source": "accelerator/commands/prime-review.md",
+      "mode": "verbatim",
+      "sourceBlob": "459d1d4f8d6f617f9952e635b409edf27064fadd",
+      "installedHash": "03bf530cdf81064f5f1eb8c04185ca4a54f9255107bf25ceac15e3070b59e74a",
+      "state": "installed"
+    },
+    ".claude/commands/qa-sprint.md": {
+      "row": "26",
+      "source": "accelerator/commands/qa-sprint.md",
+      "mode": "adapt",
+      "sourceBlob": "5242c293d72df8ffc9e6e73d2ad4e7c90e8afe71",
+      "installedHash": "91c0777ad707492b54c3ed34a5dc3fdfe3e608f9fd70c8ae8e26a995ddba198e",
+      "state": "installed"
+    },
+    ".claude/commands/survey-repo.md": {
+      "row": "111",
+      "source": "accelerator/commands/survey-repo.md",
+      "mode": "adapt",
+      "sourceBlob": "d2986f6fcdf9275388b91c1196262ad88cea1b6f",
+      "installedHash": "820bef9e25e8650c65f658618f592a070125cd9bb7bc2285006644274419777b",
+      "state": "installed"
+    },
+    ".claude/jira/preset-shl.json": {
+      "row": "131",
+      "source": "accelerator/templates/jira-preset-shl.json",
+      "mode": "verbatim",
+      "sourceBlob": "9fa98d9fe3019b73cc6a26ca635967d7c351e688",
+      "installedHash": "16ca0114eb9c413a9e1f6cc0832f2727088cda586ee21c086e8711ac3647d4ed",
+      "state": "installed"
+    },
+    ".claude/jira/preset-simple.json": {
+      "row": "131a",
+      "source": "accelerator/templates/jira-preset-simple.json",
+      "mode": "verbatim",
+      "sourceBlob": "b7f6d5396d34ac7e8c9e069944882066fc2309b1",
+      "installedHash": "5d9cf84e6d11e74eaf7f3d1a58a0829f41c1f2f435bf967f2145627fc1677093",
+      "state": "installed"
+    },
+    ".claude/rules/AUTHORING.md": {
+      "row": "31",
+      "source": "accelerator/rules/AUTHORING.md",
+      "mode": "verbatim",
+      "sourceBlob": "08a970abcf1d9452109289bec7958bbbbd1df0f2",
+      "installedHash": "c9eb1d7fec6b1a2be6917df6e2f6c91104528b848f51eae5ef9ea6fd30a87c7f",
+      "state": "installed"
+    },
+    ".claude/rules/backend.md": {
+      "row": "36",
+      "source": "accelerator/rules/backend.md",
+      "mode": "adapt",
+      "sourceBlob": "1bf502e50c39d798de87ca86771dfcfe7f6fc457",
+      "installedHash": null,
+      "state": "absent"
+    },
+    ".claude/rules/coding-style.md": {
+      "row": "38",
+      "source": "accelerator/rules/coding-style.md",
+      "mode": "adapt",
+      "sourceBlob": "0f2de81d8547588ee08b7a6ba0971cedb713e7b7",
+      "installedHash": null,
+      "state": "absent"
+    },
+    ".claude/rules/communication.md": {
+      "row": "137",
+      "source": "accelerator/rules/communication.md",
+      "mode": "verbatim",
+      "sourceBlob": "7fb4a86cf3f2aaa5edfb7e2d144cf371cb0599e8",
+      "installedHash": "844ef01a2464fba3c6631b80e6b90a975ea8be1c3b8db8f1ff2a88dbe44ca213",
+      "state": "installed"
+    },
+    ".claude/rules/connector.md": {
+      "row": "40",
+      "source": "accelerator/rules/connector.md",
+      "mode": "adapt",
+      "sourceBlob": "9947995310efef631cb4466e9a1e3a95ee887e53",
+      "installedHash": null,
+      "state": "absent"
+    },
+    ".claude/rules/context-budget.md": {
+      "row": "6",
+      "source": "accelerator/rules/context-budget.md",
+      "mode": "adapt",
+      "sourceBlob": "6813e7fb19f4e403536005d826025369133cb94d",
+      "installedHash": "792098a17c71e0992d9184ff56c763da4ddc9fddab262dcbeb07b805f5e4f27c",
+      "state": "installed"
+    },
+    ".claude/rules/contracts.md": {
+      "row": "32",
+      "source": "accelerator/rules/contracts.md",
+      "mode": "adapt",
+      "sourceBlob": "3e7620c7b219e863a141cd2bd9a1d9c0742e7f2a",
+      "installedHash": null,
+      "state": "absent"
+    },
+    ".claude/rules/copyright.md": {
+      "row": "39",
+      "source": "accelerator/rules/copyright.md",
+      "mode": "adapt",
+      "sourceBlob": "a60c3d9daa29b7a0b6f13128513b0c483d248046",
+      "installedHash": null,
+      "state": "absent"
+    },
+    ".claude/rules/estate.md": {
+      "row": "79",
+      "source": "accelerator/rules/estate.md",
+      "mode": "verbatim",
+      "sourceBlob": "a2cffe3cd0b3e738dc8eefa6d7aeef3f2e8ed27a",
+      "installedHash": "3a9e881c966cbbb74b547e5649f35bb091c8c6b519685043a52f0d0a96f8980a",
+      "state": "installed"
+    },
+    ".claude/rules/frontend.md": {
+      "row": "37",
+      "source": "accelerator/rules/frontend.md",
+      "mode": "adapt",
+      "sourceBlob": "8d867095246eb9bd1cec2e849f0cb04f056a60a6",
+      "installedHash": null,
+      "state": "absent"
+    },
+    ".claude/rules/git-workflow.md": {
+      "row": "35",
+      "source": "accelerator/rules/git-workflow.md",
+      "mode": "adapt",
+      "sourceBlob": "2d7e67f6b96f3a46d5e23c450cb9febfadab853b",
+      "installedHash": null,
+      "state": "absent"
+    },
+    ".claude/rules/jira-mirror.md": {
+      "row": "138",
+      "source": "accelerator/rules/jira-mirror.md",
+      "mode": "verbatim",
+      "sourceBlob": "ebcd853257f0e2be166b82e2ceb56580ee74f411",
+      "installedHash": "c8326587e2f09a21862b49eae2af58b9a9007e36a5e128eaa9122bb56891319e",
+      "state": "installed"
+    },
+    ".claude/rules/security.md": {
+      "row": "5",
+      "source": "accelerator/rules/security.md",
+      "mode": "adapt",
+      "sourceBlob": "e09b05d92aad81f3cd27817f931f00ee09a879a8",
+      "installedHash": "ce9cdfdde22400ce0520383f1145343691fcfb8e301a97b7cc84a9da243c91b4",
+      "state": "installed"
+    },
+    ".claude/rules/testing.md": {
+      "row": "30",
+      "source": null,
+      "mode": "new",
+      "sourceBlob": null,
+      "installedHash": "d3458fa190f3c7672e08f703ec96046dc74dbbb6531437c4b0e9916f81f8aa02",
+      "state": "installed"
+    },
+    ".claude/rules/ticket-quality.md": {
+      "row": "191",
+      "source": "accelerator/rules/ticket-quality.md",
+      "mode": "verbatim",
+      "sourceBlob": "a52f77626f56586a4ca8bda8a4e9585867dfb3b9",
+      "installedHash": "c6bdd54291f47c163d4b1781bc30bd2397b3a64d878f48681c7725c1cfe15682",
+      "state": "installed"
+    },
+    ".claude/rules/type-pipeline.md": {
+      "row": "33",
+      "source": "accelerator/rules/type-pipeline.md",
+      "mode": "adapt",
+      "sourceBlob": "a35a46060145d7c6c07aa53613ce589beba05195",
+      "installedHash": null,
+      "state": "absent"
+    },
+    ".claude/rules/watermark.md": {
+      "row": "121",
+      "source": "accelerator/rules/watermark.md",
+      "mode": "verbatim",
+      "sourceBlob": "3f6bde88a29a2885830acc50a75dfa100bac7854",
+      "installedHash": "0771810b37f9f89c7ef7199b5f176cd479a81d412182c9108bca2a180493b706",
+      "state": "installed"
+    },
+    ".claude/rules/worker-critic.md": {
+      "row": "4",
+      "source": "accelerator/rules/worker-critic.md",
+      "mode": "adapt",
+      "sourceBlob": "897da84dad454855908aee41dff12f67f6cbbd8c",
+      "installedHash": "5cd4451bef8471cde132c1035f80e30c5e2bc7edd2e608e0f55407d4a98a593a",
+      "state": "installed"
+    },
+    ".claude/rules/workflow.md": {
+      "row": "3",
+      "source": "accelerator/rules/workflow.md",
+      "mode": "adapt",
+      "sourceBlob": "3e6151b97d007bf4cf0a10e0b4693f323c02e14b",
+      "installedHash": "f9d80a9a78b27d0b0b4a1adbd27d35de3242d390cd6588cb9afba18dcb33824b",
+      "state": "installed"
+    },
+    ".claude/skills/decompose-requirements/SKILL.md": {
+      "row": "46",
+      "source": "accelerator/skills/decompose-requirements/SKILL.md",
+      "mode": "verbatim",
+      "sourceBlob": "2b8d7fbef5ca5dd492659066ddeaffc69208e921",
+      "installedHash": "c7032640083bf4a9e5bd2bf18b4d099d08cb000a7dc7a157f3964bc71f98b38f",
+      "state": "installed"
+    },
+    ".claude/skills/draft-adr/SKILL.md": {
+      "row": "70",
+      "source": "accelerator/skills/draft-adr/SKILL.md",
+      "mode": "verbatim",
+      "sourceBlob": "9d95f3b659d05bf6b319c33de62307249cc693bb",
+      "installedHash": "0157f46d1c3469771c77de6156b7ef7afccbd1f427f5df4cd3a372fde2c193dd",
+      "state": "installed"
+    },
+    ".claude/skills/fix-pr-comments/SKILL.md": {
+      "row": "145",
+      "source": "accelerator/skills/fix-pr-comments/SKILL.md",
+      "mode": "verbatim",
+      "sourceBlob": "ad1ee14f2bbbdcbf4188b51607023fb8cf78cd9c",
+      "installedHash": "88f0e7568fdb2b7a4af693c84b68a5d2418d53c82531f6d26d05305da9adf226",
+      "state": "installed"
+    },
+    ".claude/skills/implement-work-item/SKILL.md": {
+      "row": "42",
+      "source": "accelerator/skills/implement-work-item/SKILL.md",
+      "mode": "verbatim",
+      "sourceBlob": "938ee80951f446df076966222b0971d55dd0ada9",
+      "installedHash": "351cf9b5868c4cf44d98b4f97fb017aed2caf0234df71b81cfa57b7afa42db00",
+      "state": "installed"
+    },
+    ".claude/skills/investigate-bug/SKILL.md": {
+      "row": "200",
+      "source": "accelerator/skills/investigate-bug/SKILL.md",
+      "mode": "verbatim",
+      "sourceBlob": "0a340a968fd16193a9b5f09311a40bb239320bf2",
+      "installedHash": "fd0ebaa7797ca52acb31e3bbb75f6ff7a20348caa0fbac4100dc6cd4da79ab61",
+      "state": "installed"
+    },
+    ".claude/skills/persona-review/SKILL.md": {
+      "row": "44",
+      "source": "accelerator/skills/persona-review/SKILL.md",
+      "mode": "verbatim",
+      "sourceBlob": "ef097e7b99a3013b7f02236843458abff08012ee",
+      "installedHash": "02964ae4d6ffdadce212886c194eb3a076c742aa2f87451455995705fa0b7adf",
+      "state": "installed"
+    },
+    ".claude/skills/pre-merge-check/SKILL.md": {
+      "row": "45",
+      "source": "accelerator/skills/pre-merge-check/SKILL.md",
+      "mode": "adapt",
+      "sourceBlob": "16ccba86ead5c0633eaad572255b7f521b71797e",
+      "installedHash": "df0a2923befb4e712a564dd183b36a073d77e457685a4ad7a95e7153ff48cc76",
+      "state": "installed"
+    },
+    ".claude/skills/refine/SKILL.md": {
+      "row": "47",
+      "source": "accelerator/skills/refine/SKILL.md",
+      "mode": "verbatim",
+      "sourceBlob": "60411a02a8bce6c989aa911a94ea4d6312e9e915",
+      "installedHash": "b0f6b5569c81e467db6348ba81461947f082ef88e3ec83f4e15f5eb999ac693c",
+      "state": "installed"
+    },
+    ".claude/skills/resolve-build-error/SKILL.md": {
+      "row": "69",
+      "source": "accelerator/skills/resolve-build-error/SKILL.md",
+      "mode": "adapt",
+      "sourceBlob": "a96fe3862cc4b4fb3efb04c3e44530a8d56fe441",
+      "installedHash": "0bc0d2685224fb45df0f1b6996752320bfa14e65bb9abf165cb9d416441d894d",
+      "state": "installed"
+    },
+    ".claude/skills/review-artefact/SKILL.md": {
+      "row": "43",
+      "source": "accelerator/skills/review-artefact/SKILL.md",
+      "mode": "verbatim",
+      "sourceBlob": "ee9c96fad289b630194dc7224cf8db05232d6b26",
+      "installedHash": "171845f5d6f2400d5ce0ec71702df846ef1cda73058b6a5e76af5f5b46d999d4",
+      "state": "installed"
+    },
+    ".claude/skills/review-pull-request/SKILL.md": {
+      "row": "142",
+      "source": "accelerator/skills/review-pull-request/SKILL.md",
+      "mode": "verbatim",
+      "sourceBlob": "7163e9e0e34a5eb35a1937bca5a51f6f23be8bdf",
+      "installedHash": "1375d59cebac6c6423ec2370b004351da06cd5069f059361eca46cc5204a6997",
+      "state": "installed"
+    },
+    ".claude/skills/shared/persona-review.template.md": {
+      "row": "48",
+      "source": "accelerator/skills/shared/persona-review.template.md",
+      "mode": "verbatim",
+      "sourceBlob": "7df84bfd4ade1cfffc670009ce50ecbe588e4631",
+      "installedHash": "067a93c8345be7dc7ea195b9cdeb503361cadda9b69aeafeeaaa15e324f5126f",
+      "state": "installed"
+    },
+    ".claude/skills/shared/readiness-block.template.md": {
+      "row": "48",
+      "source": "accelerator/skills/shared/readiness-block.template.md",
+      "mode": "verbatim",
+      "sourceBlob": "d2de8d2ffadd9de67c76a8d786e68621e3a9b971",
+      "installedHash": "b415591dcfa3f4c36dbceb854246ce7c0011a366f8ec99a8d9fdd2b62cf46e8a",
+      "state": "installed"
+    },
+    ".claude/skills/shared/review-file.template.md": {
+      "row": "48",
+      "source": "accelerator/skills/shared/review-file.template.md",
+      "mode": "verbatim",
+      "sourceBlob": "d60d4200f701c74bca0f3a6b3035b03ce21212d0",
+      "installedHash": "025ae06f6fa64a26a81cfcd4f2e63c7e430656caaebf5dbb68eb86e0d74956d0",
+      "state": "installed"
+    },
+    ".claude/skills/shl-onboard/SKILL.md": {
+      "row": "124",
+      "source": "accelerator/skills/shl-onboard/SKILL.md",
+      "mode": "verbatim",
+      "sourceBlob": "f3a0db579e4d6ea4b24b082f137a4aab3c975eb7",
+      "installedHash": "a329219aa68bb5b75b97134cde494fa27ef979f3f4dd6c3db9b62af46eaa230e",
+      "state": "installed"
+    },
+    ".claude/skills/survey-repo/SKILL.md": {
+      "row": "113",
+      "source": "accelerator/skills/survey-repo/SKILL.md",
+      "mode": "verbatim",
+      "sourceBlob": "5bbe04b951c0b5dfd97d7e86ffd50d36a951065b",
+      "installedHash": "ffabd6448c1fac3afc091bd6e287f903385202cdc292a3c107bad484e7fcc248",
+      "state": "installed"
+    },
+    ".claude/skills/verify-pr-findings/SKILL.md": {
+      "row": "144",
+      "source": "accelerator/skills/verify-pr-findings/SKILL.md",
+      "mode": "verbatim",
+      "sourceBlob": "654d63800827d208df03e723bf876de4137c643a",
+      "installedHash": "241fe1f5bd68c6be99f04a2a06d9a1701f578d2d18daade67513a2ec58e3b3ce",
+      "state": "installed"
+    },
+    ".claude/skills/write-requirements/SKILL.md": {
+      "row": "66",
+      "source": "accelerator/skills/write-requirements/SKILL.md",
+      "mode": "verbatim",
+      "sourceBlob": "4ccc51a6c336d334bec0133c2389c6855368ad14",
+      "installedHash": "4229b12f1c2f855fdc61611919648fd01962f382a8ad65422172145c28b77c0e",
+      "state": "installed"
+    },
+    ".claude/skills/write-tests/SKILL.md": {
+      "row": "119",
+      "source": "accelerator/skills/write-tests/SKILL.md",
+      "mode": "verbatim",
+      "sourceBlob": "0e2f0f96960c17fca49e2831fc0d2a47f92642a9",
+      "installedHash": "ba320af48cd09dda91c404cc6a08da4ada3fb761ce897306655080b0cb67c0d9",
+      "state": "installed"
+    },
+    ".claude/spoke/checks.env.template": {
+      "row": "77a",
+      "source": "accelerator/spoke/checks.env.template",
+      "mode": "verbatim",
+      "sourceBlob": "97fc7a239d9d9b51848505311a3bbcce84d223a1",
+      "installedHash": "a72fd7e351cb50fa40479919704b2058b288e60a5295b5c4044dc767113a8d2c",
+      "state": "installed"
+    },
+    ".codex/hooks.json": {
+      "row": "182",
+      "source": "accelerator/settings/codex-hooks.json",
+      "mode": "verbatim",
+      "sourceBlob": "05428ec85bebee3b2c7e5def85edbe45284749de",
+      "installedHash": "8dc684d14c400ffa7cba94e815c407a4afac88419c13c92bd0a1f27b0907ea1e",
+      "state": "installed"
+    },
+    ".github/workflows/bug-gate.yml": {
+      "row": "198",
+      "source": "accelerator/hub/workflows/bug-gate.yml",
+      "mode": "adapt",
+      "sourceBlob": "0a2154e931217c3f10c5f8f81260ce8b6d08812e",
+      "installedHash": "5937539a7c830d0be2b5bd1b337f7fd8a5741a472c9e0ab7b9c3294528818f56",
+      "state": "installed"
+    },
+    ".github/workflows/context-sync.yml": {
+      "row": "207",
+      "source": "accelerator/hub/workflows/context-sync.yml",
+      "mode": "adapt",
+      "sourceBlob": "8d6e28537771a067ec0221cd7ce3671abbf08716",
+      "installedHash": "84208d9e302bdd500b6636b28482d28948fe5750a6748c2df97356840a86549a",
+      "state": "installed"
+    },
+    ".github/workflows/decomposition-gate.yml": {
+      "row": "93",
+      "source": "accelerator/hub/workflows/decomposition-gate.yml",
+      "mode": "adapt",
+      "sourceBlob": "388bf233df95cc3bcfacaaeb95ba7105f8ce4247",
+      "installedHash": "0aa53897cd84960884f5410c7140f9af68232ab43d7ca5bdede03acb947de52c",
+      "state": "installed"
+    },
+    ".github/workflows/design-gate.yml": {
+      "row": "27a",
+      "source": "accelerator/hub/workflows/design-gate.yml",
+      "mode": "adapt",
+      "sourceBlob": "ffc78dcdd17597d86486a4b09994b3b50a604def",
+      "installedHash": "c9e5a87c39b352019165d259adaab326f1f3474691c9dbdce7b9b57ada3445ca",
+      "state": "installed"
+    },
+    ".github/workflows/escalation-sweep.yml": {
+      "row": "186",
+      "source": "accelerator/hub/workflows/escalation-sweep.yml",
+      "mode": "adapt",
+      "sourceBlob": "6491b071359283ea0c506bc90c63f317b8b700b3",
+      "installedHash": "94324469877c65813abfe1a34022aeacf13c1a9e1f5077940389e08a58bffca5",
+      "state": "installed"
+    },
+    ".github/workflows/fan-in.yml": {
+      "row": "97",
+      "source": "accelerator/hub/workflows/fan-in.yml",
+      "mode": "adapt",
+      "sourceBlob": "251a2545524821ff04bdff57e57890232f67c18a",
+      "installedHash": "d47ad960b1ea6055be4f0fcfaf6a88c1c20588ecace7be70ed7ce0912221c3ea",
+      "state": "installed"
+    },
+    ".github/workflows/global-report.yml": {
+      "row": "165",
+      "source": "accelerator/hub/workflows/global-report.yml",
+      "mode": "adapt",
+      "sourceBlob": "4c0cbc7f8f7bd6ba952db6660b8120952d4af37d",
+      "installedHash": "1f5ec19274540a590674b163591c4b1f1f6e3e072687372cef0ba29175f59965",
+      "state": "installed"
+    },
+    ".github/workflows/intake-gate.yml": {
+      "row": "190",
+      "source": "accelerator/hub/workflows/intake-gate.yml",
+      "mode": "adapt",
+      "sourceBlob": "98000d924380eb98c7dcc0a150f18cff69aecdf9",
+      "installedHash": "ccbab1a9370bb82afc14ce6d8a496ff53b024e24cd0a29c4f220c81f80571c64",
+      "state": "installed"
+    },
+    ".github/workflows/observability-gates.yml": {
+      "row": "203",
+      "source": "accelerator/hub/workflows/observability-gates.yml",
+      "mode": "adapt",
+      "sourceBlob": "62a1895ab71a9e1bd78864a58da427b0c3dfc26a",
+      "installedHash": "5e194e1ef231f45656b0f7a534a591c0531cd478dee9a8fab3ba080246af7b50",
+      "state": "installed"
+    },
+    ".github/workflows/pickup-gate.yml": {
+      "row": "27",
+      "source": "accelerator/hub/workflows/pickup-gate.yml",
+      "mode": "adapt",
+      "sourceBlob": "daf1d12c34c85093f065e8c0e9c1fa4592df94d4",
+      "installedHash": "2192998eb63660e18f78566228e1d3bd4c48ccaeb26d21c3d445f9c843611b59",
+      "state": "installed"
+    },
+    ".github/workflows/requirements-gate.yml": {
+      "row": "92",
+      "source": "accelerator/hub/workflows/requirements-gate.yml",
+      "mode": "adapt",
+      "sourceBlob": "9203809932802436772394aad143662eafcb41ce",
+      "installedHash": "5627be61ddae3149325aa4b6ebbea4486e9a9088b7ef7c124996ccb38daa2939",
+      "state": "installed"
+    },
+    ".github/workflows/survey-gate.yml": {
+      "row": "116",
+      "source": "accelerator/hub/workflows/survey-gate.yml",
+      "mode": "adapt",
+      "sourceBlob": "273bd13fa285c6695c6e4013da1b1149a9ef4161",
+      "installedHash": "93b190583ede4bbadadbe6df8599d637b76232f95af0202ad4a8cce1830150a0",
+      "state": "installed"
+    },
+    ".github/workflows/validation-gate.yml": {
+      "row": "87",
+      "source": "accelerator/hub/workflows/validation-gate.yml",
+      "mode": "adapt",
+      "sourceBlob": "540d1993de091acac7fcb435d09c8a5283bc1f30",
+      "installedHash": "b8cf85e132fd03cb4ea90f365f937fe4094e9928ebec1119552e09b2cbda6f8a",
+      "state": "installed"
+    },
+    ".gitignore": {
+      "row": "30b",
+      "source": "generation.md#5:.gitignore",
+      "mode": "adapt",
+      "sourceBlob": null,
+      "installedHash": "e273ad65a6fc13c13ee453a3bda7720550742e06fee43483442253cb2c7810f0",
+      "state": "installed"
+    },
+    ".opencode/plugin/harness-observability.js": {
+      "row": "183",
+      "source": "accelerator/plugins/opencode/harness-observability.js",
+      "mode": "verbatim",
+      "sourceBlob": "bc50eaf293a67785f32d6ec424571fcd04d04f43",
+      "installedHash": "515ead9141cdf9189943eda22b13718da3b26193a0c5455e924b490d78502889",
+      "state": "installed"
+    },
+    "AGENTS.md": {
+      "row": "2",
+      "source": "accelerator/AGENTS.template.md",
+      "mode": "adapt",
+      "sourceBlob": "d8e07bdcfb9ab3870b8de5331dbd18907a1db394",
+      "installedHash": "2815d4f5fa986d25a87de04e6561eb466b7e623a7e717d7876c78ac5339cc7ea",
+      "state": "installed"
+    },
+    "CLAUDE.md": {
+      "row": "1",
+      "source": "accelerator/CLAUDE.template.md",
+      "mode": "adapt",
+      "sourceBlob": "2d7cfe9a9ca914e2e74fbde9d48b1e2334a01123",
+      "installedHash": "2f5e326255184e0f3767886ef0cd7cede2740662dab567c0c52ac685aa7b2be0",
+      "state": "installed"
+    },
+    "Makefile": {
+      "row": "28",
+      "source": "generation.md#5:Makefile",
+      "mode": "adapt",
+      "sourceBlob": null,
+      "installedHash": "3d320c2cde908b697023b8c98adaf4fdca70171d0651b84b1c9848194ec2bc84",
+      "state": "installed"
+    },
+    "docs/architecture/_TEMPLATE.adr.md": {
+      "row": "13",
+      "source": "accelerator/templates/ADR.template.md",
+      "mode": "adapt",
+      "sourceBlob": "72e8bbbb76f36b4cfd6723393415a5d7c51429e6",
+      "installedHash": "7d73b857c9c6a9e6ff6b9fd6598e611e517b71ab53080f57cbbfc4816e95fd05",
+      "state": "installed"
+    },
+    "docs/backlog/_TEMPLATE.ticket.md": {
+      "row": "192",
+      "source": "accelerator/templates/ticket.template.md",
+      "mode": "verbatim",
+      "sourceBlob": "1636c104dfa00c38bf0c3ca0b2588c85a35ea94e",
+      "installedHash": "f78d99c255cc3e0ac6b5f8484283983dd911dee4898086769ff7a42294e683cd",
+      "state": "installed"
+    },
+    "docs/backlog/keys.json": {
+      "row": "94",
+      "source": null,
+      "mode": "new",
+      "sourceBlob": null,
+      "installedHash": "a5be68b3e1f8172aa907dacaaddfc4a3400618e87f137b16be733481a54798c5",
+      "state": "installed"
+    },
+    "docs/bugs/_TEMPLATE.bug.md": {
+      "row": "197",
+      "source": "accelerator/templates/bug.template.md",
+      "mode": "verbatim",
+      "sourceBlob": "bc011311780542e04ba7d090dbf8652d8a2b310f",
+      "installedHash": "ab5551f379d31242687f9fa57b14bfd2181e4355051d5a7430f97c33c0dbe423",
+      "state": "installed"
+    },
+    "docs/designs/CLAR-log.md": {
+      "row": "14",
+      "source": "accelerator/templates/CLAR-log.template.md",
+      "mode": "adapt",
+      "sourceBlob": "358f32f13b311569cd8a83e335d4c7daa6db55cb",
+      "installedHash": "f90ca6f847c69e9e94180e4e48796a1dc1a25fc0db432946abff0ccf53d85fd6",
+      "state": "installed"
+    },
+    "docs/designs/_TEMPLATE.adr-draft.md": {
+      "row": "13a",
+      "source": "accelerator/templates/ADR-draft.template.md",
+      "mode": "adapt",
+      "sourceBlob": "31461cb9ef1a6d5022f900ba07805894d318f0a3",
+      "installedHash": "6cc9a9a29c1adf53b60d2237214730f97c509e7ca617733303e97a8e1fd8ef9b",
+      "state": "installed"
+    },
+    "docs/designs/_TEMPLATE.discovery.md": {
+      "row": "195",
+      "source": "accelerator/templates/discovery.template.md",
+      "mode": "verbatim",
+      "sourceBlob": "d5af2ad82f5c99a9c7671a9d4e16dbd906521dea",
+      "installedHash": "c4ff2b37593b33919b0498047083a32c3589424ff45c4084349e69a440d76d71",
+      "state": "installed"
+    },
+    "docs/designs/_TEMPLATE.handoff.md": {
+      "row": "60",
+      "source": "accelerator/templates/handoff-ledger.template.md",
+      "mode": "adapt",
+      "sourceBlob": "e086aa4b8882e7d88359b0b7ecc5cf1243dce760",
+      "installedHash": "febdad749dab9001b87a2fd2bef094bc403c833fa21ac2219f020d2e637b9229",
+      "state": "installed"
+    },
+    "docs/designs/_TEMPLATE.lld.md": {
+      "row": "12",
+      "source": "accelerator/templates/LLD.template.md",
+      "mode": "adapt",
+      "sourceBlob": "2049267e557fb68d6dc5135e5615829fde8a80dc",
+      "installedHash": "5077a023278dc3cb29c6bc61a87d03ab7eeb21b5b544680d433d7a3557b17924",
+      "state": "installed"
+    },
+    "docs/designs/_TEMPLATE.pr-review.md": {
+      "row": "148",
+      "source": "accelerator/templates/pr-review.template.md",
+      "mode": "verbatim",
+      "sourceBlob": "c12464d389ad06de04d7a28296ef7f3e09a16f5f",
+      "installedHash": "8b3cb3277bac39082180f0b9bb087219126e4f8f8cb2d7b7007232f957fb374b",
+      "state": "installed"
+    },
+    "docs/designs/_TEMPLATE.pull-request.md": {
+      "row": "147",
+      "source": "accelerator/templates/pull-request.template.md",
+      "mode": "verbatim",
+      "sourceBlob": "6e4622deeed7a293e75bf038dda686bd0d572d49",
+      "installedHash": "f135b0155957112a7c0794409fb1605b13345c88a963df264f67a7b8edd6431d",
+      "state": "installed"
+    },
+    "docs/designs/_TEMPLATE.testing-session.md": {
+      "row": "61",
+      "source": "accelerator/templates/testing-session.template.md",
+      "mode": "adapt",
+      "sourceBlob": "d048d4bf5fc76ac8e8306f8d1d592eb572c55afc",
+      "installedHash": "4edc0c53fef1cc58c42cc5e132b0e48b7f1d31ad77d21b78a397beb5f2da210b",
+      "state": "installed"
+    },
+    "docs/estate/_TEMPLATE.overview.md": {
+      "row": "110a",
+      "source": "accelerator/templates/estate-overview.template.md",
+      "mode": "verbatim",
+      "sourceBlob": "1778b07e77b861b9adcc7a069852e6f816c12e47",
+      "installedHash": "302db2a21aa531641461c908df782430f987e276e0ca813cc4fe29c2ccca6904",
+      "state": "installed"
+    },
+    "docs/estate/_TEMPLATE.rule.md": {
+      "row": "110b",
+      "source": "accelerator/templates/rule.template.md",
+      "mode": "verbatim",
+      "sourceBlob": "d61d32ff3606332a2dfe391e9cf37d9857fe1b8d",
+      "installedHash": "72f45327dfb2b2f4acc86d773c35a869e57fe630e0dab4c6ca649d7ca7b96170",
+      "state": "installed"
+    },
+    "docs/estate/_TEMPLATE.survey.md": {
+      "row": "111a",
+      "source": "accelerator/templates/survey.template.md",
+      "mode": "verbatim",
+      "sourceBlob": "3fc638672549b2ca785ab1e64e5fb3871af0f20a",
+      "installedHash": "e7231229a887bc5009cd181fd9c01e99863e8b2b2e34176d185e8b8db027746f",
+      "state": "installed"
+    },
+    "docs/estate/confluence.json": {
+      "row": "210",
+      "source": "accelerator/templates/confluence.template.json",
+      "mode": "verbatim",
+      "sourceBlob": "c99153774a4ee0191f0004f36023e53da0677b2a",
+      "installedHash": "def8784888b914d7a7ea4670b01035508dce0a38b7858cef9b0b6c628afe0227",
+      "state": "installed"
+    },
+    "docs/estate/repositories.json": {
+      "row": "82",
+      "source": null,
+      "mode": "new",
+      "sourceBlob": null,
+      "installedHash": "57ed1341ba366bc4342c69c926b1e84f04f0e9e5d27a0111da71b25626301758",
+      "state": "installed"
+    },
+    "docs/harness-decisions.md": {
+      "row": "29",
+      "source": "accelerator/templates/harness-decisions.template.md",
+      "mode": "adapt",
+      "sourceBlob": "f95faebef4650533ff021790caaa8f6207334095",
+      "installedHash": "a5e9778f7208fc96c1d5b911ea8ffdef148e8f90f4ee53078cf9276bf7345915",
+      "state": "installed"
+    },
+    "docs/harness-maturity.md": {
+      "row": "22",
+      "source": "accelerator/docs/maturity-scorecard.md",
+      "mode": "adapt",
+      "sourceBlob": "27ea0450ff158f2736d6c7b006a7635569f3c0d2",
+      "installedHash": "d0789c0c8767f86f7e6f9aacc21c090652403cefc61cec58696f721d82d4cad0",
+      "state": "installed"
+    },
+    "docs/harness-observability.md": {
+      "row": "181",
+      "source": "accelerator/docs/observability.md",
+      "mode": "verbatim",
+      "sourceBlob": "b8e0df13ad40a59f5927b21e57d0d48875ff9514",
+      "installedHash": "9f08b403eb532d96222738c2bb4ac8c27fb44d6cd756391437e5231c58e0aee4",
+      "state": "installed"
+    },
+    "docs/harness-test-quality.md": {
+      "row": "172",
+      "source": "accelerator/docs/test-quality.md",
+      "mode": "verbatim",
+      "sourceBlob": "78883bb5c82e4f132ac4a1222ef0925f85f41c5a",
+      "installedHash": "54968ab4942c179e20a840658b2222ab749539548ca5c30fad939a08eb0c1dc0",
+      "state": "installed"
+    },
+    "docs/requirements/_TEMPLATE.requirements.md": {
+      "row": "67",
+      "source": "accelerator/templates/requirements.template.md",
+      "mode": "adapt",
+      "sourceBlob": "21c569000f8ab8db8159acff0effbad242065c9e",
+      "installedHash": "d1646acfc3562669379662e9599c43eb9e2f6ecd63685847463ac4197078a39c",
+      "state": "installed"
+    },
+    "docs/standards/_TEMPLATE.standard.md": {
+      "row": "13b",
+      "source": "accelerator/templates/standard.template.md",
+      "mode": "adapt",
+      "sourceBlob": "49af5cc36677da2c92f903d70b7ac61b98647ca5",
+      "installedHash": "a984b0d4549a1c02fed434748be36bd88849c8f12737e8b201df225089c2e0c6",
+      "state": "installed"
+    },
+    "governance/agent-registry.json": {
+      "row": "19",
+      "source": "accelerator/governance/agent-registry.example.json",
+      "mode": "adapt",
+      "sourceBlob": "dde6a32080b5cb7b3651925cc20f150acbfe41de",
+      "installedHash": "89954266f774779749ac16f9703fb58d879d8773aadbdd4c1c4ec420c765d2de",
+      "state": "installed"
+    },
+    "governance/agent-registry.schema.json": {
+      "row": "18",
+      "source": "accelerator/governance/agent-registry.schema.json",
+      "mode": "verbatim",
+      "sourceBlob": "68ea8174337839304d0c8cf36b68737f0b0c0b97",
+      "installedHash": "4e7670da8d17b663ee4f4d4655003909ae7dcecff202baeb508adf18b3c4341a",
+      "state": "installed"
+    },
+    "governance/escalation-points.json": {
+      "row": "185b",
+      "source": "accelerator/governance/escalation-points.json",
+      "mode": "verbatim",
+      "sourceBlob": "e54d1917f37b89ff2e3f825b2eb366de9250e54e",
+      "installedHash": "14a99a01de0fd46fb20d08ab0c776944195cbfc5f53baf9883e336da9a14e797",
+      "state": "installed"
+    },
+    "governance/escalation-record.schema.json": {
+      "row": "185c",
+      "source": "accelerator/governance/escalation-record.schema.json",
+      "mode": "verbatim",
+      "sourceBlob": "24a0f3057c4eb1f64eaf7a8f823224c5af9a9dae",
+      "installedHash": "d6a0eb94b52c35cb92a0f8fd938b6802cc60f859a7b6d472e870cbd0f5f76ffe",
+      "state": "installed"
+    },
+    "governance/global.schema.json": {
+      "row": "150",
+      "source": "accelerator/governance/global.schema.json",
+      "mode": "verbatim",
+      "sourceBlob": "d1278e6808ceaebead12e9a37017dc0095b60c54",
+      "installedHash": "297750def9bec670dff5e6d33f6978ba4c7839d52cccbcaf211f7484855a6b71",
+      "state": "installed"
+    },
+    "governance/iteration-record.schema.json": {
+      "row": "20",
+      "source": "accelerator/governance/iteration-record.schema.json",
+      "mode": "verbatim",
+      "sourceBlob": "4461de2e50d6940e778db8b065d6408bf87500b5",
+      "installedHash": "e32c306569c9a05839ba51a4b3c8a1e349853753bd07c3b494d5b6ce4330ae3b",
+      "state": "installed"
+    },
+    "governance/observability.schema.json": {
+      "row": "180",
+      "source": "accelerator/governance/observability.schema.json",
+      "mode": "verbatim",
+      "sourceBlob": "c77df975ad2c727f28ae9617a8dbf920266d64c2",
+      "installedHash": "9029467c5353ed4539377d59862ce92d07010e03aa7707f465481f08e4e03bd4",
+      "state": "installed"
+    },
+    "governance/repository-registry.schema.json": {
+      "row": "71",
+      "source": "accelerator/governance/repository-registry.schema.json",
+      "mode": "verbatim",
+      "sourceBlob": "26044c19bd388e6fa5079308ddb82b51fc53ba62",
+      "installedHash": "705cb1f2c410f672916f0cb82c3b493a4b6740846d4c90c3b22128a9e2ef785d",
+      "state": "installed"
+    },
+    "governance/tracker-links.schema.json": {
+      "row": "127a",
+      "source": "accelerator/governance/tracker-links.schema.json",
+      "mode": "verbatim",
+      "sourceBlob": "6eef0ffbd0732e47601257ed61b55d84334ff684",
+      "installedHash": "6a97247e222f6d39e8e9e066333ec2d66dbadc1074284ae0a77fa41390bf08e6",
+      "state": "installed"
+    },
+    "governance/trackers.schema.json": {
+      "row": "127",
+      "source": "accelerator/governance/trackers.schema.json",
+      "mode": "verbatim",
+      "sourceBlob": "08e8af4251074f822bb1f94f3a1098f6956c467d",
+      "installedHash": "923260682dc01bf756885e6d789c404a7b3c5c33414acb63ca249b2bdb2af155",
+      "state": "installed"
+    },
+    "package.json": {
+      "row": "83",
+      "source": null,
+      "mode": "new",
+      "sourceBlob": null,
+      "installedHash": "9de5b6ceb4fc0c204ceb4661bd7b222401dc244cbe3da92068048a45b86edf2d",
+      "state": "installed"
+    },
+    "scripts/check-agent-registry.mjs": {
+      "row": "120",
+      "source": "accelerator/scripts/check-agent-registry.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "239e25b7835272c40f377ac038061f88b6b2ac1d",
+      "installedHash": "de91fd2e9ea4285fe07f55764aa618bb24cbed33d65f46be4e9fb6bf7682c66d",
+      "state": "installed"
+    },
+    "scripts/check-bug.mjs": {
+      "row": "196",
+      "source": "accelerator/gate/check-bug.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "0b36a7f01e50745053435d83a9583de8b035e4e5",
+      "installedHash": "e30e1c9c72e769f59064c3a016316deb92b94b4c1b0b6b1d6e6176784cee8c42",
+      "state": "installed"
+    },
+    "scripts/check-charters.mjs": {
+      "row": "30a",
+      "source": "scripts/check-charters.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "c08855f99eca78101af792923eb6503661ba73dd",
+      "installedHash": "9b570664042a2747efc991d2d3a3bcd097deeb9bf66f4d7f081f63e528312e10",
+      "state": "installed"
+    },
+    "scripts/check-context.mjs": {
+      "row": "107",
+      "source": "accelerator/scripts/check-context.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "02c0f02b9ec8cc26298d95d77f44fd380cbec9e4",
+      "installedHash": "fb7472973b898334c9421f8b7b203408de051a95232fc428a17ccfa9f22fcfdb",
+      "state": "installed"
+    },
+    "scripts/check-coverage.mjs": {
+      "row": "136",
+      "source": "accelerator/gate/check-coverage.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "017c02d1e728639868842b55ee335732a2444b5d",
+      "installedHash": "3339c13d5f5f335691d52244159b750c4d998cd7851a758b003df915e364bfc5",
+      "state": "installed"
+    },
+    "scripts/check-decomposition.js": {
+      "row": "90",
+      "source": "accelerator/gate/check-decomposition.js",
+      "mode": "verbatim",
+      "sourceBlob": "51d93944fef4ccdc330c9198a46345d5c8cb09f0",
+      "installedHash": "4c729665ca28a81ac9b18a24a9031789ea45ab0fa1d81111877a5be4045c2878",
+      "state": "installed"
+    },
+    "scripts/check-dependencies.mjs": {
+      "row": "96a",
+      "source": "accelerator/gate/check-dependencies.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "9819a444f78213942144058976699e7a66642c05",
+      "installedHash": "afdaf64f9da8040019e0bba885c053bb8130c4780f40493b4268ac066a77051c",
+      "state": "installed"
+    },
+    "scripts/check-design-amend.mjs": {
+      "row": "15a",
+      "source": "accelerator/gate/check-design-amend.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "a1fdb3d9a40f9f56a1b7d99ba454c1ca26bbebdd",
+      "installedHash": "60765dd772a577608c3abc683e3c7f64c5c8b13c803b4d30105eea65c186a4e8",
+      "state": "installed"
+    },
+    "scripts/check-dev-ready.js": {
+      "row": "15",
+      "source": "accelerator/gate/check-dev-ready.js",
+      "mode": "verbatim",
+      "sourceBlob": "43862b937a9937df04a65e428de6487b828e3a60",
+      "installedHash": "92125722e1eb13483829eaef0696dd893d2db11fd7891f7cb71d7523e098afb2",
+      "state": "installed"
+    },
+    "scripts/check-fan-in.mjs": {
+      "row": "95",
+      "source": "accelerator/gate/check-fan-in.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "69c99f1399cda63c1ebd7b769705905dacfdeec3",
+      "installedHash": "e921204b80fb618c126f53aa83667ee170b92c73a6d5bfa797db0fd4ac5e7dd6",
+      "state": "installed"
+    },
+    "scripts/check-intake.js": {
+      "row": "189",
+      "source": "accelerator/gate/check-intake.js",
+      "mode": "verbatim",
+      "sourceBlob": "f465167e5b917754cdbd9d10f647f6d959ad7093",
+      "installedHash": "254f06cbb3183b16a3445a9a964a0909c692cb3f46c5632460e9267ad61bace1",
+      "state": "installed"
+    },
+    "scripts/check-qa-gate.mjs": {
+      "row": "175",
+      "source": "accelerator/gate/check-qa-gate.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "e1a4d1fedd050efa91a6dbe188e470be88ed6ab4",
+      "installedHash": "145e7bfbda894f1083115cf30d7e4c717b228a02b06ab9b850742c81f378b17e",
+      "state": "installed"
+    },
+    "scripts/check-registry.mjs": {
+      "row": "75",
+      "source": "accelerator/scripts/check-registry.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "7cd31bbf9ceb78bc1ab1608356a577861fe4f291",
+      "installedHash": "0ffc3145e23e99061faa1f2a14c9b2fb2b2e68422caf8a05298fde3959ab0706",
+      "state": "installed"
+    },
+    "scripts/check-requirements-amend.mjs": {
+      "row": "88b",
+      "source": "accelerator/gate/check-requirements-amend.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "6847977828754b06ba70b71a4d7bfbfdac992f34",
+      "installedHash": "5192ef3cb03f00a083a4de9f7e99bc7c87b500844683fb29a2f9d9a886761c76",
+      "state": "installed"
+    },
+    "scripts/check-requirements-candidate.mjs": {
+      "row": "88a",
+      "source": "accelerator/gate/check-requirements-candidate.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "19326e209c3fcbe8c18dccdd9893791a6f87aca6",
+      "installedHash": "9988004bc796261495bb610cc6b1a918977c6f8ba5b87ff8f475ccff41d0e0dd",
+      "state": "installed"
+    },
+    "scripts/check-requirements.js": {
+      "row": "88",
+      "source": "accelerator/gate/check-requirements.js",
+      "mode": "verbatim",
+      "sourceBlob": "621eb22d67ea98d837d30348c19970c34d052a5e",
+      "installedHash": "3415289530704cc74b839a1cc1928ceda17f4e324cb3133b65df1b2f19d8ac35",
+      "state": "installed"
+    },
+    "scripts/check-spoke-rules.mjs": {
+      "row": "105",
+      "source": "accelerator/scripts/check-spoke-rules.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "10fc50d8b0d6e4e3a0ade9f1b45087656016c1c5",
+      "installedHash": "0e4b69947024b90f02d0fc4c9d156119cab66882c4556b85a4aab7059c392084",
+      "state": "installed"
+    },
+    "scripts/check-staged.mjs": {
+      "row": "126",
+      "source": "accelerator/gate/check-staged.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "7621c3226a7793a44e581a601692f7e61c2802f7",
+      "installedHash": "dd10825a55e7830288d0eb784063837bbf5f1950eff43b2330e05038a7d73fa9",
+      "state": "installed"
+    },
+    "scripts/check-survey-secrets.mjs": {
+      "row": "115b",
+      "source": "accelerator/gate/check-survey-secrets.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "aa31917c03e559e2232c11d930e56a1f41566e93",
+      "installedHash": "1301df4d7c86f8f69078057f3110fd1489aab5394c1620b6651bddd12e8930d1",
+      "state": "installed"
+    },
+    "scripts/check-survey.mjs": {
+      "row": "115",
+      "source": "accelerator/scripts/check-survey.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "e5b1fc11287facdfe5fdd0b95f96957a819b68fd",
+      "installedHash": "8d2c7e2e29efab455367eee7fb610833eb0c7b3342194403544f41be940c0192",
+      "state": "installed"
+    },
+    "scripts/check-trackers.mjs": {
+      "row": "129",
+      "source": "accelerator/scripts/check-trackers.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "f84e5ff9c595681dbec7d0f0ef635455d48ac3ae",
+      "installedHash": "ee6d93cb8b60b49fc245a3141c9662d00417330609b98da05e3a0688ce55a823",
+      "state": "installed"
+    },
+    "scripts/check-validation.js": {
+      "row": "85",
+      "source": "accelerator/gate/check-validation.js",
+      "mode": "verbatim",
+      "sourceBlob": "b8943453c8c1757c575c3662fc1c94c8386fc8bb",
+      "installedHash": "0fc081aa4c1d1d438f9200119846d46635f5b3c4dfdd9c25bed5324ba40120c2",
+      "state": "installed"
+    },
+    "scripts/check-watermark.mjs": {
+      "row": "122",
+      "source": "accelerator/gate/check-watermark.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "6d1fedbe7741ae0f15c53e60b1b40c40821a580f",
+      "installedHash": "06db32a269d18f4fc41ebe2a2dfa670d172ba5210b316b52cfd2d594b15824d8",
+      "state": "installed"
+    },
+    "scripts/confluence-page.mjs": {
+      "row": "206",
+      "source": "accelerator/scripts/confluence-page.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "4f4a93ed5d1e683e677fb0075414263b60df4ebf",
+      "installedHash": "6fa18f90bc02a97bbcbda7b50b3dae0ddacdbfff9e5ab0cc84d327aa0be3a40d",
+      "state": "installed"
+    },
+    "scripts/confluence-sync.mjs": {
+      "row": "204",
+      "source": "accelerator/scripts/confluence-sync.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "d0677228be9bfbe3c84ef19ba8ff6716cfc14b63",
+      "installedHash": "53c6e286d278673f90500bbc4b52e5af1ec0cebaa18fcc307665b3df2fd05a72",
+      "state": "installed"
+    },
+    "scripts/confluence.mjs": {
+      "row": "205",
+      "source": "accelerator/scripts/confluence.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "07c1c6091c395b03ffc43dcd02d294ef3752598c",
+      "installedHash": "5ea817167816037990c85956df6bc0393bde29d250eba481e11e2341c221734f",
+      "state": "installed"
+    },
+    "scripts/context-docs.mjs": {
+      "row": "106",
+      "source": "accelerator/scripts/context-docs.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "430e9583187228b66c96955e95722f5f58ee1eb4",
+      "installedHash": "9302fa9d86f111aa1981e0c92040f356fada72f2aa5a1d908edba11fdb2ece5a",
+      "state": "installed"
+    },
+    "scripts/docker-image.mjs": {
+      "row": "134b",
+      "source": "accelerator/gate/docker-image.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "1d510d2dd3d09d221f959d5b9d125209cbdcfd07",
+      "installedHash": "555ec74c814110a91c878d8bb4a3180f479503646aa35d0fb609351da14431a8",
+      "state": "installed"
+    },
+    "scripts/escalation-record.mjs": {
+      "row": "185a",
+      "source": "accelerator/scripts/escalation-record.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "e0ac95452e4c41ae173208c793a16382fa7f5221",
+      "installedHash": "36957f9c1a70312238ec7a18fce5444008c859cdedca4b702888b2624637edac",
+      "state": "installed"
+    },
+    "scripts/escalation-store.mjs": {
+      "row": "185e",
+      "source": "accelerator/scripts/escalation-store.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "6b28d721220867d077e3d9dd6847fa27a5289798",
+      "installedHash": "8a98ae7d49417c4b4893bd1b7d0e04f77e09c3090c81be5fbc44ed418b4654a5",
+      "state": "installed"
+    },
+    "scripts/escalation.mjs": {
+      "row": "185",
+      "source": "accelerator/scripts/escalation.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "a6bd0281beb53fda12cf57045014068aa391fe4b",
+      "installedHash": "fa56d9ea9a46d8c9d29d043200cfc0bc04dc30b27694ef007d9de67768100bdd",
+      "state": "installed"
+    },
+    "scripts/feedback-context.mjs": {
+      "row": "167a",
+      "source": "accelerator/scripts/feedback-context.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "74161d7bc69c7ee7bef36c09b3efddbe607df11c",
+      "installedHash": "87ed9ad87fdaca23fd50a409a91dd80d6a784ebc8a0499a1dab6cf5ff795f514",
+      "state": "installed"
+    },
+    "scripts/gitleaks/gitleaks.json": {
+      "row": "115d",
+      "source": "accelerator/gate/gitleaks/gitleaks.json",
+      "mode": "verbatim",
+      "sourceBlob": "7a8846f3a11d53f7621cd7b2c2b0c2788913a531",
+      "installedHash": "de75107b600d4febed4b85e47b7547c40f6606b9c1ce3cfadac43677218841b8",
+      "state": "installed"
+    },
+    "scripts/gitleaks/gitleaks.toml": {
+      "row": "115d",
+      "source": "accelerator/gate/gitleaks/gitleaks.toml",
+      "mode": "verbatim",
+      "sourceBlob": "450953d26a7c701efcd44a9320eaf0cd0a8388a0",
+      "installedHash": "99dd8c1b891fd0b1a890ca1ed5da3ee4a8d41384bf764bd5e3ff5cc2d2861158",
+      "state": "installed"
+    },
+    "scripts/harness-commit.mjs": {
+      "row": "123",
+      "source": "accelerator/gate/harness-commit.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "180a69908bc30a32f4c0f057196f935c07e7d445",
+      "installedHash": "3dda9d3ab54b8c00b9ed9acd551a0b8d7de8fe212c957f39101432b2471a6fc8",
+      "state": "installed"
+    },
+    "scripts/jira-sync.mjs": {
+      "row": "133",
+      "source": "accelerator/scripts/jira-sync.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "b95e49dba6118687fb98b72365eff41fb3e70a0e",
+      "installedHash": "991684311791cf95f610cdb2c69130d0de26786d7bc72ba6e0bd69442e3abc46",
+      "state": "installed"
+    },
+    "scripts/jira.mjs": {
+      "row": "132",
+      "source": "accelerator/scripts/jira.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "f5f919c1b1f0cf189c1c612e2dc03460ac1bfd52",
+      "installedHash": "12bd08aa857b9d6dac89ad5dbbf9a0915058b3ec40b02b1c8837dae0f25e2873",
+      "state": "installed"
+    },
+    "scripts/join-survey.mjs": {
+      "row": "117d",
+      "source": "accelerator/scripts/join-survey.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "2a3ca9a7a3389e9aa3b13d588a742ff9aab7b267",
+      "installedHash": "dddf61d7f82f4632205266d633d78d8b757a255a832e9b6669dcd4fc763bdcab",
+      "state": "installed"
+    },
+    "scripts/observability-gate.mjs": {
+      "row": "202",
+      "source": "accelerator/scripts/observability-gate.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "a012f3223084bc27eb5e0d4f5fa4670b279527d4",
+      "installedHash": "f749324345bfe74eeac668302eafa6bbb502fe2b75bb773615472ff81e0944b5",
+      "state": "installed"
+    },
+    "scripts/observability-hook.mjs": {
+      "row": "177",
+      "source": "accelerator/scripts/observability-hook.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "932c3a9cb28cb4ee9e94977e15256a628366108a",
+      "installedHash": "6dfeca598c0527b9d90480d58fde9cc9761dffd8669fc3b2bf3b8f8f18875332",
+      "state": "installed"
+    },
+    "scripts/observability-send.mjs": {
+      "row": "178",
+      "source": "accelerator/scripts/observability-send.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "7ec9fcb958e82afa98aaff32ee0c6eab80ddc6c2",
+      "installedHash": "9ca8dd0f844bf1d16fdf9bacc4367db5f0240ef20017be4ad2236fbb4b1e0302",
+      "state": "installed"
+    },
+    "scripts/observability-status.mjs": {
+      "row": "179",
+      "source": "accelerator/scripts/observability-status.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "02d6df4fecef27f90acb2a3170eecb231dcb92b9",
+      "installedHash": "1a68887773fedcaa53760a2c2adc9da4b2e12c5111bc1bf8296bb30e0aa85949",
+      "state": "installed"
+    },
+    "scripts/observability/collect.mjs": {
+      "row": "176",
+      "source": "accelerator/scripts/observability/collect.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "661cd34e05daf5282e7b417bf9a93e7c5399530c",
+      "installedHash": "61e6f6bd2a558672488ed12fa9a6de34873dcbcda05e7a2f5fb8fbcbb51bc627",
+      "state": "installed"
+    },
+    "scripts/observability/collectors/claude-code.mjs": {
+      "row": "176",
+      "source": "accelerator/scripts/observability/collectors/claude-code.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "e0a4e4eb310cf14284b24b2452faa1b535226df9",
+      "installedHash": "ce40e45166c904d42ee608cf83d06d53da719746401e4862b49f5611fed0b928",
+      "state": "installed"
+    },
+    "scripts/observability/collectors/codex.mjs": {
+      "row": "176",
+      "source": "accelerator/scripts/observability/collectors/codex.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "c09966cb15f2f10221b6ec0101fd87f479097b6d",
+      "installedHash": "7e8bbfde4f5f0e8b9d2070c10464d196dfd0c5bdac920e7ed583b578d8c970ad",
+      "state": "installed"
+    },
+    "scripts/observability/collectors/lines.mjs": {
+      "row": "176",
+      "source": "accelerator/scripts/observability/collectors/lines.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "2e781b9b5c1c4ae848a486afdfe7295a027e42f0",
+      "installedHash": "d88bd7908e0913124d98b06605806ce52737f6bb1d79e53e71d53e8dd55286b2",
+      "state": "installed"
+    },
+    "scripts/observability/collectors/opencode.mjs": {
+      "row": "176",
+      "source": "accelerator/scripts/observability/collectors/opencode.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "9d6ed20b601cacd886e910ef7bcc396516a877de",
+      "installedHash": "5021fabf514c41ef900e72e72a443cd4bdd7a0c6f67f8b533b7c7ca093fc4157",
+      "state": "installed"
+    },
+    "scripts/observability/common.mjs": {
+      "row": "176",
+      "source": "accelerator/scripts/observability/common.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "b892137e8d6acc872699b84df9bdae4b9c771329",
+      "installedHash": "3351bd669266908060c8ab2e9444be7f942452a1d792e40014a42389c535f278",
+      "state": "installed"
+    },
+    "scripts/observability/config.mjs": {
+      "row": "176",
+      "source": "accelerator/scripts/observability/config.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "4c7023bbb9ef7c27b9148f2bb84021770e836053",
+      "installedHash": "9958f49efacfb113cca055606dd27a0beecc30ff4fe488eb7e5d4ce4af8bd798",
+      "state": "installed"
+    },
+    "scripts/observability/delta.mjs": {
+      "row": "176",
+      "source": "accelerator/scripts/observability/delta.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "ea7f050d8f26690238e95b36e7b544058762ec5c",
+      "installedHash": "ab2a57ec787f26793db7e21835603d4bac94f32a1ac0b5edff241fd9b609ec4c",
+      "state": "installed"
+    },
+    "scripts/observability/failures.mjs": {
+      "row": "176",
+      "source": "accelerator/scripts/observability/failures.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "80e526965ed83516fd28a0972569e43958219a9d",
+      "installedHash": "30129f6d7c103d6bb7ce7dfe630fb219b05235eeb14b631c9b67c94fda921494",
+      "state": "installed"
+    },
+    "scripts/observability/gates.mjs": {
+      "row": "176",
+      "source": "accelerator/scripts/observability/gates.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "a45cf20fc0bdc1592f919eb28add41e88807fa9b",
+      "installedHash": "8dde67bc052eca924b77e595da05d6a161f361dc609a9e71f3e1e1527db72191",
+      "state": "installed"
+    },
+    "scripts/observability/lookups.mjs": {
+      "row": "176",
+      "source": "accelerator/scripts/observability/lookups.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "2f32a748bd300381b6aa252bda6e3595e26aef79",
+      "installedHash": "8e320ddb934c542e74d7893edaecc831a0a43ac080ec2ca0a66a62f224febf69",
+      "state": "installed"
+    },
+    "scripts/observability/person.mjs": {
+      "row": "176",
+      "source": "accelerator/scripts/observability/person.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "c31b6d7b397dc81e3fbf020b79f2141fe7ca975e",
+      "installedHash": "1d10360a29c7836215f83915062918952d4b00d7f7daf4dae20797fb850d41c0",
+      "state": "installed"
+    },
+    "scripts/observability/platforms/cubeapm.mjs": {
+      "row": "176",
+      "source": "accelerator/scripts/observability/platforms/cubeapm.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "e986be7a51af7fddedf871d19c0b1d0cea005fef",
+      "installedHash": "5dc34b054a87f355922d039eb67f196f1bccce03997ac15fb077f4e63f6e857a",
+      "state": "installed"
+    },
+    "scripts/observability/platforms/grafana.mjs": {
+      "row": "176",
+      "source": "accelerator/scripts/observability/platforms/grafana.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "56ad977bb25f213e59b195ec38d64504549c7788",
+      "installedHash": "c66732d844ae4c4a685e78c0ba8c3319ca65954b5261f85be37911d30082d9be",
+      "state": "installed"
+    },
+    "scripts/observability/prices.json": {
+      "row": "176",
+      "source": "accelerator/scripts/observability/prices.json",
+      "mode": "verbatim",
+      "sourceBlob": "566876186bd4bb6f3d7cbfee0afe47aeeffe43e2",
+      "installedHash": "f9007a371fe36f5c3e42307b7fa953f5004834292e71bfdbb6e52106d36b72d5",
+      "state": "installed"
+    },
+    "scripts/observability/prices.mjs": {
+      "row": "176",
+      "source": "accelerator/scripts/observability/prices.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "283af56918d8c7c06384ec670759ef5563ef6e12",
+      "installedHash": "edc65eb95b6f650c9460a4d7441adb5176754fb503f3543eecd99a29185e6fd6",
+      "state": "installed"
+    },
+    "scripts/observability/record.mjs": {
+      "row": "176",
+      "source": "accelerator/scripts/observability/record.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "3245692e445f755e4fb5706d823da093661b6b0c",
+      "installedHash": "4c5c16db1195aa092eef7557dd70d337bc6e7d090721c8c5114bd6df6803bdf5",
+      "state": "installed"
+    },
+    "scripts/observability/runs.mjs": {
+      "row": "176",
+      "source": "accelerator/scripts/observability/runs.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "48b3dd5a3cf4ca1e5fd8a2b6e28e66e2aa09bee8",
+      "installedHash": "0560fc1a05a2502621f4da1179797cbbdfc764d0a07c358500eb7b1dc48646b7",
+      "state": "installed"
+    },
+    "scripts/observability/sender.mjs": {
+      "row": "176",
+      "source": "accelerator/scripts/observability/sender.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "bc7dfa22017825e9009ced21026df1c61d5fb4c1",
+      "installedHash": "a0e1ede95357d61151a00679c274c4fffe7d23c126d8ce1597c8f8fe19c04e29",
+      "state": "installed"
+    },
+    "scripts/observability/state.mjs": {
+      "row": "176",
+      "source": "accelerator/scripts/observability/state.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "12f2fb82d7fde57db4ade0e3b1d204ca714d9f50",
+      "installedHash": "dbbd3874fb9456f54ac74e2c00038e5eb9f2b38b283e24377e25e10cdc4fa583",
+      "state": "installed"
+    },
+    "scripts/observability/time.mjs": {
+      "row": "176",
+      "source": "accelerator/scripts/observability/time.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "9d88aeb5baa0fbe46553f8f35ee80a911829fbe5",
+      "installedHash": "4ac19d6156c2e6fb713f9bf557f51737aa710df9e96299cf2318cc64ea7e5197",
+      "state": "installed"
+    },
+    "scripts/plan-overview.mjs": {
+      "row": "110d",
+      "source": "accelerator/scripts/plan-overview.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "27c6dd41c83b701f4a64e578cf667b6586135862",
+      "installedHash": "0f44ae6f543db857e7118cafaed9894946c939274d0ebc98efe086821fe1a409",
+      "state": "installed"
+    },
+    "scripts/plan-survey.mjs": {
+      "row": "117b",
+      "source": "accelerator/scripts/plan-survey.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "a4fe14ce65a7a06b665970cec5a6f8e35d5eeb5e",
+      "installedHash": "a4cf03dba5d3fcf14a6b54f3faa98f0de5f9fa518c35b607f1320039ab661da3",
+      "state": "installed"
+    },
+    "scripts/prime.mjs": {
+      "row": "140b",
+      "source": "accelerator/scripts/prime.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "88566fe5486fc215a20639fac0966fcd2102b9cb",
+      "installedHash": "da239c49ad9b38d6260fcd2bcd84a8e17433fcbcfbcb20cc6735287504bf5635",
+      "state": "installed"
+    },
+    "scripts/pull-request.mjs": {
+      "row": "140",
+      "source": "accelerator/scripts/pull-request.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "76d610fbe1f3abd013dd526df4644f7fc3b39cac",
+      "installedHash": "4309b516ded7959bf9b10e16756d1a9be7d897887db0ee1b65972e0e80e66261",
+      "state": "installed"
+    },
+    "scripts/read-context.mjs": {
+      "row": "108",
+      "source": "accelerator/scripts/read-context.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "66009ddc3c8ac9da7b58f9eb2ba5217a6021a054",
+      "installedHash": "7b48988c829c30a47186cd1a694761dfa0713bcb82eb55db4b50ee960d8dc6f4",
+      "state": "installed"
+    },
+    "scripts/read-discovery.mjs": {
+      "row": "194",
+      "source": "accelerator/scripts/read-discovery.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "2c86d0d1fba80be1480ff2600342d52ede212c0b",
+      "installedHash": "8c181217bf0df713a6d2004962035d08a89ea154d108d24e703b5004ea33e45a",
+      "state": "installed"
+    },
+    "scripts/read-global.mjs": {
+      "row": "149",
+      "source": "accelerator/scripts/read-global.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "c3b0967f2e0b10089050976d781140398eb16584",
+      "installedHash": "3a7d7c800594070e246324b04e5242a3d670f7db76be577e3c47a35323ca20f3",
+      "state": "installed"
+    },
+    "scripts/read-hubs.mjs": {
+      "row": "162",
+      "source": "accelerator/scripts/read-hubs.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "f1ffe27ede568020b147c24913f609773b6f876e",
+      "installedHash": "07eb74277fdc8a7ea98afb8061338040d1da9b6bd40d07d16986142198f9857a",
+      "state": "installed"
+    },
+    "scripts/read-spoke-rules.mjs": {
+      "row": "104",
+      "source": "accelerator/scripts/read-spoke-rules.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "8db84cb52eb2085e00e70981f29c10a83b90d223",
+      "installedHash": "12725a37abf9d72544c751b14d51060400892bb07eb775648ce18b47711969f9",
+      "state": "installed"
+    },
+    "scripts/read-spoke.mjs": {
+      "row": "74",
+      "source": "accelerator/scripts/read-spoke.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "cbc9c38a48945cf201afbb4c180cbfb885cfc315",
+      "installedHash": "a7115e20c049381b322995e929181e076982489b7d418c08e02e645e8f267f48",
+      "state": "installed"
+    },
+    "scripts/read-survey.mjs": {
+      "row": "117",
+      "source": "accelerator/scripts/read-survey.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "db86514a49f993767764245bb8c924c756b4b57c",
+      "installedHash": "48ad9667ae2b8aa86b552d4b9a39c2d905595719d99ab0052a314cce385bccae",
+      "state": "installed"
+    },
+    "scripts/report-context.mjs": {
+      "row": "108b",
+      "source": "accelerator/scripts/report-context.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "dac5c2b260a784ccc133db635015a016ff4d67f9",
+      "installedHash": "f91bb7e2d77799f0e6db074595b3f817e8c4a63afb20e49fcc60102a3fe28398",
+      "state": "installed"
+    },
+    "scripts/report-global.mjs": {
+      "row": "164",
+      "source": "accelerator/scripts/report-global.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "38b8a26ef49de0cc9e9b41ee8f7ceb3cc09c3155",
+      "installedHash": "8333dfafaf3d10cae1ff0dce67805ce31267567762f92df9828b82b799bae867",
+      "state": "installed"
+    },
+    "scripts/secret-scan.cjs": {
+      "row": "134",
+      "source": "accelerator/gate/secret-scan.cjs",
+      "mode": "verbatim",
+      "sourceBlob": "3d3e034dc024110c78be274231dc01773a3706fe",
+      "installedHash": "5477eee7c11d6e17faab3db7d0d646e09c5e7ad436b45427f46772f40720ddcf",
+      "state": "installed"
+    },
+    "scripts/spoke-codeowners.mjs": {
+      "row": "193",
+      "source": "accelerator/gate/spoke-codeowners.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "4914ecbbd084ba1f14da9bfac353c8533969523e",
+      "installedHash": "9e047c72b09f738a8cd3b540092b0b671561022c27c047377fb78d3e19ab964d",
+      "state": "installed"
+    },
+    "scripts/spoke-remote.mjs": {
+      "row": "73",
+      "source": "accelerator/scripts/spoke-remote.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "42fdf474122253648c68df84ebd481d0cf935520",
+      "installedHash": "d45cf6db11a3fdeb5dfe2381b4aafb4296a7bc3a3b076a668404f927edf17aa6",
+      "state": "installed"
+    },
+    "scripts/spoke-rules.mjs": {
+      "row": "103",
+      "source": "accelerator/scripts/spoke-rules.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "b18e027a49b141f5a472fc789821b3cb9149c872",
+      "installedHash": "41e53be54e1d7a07bc301159aa501000716abe286d4110bab464b3c2357424e7",
+      "state": "installed"
+    },
+    "scripts/spoke-search.mjs": {
+      "row": "74b",
+      "source": "accelerator/scripts/spoke-search.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "efc89a3a4f2c464f0daf29596c5e59fcb9206b2a",
+      "installedHash": "964c00f96f7922106487b99971d3d4bfc24cf1156cab740ee7a2352a463c0da7",
+      "state": "installed"
+    },
+    "scripts/spoke-trunk.mjs": {
+      "row": "174",
+      "source": "accelerator/gate/spoke-trunk.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "f1f4627922b898ec849cc203e80b950acbc918b5",
+      "installedHash": "7a6b87fe60bdd0c63c51a6fbdc136eae26a4e214fb072304ba40fb633964ba16",
+      "state": "installed"
+    },
+    "scripts/story-done.mjs": {
+      "row": "73a",
+      "source": "accelerator/scripts/story-done.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "4b9ee236f84e35a3b07929b03465ae252cde9697",
+      "installedHash": "461baaaa7e79cc32bab41eee217536f0fb3e0a36bc8d4cc45bcf855295ce569e",
+      "state": "installed"
+    },
+    "scripts/story-gate-plan.mjs": {
+      "row": "173",
+      "source": "accelerator/gate/story-gate-plan.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "ec94e0de2bea96462f38cb37b513c18d301a1724",
+      "installedHash": "c22329ac785ce5f9c57797e239245bf30616a0f3ff5f26523ace69a014326c14",
+      "state": "installed"
+    },
+    "scripts/surveys.mjs": {
+      "row": "114",
+      "source": "accelerator/scripts/surveys.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "3ec219ed2c3e04fb770391fa97045cd73e865220",
+      "installedHash": "7c24ebea81b1302d5c7e222bbeb6fe287dfc9bf18962eda5f4541fdf8a5a94be",
+      "state": "installed"
+    },
+    "scripts/test-guard-hook.mjs": {
+      "row": "125c",
+      "source": "accelerator/gate/test-guard-hook.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "49ef5043e4daf8ec4e865e1e6e19510a112fd182",
+      "installedHash": "b85eae2df9810e4f598497eca5e316a3b63adbd13a1e94222b0f9fc1a24a6919",
+      "state": "installed"
+    },
+    "scripts/test-guard.mjs": {
+      "row": "125",
+      "source": "accelerator/gate/test-guard.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "b6df508f36d9e7893c5984b46e9c154f07f5d5a4",
+      "installedHash": "ebcdff800d3f2f19b029619e406fec012aa57a40fe7ba3d8332a2530cb3cf4b2",
+      "state": "installed"
+    },
+    "scripts/test-guard/baseline.mjs": {
+      "row": "125b",
+      "source": "accelerator/gate/test-guard/baseline.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "a2977c43e2f0da51e57ac700d550f68886dcb108",
+      "installedHash": "69651fb71bee2ee26f5790e9d3cb503b7306bcf1eaee4686d4b4d25602f57661",
+      "state": "installed"
+    },
+    "scripts/test-guard/candidate.mjs": {
+      "row": "125b",
+      "source": "accelerator/gate/test-guard/candidate.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "845bc5a0927c1c2c578da64a9bfcde73d857ded2",
+      "installedHash": "ab996cc01011cc9a07f025f2c08f873d9956e58a731e5884aa3721a8804be5ef",
+      "state": "installed"
+    },
+    "scripts/test-guard/checks.mjs": {
+      "row": "125b",
+      "source": "accelerator/gate/test-guard/checks.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "461ae6f8c7a6c00e035ed167f7c658fa19864b65",
+      "installedHash": "98bff5e68f43d7e03cfadd0ed082adc9b5b18d0092d9ab26033e18f2e516b591",
+      "state": "installed"
+    },
+    "scripts/test-guard/clone.mjs": {
+      "row": "125b",
+      "source": "accelerator/gate/test-guard/clone.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "c654419519b9616aab8a3e6c9f0f62de65e8cab9",
+      "installedHash": "ebc283a65aa343c17b4be091462888b83ae6995a57ef3aed17c9e7e1107e14f7",
+      "state": "installed"
+    },
+    "scripts/test-guard/cmd-engineer.mjs": {
+      "row": "125b",
+      "source": "accelerator/gate/test-guard/cmd-engineer.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "6f8534f8e4213a0fd3250479e75b3ab0cb58b164",
+      "installedHash": "b3eae02041e0e27e087b5a8f79b20dbb25a23d42cd41ff7638fed4ea71cccaad",
+      "state": "installed"
+    },
+    "scripts/test-guard/cmd-finalize.mjs": {
+      "row": "125b",
+      "source": "accelerator/gate/test-guard/cmd-finalize.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "4424d27cb471e1017b1746c54ecff90a95f9f647",
+      "installedHash": "b3a9f51cad45e4ac5215c2c7875afc5200e08958823ad1a21138d8dd0f98fa8b",
+      "state": "installed"
+    },
+    "scripts/test-guard/cmd-review.mjs": {
+      "row": "125b",
+      "source": "accelerator/gate/test-guard/cmd-review.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "bcf25e9ae8719ace06081c8c3a6cfe9218d58fe4",
+      "installedHash": "25dce9c8abf1866af0c4e0f96f15b8a56e37be3102c1c28e13388bce649ead28",
+      "state": "installed"
+    },
+    "scripts/test-guard/cmd-run.mjs": {
+      "row": "125b",
+      "source": "accelerator/gate/test-guard/cmd-run.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "ce5603c7850490970157c9b53cd00e92d279ad71",
+      "installedHash": "c69a9eaff3d21223cc11e0949c838818a833e9aa07de102429ebe13351f4edaa",
+      "state": "installed"
+    },
+    "scripts/test-guard/cmd-setup.mjs": {
+      "row": "125b",
+      "source": "accelerator/gate/test-guard/cmd-setup.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "a9d4958496da8c7f89440234e2f128c21aaf9d24",
+      "installedHash": "77f10ccb71a8d60af925fbb55bf9d0373d21fab9d570bfc3b94ef9c67f21d97d",
+      "state": "installed"
+    },
+    "scripts/test-guard/common.mjs": {
+      "row": "125b",
+      "source": "accelerator/gate/test-guard/common.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "0e568d8890f5d3db0d3658301621fd7d466d1898",
+      "installedHash": "f65bb13283df8294cf4fe7cbd3e4ce9cf12956edc45c9931c6d73288271a7362",
+      "state": "installed"
+    },
+    "scripts/test-guard/contract.mjs": {
+      "row": "125b",
+      "source": "accelerator/gate/test-guard/contract.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "fe0140b3a7d3530df12b26c340b747d11d5c724e",
+      "installedHash": "5e4f2bb063e248dc4253dd3de7ae2643bcfe449627b5a7907df763274690aac4",
+      "state": "installed"
+    },
+    "scripts/test-guard/git.mjs": {
+      "row": "125b",
+      "source": "accelerator/gate/test-guard/git.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "1b4c04c89a07b3983cf18f5195c690ad6bb9195d",
+      "installedHash": "c348938d7bb56f5316744894ec05987a47829ccfe652f31e0865d0d941ccdcf0",
+      "state": "installed"
+    },
+    "scripts/test-guard/inagent.mjs": {
+      "row": "125b",
+      "source": "accelerator/gate/test-guard/inagent.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "edb9aa19375bad8b01cb54df00a3528f77735174",
+      "installedHash": "b664e5c5ef13415b236075d826d57b32ccef433a6d6271c0a07a5f2ee560d246",
+      "state": "installed"
+    },
+    "scripts/test-guard/preflight.mjs": {
+      "row": "125b",
+      "source": "accelerator/gate/test-guard/preflight.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "0c5ba0b77be3f70fc4f553287ef681f8482b91aa",
+      "installedHash": "56065415a5c6c010dcd11d218acc4f59d0350778440f4572f6e9f79c898952e6",
+      "state": "installed"
+    },
+    "scripts/test-guard/scan.mjs": {
+      "row": "125b",
+      "source": "accelerator/gate/test-guard/scan.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "29bdbd2d3dfe72974f59a3657bcbf1206d950de5",
+      "installedHash": "25ce284ea7c477a6c86c3411140b9143b222f652fbb6f10e7a1cbbf4b43afbb0",
+      "state": "installed"
+    },
+    "scripts/test-guard/state.mjs": {
+      "row": "125b",
+      "source": "accelerator/gate/test-guard/state.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "208e838e49df0e5bea45d6a89f7305a0e9528e9b",
+      "installedHash": "b6386184fe6329cbece5db42c994f53ee0c42a1e58ea191eb9de94f7d88ff933",
+      "state": "installed"
+    },
+    "scripts/test-guard/subagent.mjs": {
+      "row": "125b",
+      "source": "accelerator/gate/test-guard/subagent.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "b3505b2af81a6ea98db16bcdba6874305afb57ed",
+      "installedHash": "a8f538725f28d652c521e687282281fd28e48c9ea4493287dafe7450113f287e",
+      "state": "installed"
+    },
+    "scripts/test-quality-hook.mjs": {
+      "row": "169",
+      "source": "accelerator/gate/test-quality-hook.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "7b8464cffc8d20058a95ea171a06729f1fdb82c8",
+      "installedHash": "2a4554e9f1840a3729c1cb033de122f7387b35e099bd19d883a326cda4acb3b9",
+      "state": "installed"
+    },
+    "scripts/test-quality-scan.mjs": {
+      "row": "168",
+      "source": "accelerator/gate/test-quality-scan.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "d680957dfde0ec8e84f1ee630635fc7cd7178cb2",
+      "installedHash": "689eb15986ccbe71fffdd1c8eed4af15a757f2102794926b4a037d5d8828a84a",
+      "state": "installed"
+    },
+    "scripts/test-quality/rules/go-testing-testify.yml": {
+      "row": "170",
+      "source": "accelerator/gate/test-quality/rules/go-testing-testify.yml",
+      "mode": "verbatim",
+      "sourceBlob": "57b893152c059dd65d22ef85ea2e8eb03442f12c",
+      "installedHash": "cc9d673e3f72032f100781106fbc01765029d72f3351e03f9f634bc78bc936ac",
+      "state": "installed"
+    },
+    "scripts/test-quality/rules/java-junit-mockito.yml": {
+      "row": "170",
+      "source": "accelerator/gate/test-quality/rules/java-junit-mockito.yml",
+      "mode": "verbatim",
+      "sourceBlob": "7bdd82cf31d41c45a840c55c8c6cccc0afeb47e5",
+      "installedHash": "82017b5d501936c5e3495dbc453ab16d11e5aebaabeb3d13d4ce50e8db921129",
+      "state": "installed"
+    },
+    "scripts/test-quality/rules/js-ts-jest-vitest-node.yml": {
+      "row": "170",
+      "source": "accelerator/gate/test-quality/rules/js-ts-jest-vitest-node.yml",
+      "mode": "verbatim",
+      "sourceBlob": "e94e8cfd89a0e3179b86764e47e5eb80dde1c62d",
+      "installedHash": "c97d8b91bd5ff97bafa7d83b4ed3a0d6c26dcb9b89815a87f1430cbdff59ee4e",
+      "state": "installed"
+    },
+    "scripts/test-quality/rules/php-phpunit.yml": {
+      "row": "170",
+      "source": "accelerator/gate/test-quality/rules/php-phpunit.yml",
+      "mode": "verbatim",
+      "sourceBlob": "dc7b96f82e754277ecc51217f9ffc2941f0c9e51",
+      "installedHash": "6074baac45edaba16d00e9d9669762371b182b2893f5e81462437af041164d0f",
+      "state": "installed"
+    },
+    "scripts/test-quality/rules/python-pytest-unittest.yml": {
+      "row": "170",
+      "source": "accelerator/gate/test-quality/rules/python-pytest-unittest.yml",
+      "mode": "verbatim",
+      "sourceBlob": "2d6f15bf9f28b6d26ed94108087fea58c40778de",
+      "installedHash": "8f874d5312f4360caae79501ef97ac13cc0f44f5b92181ed728df7ebf028e0bd",
+      "state": "installed"
+    },
+    "scripts/test-quality/ruleset.json": {
+      "row": "170",
+      "source": "accelerator/gate/test-quality/ruleset.json",
+      "mode": "verbatim",
+      "sourceBlob": "e2c9842ada7095fa8dae6cccc6676ff64d8d78b1",
+      "installedHash": "2f52a840bc6a42345806fcac4fa20e22a9ee8e78b243a90bf9e466bf4f4f7426",
+      "state": "installed"
+    },
+    "scripts/test-quality/suggested/hub-csharp.yml": {
+      "row": "170",
+      "source": "accelerator/gate/test-quality/suggested/hub-csharp.yml",
+      "mode": "verbatim",
+      "sourceBlob": "beb39f8255503c192d2df2d5c036165759f309ab",
+      "installedHash": "14aea11c6466e33e35f2072f34a42e457bfdc88ee4968d5ab301e21e48a8e1a7",
+      "state": "installed"
+    },
+    "scripts/test-quality/suggested/hub-kotlin.yml": {
+      "row": "170",
+      "source": "accelerator/gate/test-quality/suggested/hub-kotlin.yml",
+      "mode": "verbatim",
+      "sourceBlob": "bf17d0278e63b1d4db645a49912ed3cd9c251da7",
+      "installedHash": "f93f50976936f5e63f071c3694c80e25f5c8acc60126afd41e0d3791d56d1055",
+      "state": "installed"
+    },
+    "scripts/test-quality/suggested/hub-ruby.yml": {
+      "row": "170",
+      "source": "accelerator/gate/test-quality/suggested/hub-ruby.yml",
+      "mode": "verbatim",
+      "sourceBlob": "1dc4a9d2cb9ae0fa99b2971bd67ce7e2d893138b",
+      "installedHash": "5665a3b04351e89ea56a317e21f82bef11e99872eb196131b01e188d8c6e98d7",
+      "state": "installed"
+    },
+    "tests/check-agent-registry/run.mjs": {
+      "row": "120a",
+      "source": "accelerator/scripts/tests/check-agent-registry/run.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "a5f32fac976d14454548a9b326233c83276f7c78",
+      "installedHash": "f4d7dba9c7fdb2c7fc17c58382ea81109f7e6631607953034182dcb03cfe0bb9",
+      "state": "installed"
+    },
+    "tests/check-bug/run.mjs": {
+      "row": "196a",
+      "source": "accelerator/gate/tests/check-bug/run.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "4d4265ae374a1cfa884e469e45a6226fd22ab7bf",
+      "installedHash": "4c8ae093d9dc9cf557ab01ebdece73d5b65860626c022570437bd5e54377c4c3",
+      "state": "installed"
+    },
+    "tests/check-context/run.mjs": {
+      "row": "107a",
+      "source": "accelerator/scripts/tests/check-context/run.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "65ece537287a2696cba4ff42b156279e70afa1ab",
+      "installedHash": "bfb7d8feca8ea1d92555a95e9666a17b619251e3c22d65e005dcd2caeeb42f90",
+      "state": "installed"
+    },
+    "tests/check-coverage/run.mjs": {
+      "row": "136a",
+      "source": "accelerator/gate/tests/check-coverage/run.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "58f6bc59f74b9ec87820cbae5707d46430db38f8",
+      "installedHash": "fc0669a72542d8262e406f067e907c502a3cecd62516c12071ac1a1b82317df8",
+      "state": "installed"
+    },
+    "tests/check-decomposition/run.mjs": {
+      "row": "91",
+      "source": "accelerator/gate/tests/check-decomposition/run.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "93cb67237c457d572f5210b24c9e708cc31507f4",
+      "installedHash": "c1e67200996d00d51e8d1efec1852fe7da592070269d3c616928817b5cef6511",
+      "state": "installed"
+    },
+    "tests/check-dependencies/run.mjs": {
+      "row": "96b",
+      "source": "accelerator/gate/tests/check-dependencies/run.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "fda1dc3c64012a910c6e954e6b5ce663617e5395",
+      "installedHash": "e304cac3791b2767c369643208c2df0222ddc33445ed119a108390aaefbd7793",
+      "state": "installed"
+    },
+    "tests/check-dev-ready/README.md": {
+      "row": "17",
+      "source": "accelerator/gate/tests/check-dev-ready/README.md",
+      "mode": "verbatim",
+      "sourceBlob": "f3c8dfbdc0eee1f226fcc74a650ebc089adb7c7c",
+      "installedHash": "2fbc221a88a649491cad6e9886f48a75d335ab565d543be7b70f0ba2c2fe6a40",
+      "state": "installed"
+    },
+    "tests/check-dev-ready/run.mjs": {
+      "row": "16",
+      "source": "accelerator/gate/tests/check-dev-ready/run.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "cf922e07cbafa33421e16d7095150fa475637a64",
+      "installedHash": "5a648a607ce3435e689d845cd229b523230ce450190b9a4f535251678ab1352d",
+      "state": "installed"
+    },
+    "tests/check-fan-in/run.mjs": {
+      "row": "96",
+      "source": "accelerator/gate/tests/check-fan-in/run.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "8c54504c1fe0a553c77f985714b27e02352aa5ca",
+      "installedHash": "b0334051e12ae30fec88266349e31f35dd0b59176e6ba742662302c86e6b0766",
+      "state": "installed"
+    },
+    "tests/check-intake/run.mjs": {
+      "row": "189a",
+      "source": "accelerator/gate/tests/check-intake/run.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "bbece404bf9292b9e73011e4a7cd9b5633219f7b",
+      "installedHash": "9600122bd5bbdec01929015204e355764ccf9cb6387ac0e084df51d092e48d0a",
+      "state": "installed"
+    },
+    "tests/check-qa-gate/run.mjs": {
+      "row": "175a",
+      "source": "accelerator/gate/tests/check-qa-gate/run.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "a87be6223ff048aeb6d0065098190263e948c926",
+      "installedHash": "2b5cce2bcc23f5d1c8d3189f84b87227d2d01f21d0015c81764e4fa5246d0022",
+      "state": "installed"
+    },
+    "tests/check-registry/run.mjs": {
+      "row": "75a",
+      "source": "accelerator/scripts/tests/check-registry/run.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "29877fb17756a2870c1c881061544e4120db2822",
+      "installedHash": "7970d2b3a40bfe8138f6f986cf3e5f3a344d19865d706467b5de80f1dd97101e",
+      "state": "installed"
+    },
+    "tests/check-requirements/run.mjs": {
+      "row": "89",
+      "source": "accelerator/gate/tests/check-requirements/run.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "a218078751032a484ee69bbfca877deb0d9f64f2",
+      "installedHash": "b149225e7254a14b31db3f1711847bb7e3302fc569d4712f70d0b011c750091f",
+      "state": "installed"
+    },
+    "tests/check-spoke-rules/run.mjs": {
+      "row": "105a",
+      "source": "accelerator/scripts/tests/check-spoke-rules/run.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "5082977d249b8317a96d6d872bcec60adba231ae",
+      "installedHash": "73fe87dfaa988bdcd6a96b0be7bf1ed0771a918f9e6da175ea23816aad8c5546",
+      "state": "installed"
+    },
+    "tests/check-staged/run.mjs": {
+      "row": "126a",
+      "source": "accelerator/gate/tests/check-staged/run.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "1d52265f37a20e9abb4bc358acc73c8f4fed1866",
+      "installedHash": "35a86ae16d8a0562ede2e8de89979ff30ab666f357cd0d6ce0ab06eeb07b1501",
+      "state": "installed"
+    },
+    "tests/check-survey-secrets/run.mjs": {
+      "row": "115c",
+      "source": "accelerator/gate/tests/check-survey-secrets/run.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "c3cd4f9cef5a2b5dc48cd5f70bf09b64a2a7c14c",
+      "installedHash": "cc21ca63893b6754a08147b7d73ba8e6b731e1c669590c7f8c2e67437916b80a",
+      "state": "installed"
+    },
+    "tests/check-survey/run.mjs": {
+      "row": "115a",
+      "source": "accelerator/scripts/tests/check-survey/run.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "2e2af60430c5c79b4b8899f9531df05ae16754c2",
+      "installedHash": "40ae144352a6a4c066406a83bd0257eeb9b771116b82af0821558c6b1ba6fcfa",
+      "state": "installed"
+    },
+    "tests/check-trackers/run.mjs": {
+      "row": "129a",
+      "source": "accelerator/scripts/tests/check-trackers/run.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "821372f240929b8bfc1e14d733c9741489ef4971",
+      "installedHash": "c1a19544b5de4de5de08065e1e0631807db77e94cad259aba0ba7ef744ca91ff",
+      "state": "installed"
+    },
+    "tests/check-validation/run.mjs": {
+      "row": "86",
+      "source": "accelerator/gate/tests/check-validation/run.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "c800f93effbdd0ae3db6b2eb386b9342d1e00e1d",
+      "installedHash": "9f9d2473cd634107fb2ec5488a9f49e70a902377e73e96fe90afcf02fc120e98",
+      "state": "installed"
+    },
+    "tests/check-watermark/run.mjs": {
+      "row": "122a",
+      "source": "accelerator/gate/tests/check-watermark/run.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "85ab0b50bbfaebce2331c1f969ff7849247cfee5",
+      "installedHash": "c6b99c98e07835a190ef49aa93a31e07d61694e587fd3c121105a8d8e444815c",
+      "state": "installed"
+    },
+    "tests/confluence-sync/fake-confluence.mjs": {
+      "row": "204b",
+      "source": "accelerator/scripts/tests/confluence-sync/fake-confluence.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "530593bd56da514a807b69d987caa0ec62e15a04",
+      "installedHash": "02afb072651e8cfc01513204c7d01c9bf4c5ed4aaac46238244f03900a9a9f19",
+      "state": "installed"
+    },
+    "tests/confluence-sync/run.mjs": {
+      "row": "204a",
+      "source": "accelerator/scripts/tests/confluence-sync/run.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "9b8e4d3c2cf9ea50246d1423ed53c18a72cae961",
+      "installedHash": "1a5ce594df11639eca44816295eda73ac098c5cd5f9a2110aef8273849bd8e0f",
+      "state": "installed"
+    },
+    "tests/escalation/fake-gh.mjs": {
+      "row": "185f",
+      "source": "accelerator/scripts/tests/escalation/fake-gh.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "3ae8cc85d89e6a01ddd931af50b3646ea94d193a",
+      "installedHash": "38285390c3f08dd5722d960c88ac4bfd705211bac042e96bcf17f8c7cfab519c",
+      "state": "installed"
+    },
+    "tests/escalation/run.mjs": {
+      "row": "185d",
+      "source": "accelerator/scripts/tests/escalation/run.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "a5d49019d481d02397516fa5b9be4194448a2d72",
+      "installedHash": "177b58b2a05e824cd0a920f47a548826a887565bccf4c829f663466e1b0de113",
+      "state": "installed"
+    },
+    "tests/feedback-context/run.mjs": {
+      "row": "167b",
+      "source": "accelerator/scripts/tests/feedback-context/run.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "0f1e0a250e5599e06398da180fb84b19120a72fb",
+      "installedHash": "79177ba8c9b3dfd7b474310f37698c027f3e79a2d62ac19c1b632ec157de2142",
+      "state": "installed"
+    },
+    "tests/jira-sync/fake-jira.mjs": {
+      "row": "133b",
+      "source": "accelerator/scripts/tests/jira-sync/fake-jira.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "9b0c666ab74255e5a5109a1b55e4edbd9a2db6ab",
+      "installedHash": "2155bd834640d945b2f7093778262058fe02fa99cba894df1afe294140fa5744",
+      "state": "installed"
+    },
+    "tests/jira-sync/run.mjs": {
+      "row": "133a",
+      "source": "accelerator/scripts/tests/jira-sync/run.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "6734a0dc636093475905763952d0f3c43bce487b",
+      "installedHash": "d1e8ec6fd5bb012db16f4318c4f07b52a26cd06c401cae96e6f2ed4632a871f7",
+      "state": "installed"
+    },
+    "tests/join-survey/run.mjs": {
+      "row": "117e",
+      "source": "accelerator/scripts/tests/join-survey/run.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "ea2e3fd77fdc3363c56c6cac2a9d42ef9b4d221f",
+      "installedHash": "060e19921b89de8e56a006ff1188ce8d0feb3446d18901c3300324e5a5bbd3e2",
+      "state": "installed"
+    },
+    "tests/observability-collect/run.mjs": {
+      "row": "176a",
+      "source": "accelerator/scripts/tests/observability-collect/run.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "c25b279170f39ecd053c9a7a4e5ee0a56fb7cc1d",
+      "installedHash": "ae0621778a70766f5cacd61f3a3bdfc9c855f812a6a857a551d0488f8581a4c1",
+      "state": "installed"
+    },
+    "tests/observability-gate/run.mjs": {
+      "row": "202a",
+      "source": "accelerator/scripts/tests/observability-gate/run.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "8f77ae2d90b0bbf9ae80479264a64d1c119fe6b7",
+      "installedHash": "8fee118ae9cc4a8327c0141eac9dde3c9cdbe2cfe223b7734386dea7f77c960d",
+      "state": "installed"
+    },
+    "tests/observability-send/run.mjs": {
+      "row": "178a",
+      "source": "accelerator/scripts/tests/observability-send/run.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "5a9a9da375a8675c4e5fc4237470f2d32e73857a",
+      "installedHash": "40edc5488b5ba9e7fa961bd991e443caf152b8bb50b8b483e032c5ece8aaf965",
+      "state": "installed"
+    },
+    "tests/plan-overview/run.mjs": {
+      "row": "110e",
+      "source": "accelerator/scripts/tests/plan-overview/run.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "8b79fa8d4420087707d7da615e4c807191aeccbd",
+      "installedHash": "ac9e0a3d12619eef939b2e2069d131406954e5bdbaf05f1b89fed704e8d59a13",
+      "state": "installed"
+    },
+    "tests/plan-survey/run.mjs": {
+      "row": "117c",
+      "source": "accelerator/scripts/tests/plan-survey/run.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "ca656356d56de57fd672270c6c9e4c88366e1a5b",
+      "installedHash": "506afe37d3669e5c5623f8c42a1ac196b994589cf1716fef77d0ae357e927884",
+      "state": "installed"
+    },
+    "tests/prime/run.mjs": {
+      "row": "140c",
+      "source": "accelerator/scripts/tests/prime/run.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "f80f679dfa1f44a1bd005e2f7ccab5297a798157",
+      "installedHash": "f4fd4c30888545beafea57e8fc851d7dbc0f7dec933cdf3c6852c598bc5032ee",
+      "state": "installed"
+    },
+    "tests/pull-request/fake-gh.mjs": {
+      "row": "140a",
+      "source": "accelerator/scripts/tests/pull-request/fake-gh.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "3ff6921b93fc53c94f03ed54c341b999f65dbc8c",
+      "installedHash": "da10896d2c19cbae80d4f10d0f4367afaddd1b35a89070f72b51cd5b40346c64",
+      "state": "installed"
+    },
+    "tests/pull-request/run.mjs": {
+      "row": "140a",
+      "source": "accelerator/scripts/tests/pull-request/run.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "7a8b0aeb3e7751eb925eedfbcb0eefb3b84a19df",
+      "installedHash": "d879eab50185aa4a89ccb1a0640a7176bbd73792572d48e19c754c493e32b981",
+      "state": "installed"
+    },
+    "tests/read-context/run.mjs": {
+      "row": "108a",
+      "source": "accelerator/scripts/tests/read-context/run.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "1fc43bcda915929a8b1d7b34777903daf5605acb",
+      "installedHash": "956ddc7d0eac458a384fde1fc389a83a72240dbbbbb8faf43b7731b990dd4aa3",
+      "state": "installed"
+    },
+    "tests/read-discovery/README.md": {
+      "row": "194b",
+      "source": "accelerator/scripts/tests/read-discovery/README.md",
+      "mode": "verbatim",
+      "sourceBlob": "8defd9a61e0f0584703bbd10949e054007dbdc5a",
+      "installedHash": "05c99ea8f3c08332b1aa3d7cb409236826983b6207ae32fc67b0b7f2e4492f4e",
+      "state": "installed"
+    },
+    "tests/read-discovery/run.mjs": {
+      "row": "194a",
+      "source": "accelerator/scripts/tests/read-discovery/run.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "925eb2c87f5eac4b064d8ab3c747e805673e3c34",
+      "installedHash": "9b9b371ea97d2e33e5a6d911049727a9e59b2bb5722572d976cbb68256a8781d",
+      "state": "installed"
+    },
+    "tests/read-global/run.mjs": {
+      "row": "149a",
+      "source": "accelerator/scripts/tests/read-global/run.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "c04e466233828b6d059011de9daf712afbbc9102",
+      "installedHash": "fc6feb29fe741773e022d11890222be6b86e92b02044172e2c956aa6d35b5efc",
+      "state": "installed"
+    },
+    "tests/read-hubs/run.mjs": {
+      "row": "162a",
+      "source": "accelerator/scripts/tests/read-hubs/run.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "df5c04055ed59b63b6a047f336e2051d83fc989e",
+      "installedHash": "90bb6b127f719dd0d8594520a6b3f18fff103ed339c913b1801224e53a60a9ac",
+      "state": "installed"
+    },
+    "tests/read-spoke-rules/run.mjs": {
+      "row": "104a",
+      "source": "accelerator/scripts/tests/read-spoke-rules/run.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "53eabe9e494715d5906bf3275b37ee2deb66e88b",
+      "installedHash": "61cead5b5534be83941ef8a0ea27d1146ea4fade065408ae0e8f511cf107b152",
+      "state": "installed"
+    },
+    "tests/read-spoke/run.mjs": {
+      "row": "74a",
+      "source": "accelerator/scripts/tests/read-spoke/run.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "53b29c42c5b467c50f0165cec7ee951f58966135",
+      "installedHash": "7c83d4b95b86cede77b907ab5816b723ee774afecf97ae6e27995155436df730",
+      "state": "installed"
+    },
+    "tests/read-survey/run.mjs": {
+      "row": "117a",
+      "source": "accelerator/scripts/tests/read-survey/run.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "4daa00c1ad53139e09ad3273ec022a293b93ae0c",
+      "installedHash": "1177aac4957a318e7877849642f82b6ce2aa363fcf895185b2e060feb119615f",
+      "state": "installed"
+    },
+    "tests/report-context/run.mjs": {
+      "row": "108c",
+      "source": "accelerator/scripts/tests/report-context/run.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "7162befecdc7125ea036d73c54b4805a406a3211",
+      "installedHash": "09a52c98df70d5e75f7c328702f1864317ff080bd275649c572ded8b0843474c",
+      "state": "installed"
+    },
+    "tests/report-global/run.mjs": {
+      "row": "164a",
+      "source": "accelerator/scripts/tests/report-global/run.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "98e0e796809610f587894e7a26ac5879aca10ba2",
+      "installedHash": "72f172bdccd85c279e97ef9d9fd60c825f8ce9720027a4184e03bd8f0bf00f42",
+      "state": "installed"
+    },
+    "tests/secret-scan/run.mjs": {
+      "row": "134a",
+      "source": "accelerator/gate/tests/secret-scan/run.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "de58de21b96a3d46486fc8fd8ca3d79e8ae71715",
+      "installedHash": "b15d7880f1813042af5e62567cd2b6e0df4302949bfae0f206927d064fe8d0a1",
+      "state": "installed"
+    },
+    "tests/spoke-codeowners/run.mjs": {
+      "row": "193a",
+      "source": "accelerator/gate/tests/spoke-codeowners/run.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "726f40c2647de06cfc861ff780250dddd9688d48",
+      "installedHash": "70421ccae05194421008b2f7b4c7dd3c2138c39b5de36cce2e195db9d4596c23",
+      "state": "installed"
+    },
+    "tests/story-gate-plan/run.mjs": {
+      "row": "173a",
+      "source": "accelerator/gate/tests/story-gate-plan/run.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "28ad18d8dd8f2eb809d27c5b7416ae32969383a1",
+      "installedHash": "ca34e1a2ff37c8bfb0d6ec69ac6036ac410dc5a345d944e6d4eb4eb29a995180",
+      "state": "installed"
+    },
+    "tests/test-guard/SMOKE-TESTS.md": {
+      "row": "125a",
+      "source": "accelerator/gate/tests/test-guard/SMOKE-TESTS.md",
+      "mode": "verbatim",
+      "sourceBlob": "d08e587be3b4b1063130910fef89c56361f67238",
+      "installedHash": "3c8cbb1a029ea2bf9881d867b3fb15fc8d88601524ca664510ca7663fa9a404a",
+      "state": "installed"
+    },
+    "tests/test-guard/payloads/post-failed.json": {
+      "row": "125a",
+      "source": "accelerator/gate/tests/test-guard/payloads/post-failed.json",
+      "mode": "verbatim",
+      "sourceBlob": "fbcc59072e7259e14719b72811f4c6fc77ed1b2d",
+      "installedHash": "7d1dd33218b5f5f86d0e3262b74f701fc2fa7b23c77dd53a7cd0e0f7856517d1",
+      "state": "installed"
+    },
+    "tests/test-guard/payloads/post-quiet.json": {
+      "row": "125a",
+      "source": "accelerator/gate/tests/test-guard/payloads/post-quiet.json",
+      "mode": "verbatim",
+      "sourceBlob": "d1c16efab4ba7f1463790d81b2fd650785b28df4",
+      "installedHash": "cfb469604c01497aa643910dcd808f5272f71f78f885e8ef619b9313585bdf6d",
+      "state": "installed"
+    },
+    "tests/test-guard/payloads/pre-approved.json": {
+      "row": "125a",
+      "source": "accelerator/gate/tests/test-guard/payloads/pre-approved.json",
+      "mode": "verbatim",
+      "sourceBlob": "0602fecf42381fad556d6b7a78a7fb13591b43e4",
+      "installedHash": "dafa54c9735a38e4e5a45985596a98faa2b2a6909512b6f063dbac6aff47d18e",
+      "state": "installed"
+    },
+    "tests/test-guard/payloads/pre-bash.json": {
+      "row": "125a",
+      "source": "accelerator/gate/tests/test-guard/payloads/pre-bash.json",
+      "mode": "verbatim",
+      "sourceBlob": "0b01de666408c1d6dbae6e603f1dd877b370339a",
+      "installedHash": "000b9188ad2776164409d001e58253eac6732952e6db345896c643737d0db886",
+      "state": "installed"
+    },
+    "tests/test-guard/payloads/pre-production.json": {
+      "row": "125a",
+      "source": "accelerator/gate/tests/test-guard/payloads/pre-production.json",
+      "mode": "verbatim",
+      "sourceBlob": "bf7a93b79d43ddae22efc10a70f60908e227877f",
+      "installedHash": "a9284801f972be7b83ab16eeee7534d986b8c1bc5ff9f8718f8bcd031ab68f17",
+      "state": "installed"
+    },
+    "tests/test-guard/payloads/stop.json": {
+      "row": "125a",
+      "source": "accelerator/gate/tests/test-guard/payloads/stop.json",
+      "mode": "verbatim",
+      "sourceBlob": "50f4c4b04473b0232dd30ec6d15348066266e4b0",
+      "installedHash": "28d8d7978bdc09abdccb9910fa7dce07460b5f68e7b3bd3c24aa780d253d2f8d",
+      "state": "installed"
+    },
+    "tests/test-guard/run.mjs": {
+      "row": "125a",
+      "source": "accelerator/gate/tests/test-guard/run.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "de78f9f6d643dd1c74d585e06dd1d941b98c14da",
+      "installedHash": "012b4fda128a47822c9384f3be17ccc49019adbe4eb108842c332bb1c9fa0146",
+      "state": "installed"
+    },
+    "tests/test-quality/fixtures-suggested/csharp/tests/InvoiceTests.cs": {
+      "row": "170a",
+      "source": "accelerator/gate/tests/test-quality/fixtures-suggested/csharp/tests/InvoiceTests.cs",
+      "mode": "verbatim",
+      "sourceBlob": "ea031687394ed34e321c2a9941b117d34ad3ea87",
+      "installedHash": "db79d67bd866be5db34f723428e0cd8006e4be4bd613fcb0f8de57403ef4cbea",
+      "state": "installed"
+    },
+    "tests/test-quality/fixtures-suggested/kotlin/src/test/kotlin/com/example/OrderServiceTest.kt": {
+      "row": "170a",
+      "source": "accelerator/gate/tests/test-quality/fixtures-suggested/kotlin/src/test/kotlin/com/example/OrderServiceTest.kt",
+      "mode": "verbatim",
+      "sourceBlob": "ded30f7ec91b9436035533200f09cd7bc7fb9a2d",
+      "installedHash": "c86632844e8639f50e892bb504d9d77256c856a582d8d34251ba59fac44c5f01",
+      "state": "installed"
+    },
+    "tests/test-quality/fixtures-suggested/ruby/spec/billing_spec.rb": {
+      "row": "170a",
+      "source": "accelerator/gate/tests/test-quality/fixtures-suggested/ruby/spec/billing_spec.rb",
+      "mode": "verbatim",
+      "sourceBlob": "8639b4cf89f7b80c987ec885d058894378fcaf89",
+      "installedHash": "e37e379a054825d5ec1b4ad074bbe08a9b12e60ed331e4c30b95b057d121cc39",
+      "state": "installed"
+    },
+    "tests/test-quality/fixtures-suggested/ruby/spec/invoice_test.rb": {
+      "row": "170a",
+      "source": "accelerator/gate/tests/test-quality/fixtures-suggested/ruby/spec/invoice_test.rb",
+      "mode": "verbatim",
+      "sourceBlob": "6e423cb71b209b047468d600126b51f80dde8e26",
+      "installedHash": "eade3ac901286f6de55a89f2e505779fd8b66d5ea0c7567130e7c806c1a63948",
+      "state": "installed"
+    },
+    "tests/test-quality/fixtures/go/internal/billing/invoice_test.go": {
+      "row": "170a",
+      "source": "accelerator/gate/tests/test-quality/fixtures/go/internal/billing/invoice_test.go",
+      "mode": "verbatim",
+      "sourceBlob": "52744834c49ee5ec5bdc5bb33be366c890094bf0",
+      "installedHash": "abf88b7126a4fbbc8fd7e66ce98c63f1e75d8ad4ee172af3a8378972be670671",
+      "state": "installed"
+    },
+    "tests/test-quality/fixtures/java/src/test/java/com/example/OrderServiceTest.java": {
+      "row": "170a",
+      "source": "accelerator/gate/tests/test-quality/fixtures/java/src/test/java/com/example/OrderServiceTest.java",
+      "mode": "verbatim",
+      "sourceBlob": "08c0ff387de918540caf06fb797456e71d5c9a36",
+      "installedHash": "1440ba53054ba28e5383a8fbdc7aec350d9813ff18f3633164500fbe99b60355",
+      "state": "installed"
+    },
+    "tests/test-quality/fixtures/java/src/test/java/com/example/SkippedSuiteTest.java": {
+      "row": "170a",
+      "source": "accelerator/gate/tests/test-quality/fixtures/java/src/test/java/com/example/SkippedSuiteTest.java",
+      "mode": "verbatim",
+      "sourceBlob": "55ba63153e4cb984a849581944edd0f2215c5cb4",
+      "installedHash": "a15b6bef0ed2cfb061ffcf933157b3a21906cddaa07001982b791557cef8d1f0",
+      "state": "installed"
+    },
+    "tests/test-quality/fixtures/js/src/app/Player.test.tsx": {
+      "row": "170a",
+      "source": "accelerator/gate/tests/test-quality/fixtures/js/src/app/Player.test.tsx",
+      "mode": "verbatim",
+      "sourceBlob": "7037a5382178279abd9046d28b0f00e7f57bc959",
+      "installedHash": "698b7c5af8bb755c25346ab2974a822f55ce8e9e065d2bc2b3eeb198dcc752f6",
+      "state": "installed"
+    },
+    "tests/test-quality/fixtures/js/src/app/auth.service.spec.ts": {
+      "row": "170a",
+      "source": "accelerator/gate/tests/test-quality/fixtures/js/src/app/auth.service.spec.ts",
+      "mode": "verbatim",
+      "sourceBlob": "26bed37aae62d5b8153d38ba72b1ce651156a629",
+      "installedHash": "19dbfa9931f61ef45abe02bb284ef04e460cfaec3d4ad52e350d3e7e38ada61e",
+      "state": "installed"
+    },
+    "tests/test-quality/fixtures/js/test/nosem.test.mjs": {
+      "row": "170a",
+      "source": "accelerator/gate/tests/test-quality/fixtures/js/test/nosem.test.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "42c93d2b668788829f3d98d963b8f78862bc86bc",
+      "installedHash": "6e642b168a53fc1c12e299426dcd5d03a53eb1f740528a6c5591af73086a8ca8",
+      "state": "installed"
+    },
+    "tests/test-quality/fixtures/js/test/server.test.mjs": {
+      "row": "170a",
+      "source": "accelerator/gate/tests/test-quality/fixtures/js/test/server.test.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "e61455d5ca4370565934f711f891e49ba701f4a4",
+      "installedHash": "ac6bb99ed5e4e0aae50aa59245f4d9fcd54857e84d3ed4961ec2cb87f05fd5f1",
+      "state": "installed"
+    },
+    "tests/test-quality/fixtures/php/tests/Billing/InvoiceTest.php": {
+      "row": "170a",
+      "source": "accelerator/gate/tests/test-quality/fixtures/php/tests/Billing/InvoiceTest.php",
+      "mode": "verbatim",
+      "sourceBlob": "5d99e9effe418d9cdbdcf3dcee45058dffe021b6",
+      "installedHash": "eeaa877fb9c9e036908aafa47edb636636bb65b64a59cff8edef9c0dde9c99f0",
+      "state": "installed"
+    },
+    "tests/test-quality/fixtures/python/tests/test_reconcile.py": {
+      "row": "170a",
+      "source": "accelerator/gate/tests/test-quality/fixtures/python/tests/test_reconcile.py",
+      "mode": "verbatim",
+      "sourceBlob": "350dba5e01c4a4f802283d01170d333a5925314c",
+      "installedHash": "14b44f6f118e0f01abcc4e67c01f9899c6eeb45eb753dab262ff77b3555e0c9e",
+      "state": "installed"
+    },
+    "tests/test-quality/run.mjs": {
+      "row": "170a",
+      "source": "accelerator/gate/tests/test-quality/run.mjs",
+      "mode": "verbatim",
+      "sourceBlob": "b0c54ad611db207bd91232f3b9a072759e60536c",
+      "installedHash": "8b3824e64579614a675086bb067c7f51628a07e5824ce632d47c23a9faf60188",
+      "state": "installed"
+    }
+  },
+  "spokes": {}
+}
