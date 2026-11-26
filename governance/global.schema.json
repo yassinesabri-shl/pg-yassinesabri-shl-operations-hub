@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.internal/harness/global.schema.json",
+  "title": "Global context link",
+  "description": "A hub's link to the global context repository, at `docs/estate/global.json`. The global repository holds the decision records, standards and exceptions that bind every product, and the Global Architecture Board owns it. A hub has a global layer when it has this file, and a hub without it has none: its requirements say `Global: none`. The file holds the URL only. It names no branch, no tag and no commit. The trunk is asked of the remote each time with `git ls-remote --symref`, and the version a piece of work reads is the `Global:` line on that work's requirements document. Read by `read-global.mjs` and `read-context.mjs`.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "url"],
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "const": 1
+    },
+    "url": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S",
+      "description": "The clone URL of the global context repository. Never a credential: a URL that carries a user name, a password or a token is refused, because this file is committed and every seat reads it. The hub's CI reads the repository with the credential it already uses to read its spokes."
+    }
+  }
+}

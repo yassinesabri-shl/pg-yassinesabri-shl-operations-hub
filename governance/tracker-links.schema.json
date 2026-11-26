@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.internal/harness/tracker-links.schema.json",
+  "title": "Tracker links for one decomposition",
+  "description": "The persistent reference from each harness key to its ticket, one file per decomposition at `docs/estate/tracker-links/<SLUG>.json`. It covers the decomposition's stories and the defects raised from them, which have no item file. Bookkeeping, not acceptance: no item gate reads it. Written by `jira-sync.mjs` in a pull request after it creates tickets; read by `check-trackers.mjs` and `jira-sync.mjs`.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "slug", "items"],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "slug": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+    "epic": { "type": "string", "pattern": "^[a-z][a-z0-9-]{0,19}:[A-Z][A-Z0-9_]+-[1-9][0-9]*$", "description": "The Epic chosen or created for this decomposition, as `<instance-id>:<JIRA-KEY>`. Absent where the board's `epics` is `none`." },
+    "items": {
+      "type": "object",
+      "propertyNames": { "pattern": "^[A-Z][A-Z0-9]{1,9}-[1-9][0-9]*$" },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type", "board", "ticket"],
+        "properties": {
+          "type": { "type": "string", "enum": ["story", "defect"] },
+          "board": { "type": "string" },
+          "ticket": { "type": "string", "pattern": "^[a-z][a-z0-9-]{0,19}:[A-Z][A-Z0-9_]+-[1-9][0-9]*$" },
+          "parent": { "type": "string", "pattern": "^[A-Z][A-Z0-9]{1,9}-[1-9][0-9]*$", "description": "A defect's parent story, the `key` of the validation block that minted the defect's key." }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "session_id": "{{SESSION}}",
+  "transcript_path": "/home/dev/.claude/projects/-home-dev-hub/{{SESSION}}.jsonl",
+  "cwd": "{{HUB}}",
+  "scratchpad_dir": "/tmp/claude-1000/-home-dev-hub/{{SESSION}}/scratchpad",
+  "prompt_id": "7d1c2e9a-4b6f-4f0e-9a51-0c3f2b8e6d14",
+  "permission_mode": "acceptEdits",
+  "agent_id": "{{AGENT}}",
+  "agent_type": "engineer",
+  "effort": "high",
+  "hook_event_name": "PostToolUseFailure",
+  "tool_use_id": "toolu_01PostFailed",
+  "tool_name": "Bash",
+  "tool_input": {
+    "command": "cd \"{{CLONE}}\" && sed -i \"\" \"s/assert/;/\" {{APPROVED}} && node --test",
+    "description": "Run the tests"
+  },
+  "error": "Exit code 1\nnot ok 1 - sum adds a list",
+  "is_interrupt": false,
+  "duration_ms": 812
+}

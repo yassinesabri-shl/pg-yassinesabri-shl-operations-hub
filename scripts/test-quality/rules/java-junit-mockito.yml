@@ -1,0 +1,212 @@
+# Part of the harness asset library c6f3b4427d58f7c3 (see VERSION.json) · 2026-10-15
+#
+# Test-quality rules for Java: JUnit 5 and 4, TestNG, Mockito, AssertJ, Spring Boot Test.
+# ERROR is a clear violation (the test writer fixes it before approval); WARNING is for the
+# critic to judge. Fixtures: tests/test-quality/fixtures/java/. Add a rule here, add its fixture.
+# Semgrep rules cannot share a block, so each rule repeats its `paths:` and a few messages: that
+# is deliberate, and a change to one is a change to all of them.
+rules:
+  - id: shl-java-disabled
+    languages: [java]
+    severity: ERROR
+    message: "A disabled test never runs, so it proves nothing. Enable it, or delete it with the criterion it covered."
+    paths:
+      include: ["**/src/test/", "*Test.java", "*Tests.java", "*IT.java", "*TestCase.java"]
+    pattern-either:
+      - pattern: |
+          @Disabled
+          $RET $M(...) {...}
+      - pattern: |
+          @Disabled(...)
+          $RET $M(...) {...}
+      - pattern: |
+          @Ignore
+          $RET $M(...) {...}
+      - pattern: |
+          @Ignore(...)
+          $RET $M(...) {...}
+      - pattern: |
+          @Test(..., enabled = false, ...)
+          $RET $M(...) {...}
+      - pattern: |
+          @Disabled
+          class $C {...}
+      - pattern: |
+          @Disabled(...)
+          class $C {...}
+      - pattern: |
+          @Ignore
+          class $C {...}
+      - pattern: |
+          @Ignore(...)
+          class $C {...}
+
+  - id: shl-java-assumption
+    languages: [java]
+    severity: WARNING
+    message: "An assumption skips the test silently when it does not hold. Confirm the test still runs in CI."
+    paths:
+      include: ["**/src/test/", "*Test.java", "*Tests.java", "*IT.java", "*TestCase.java"]
+    pattern-either:
+      - pattern: assumeTrue(...)
+      - pattern: assumeFalse(...)
+      - pattern: assumingThat(...)
+      - pattern: Assumptions.$F(...)
+      - pattern: Assume.$F(...)
+
+  - id: shl-java-tautology
+    languages: [java]
+    severity: ERROR
+    message: "This assertion cannot fail: it compares a value with itself or asserts a constant. Assert the behaviour under test."
+    paths:
+      include: ["**/src/test/", "*Test.java", "*Tests.java", "*IT.java", "*TestCase.java"]
+    pattern-either:
+      - pattern: assertTrue(true)
+      - pattern: assertTrue(true, ...)
+      - pattern: assertFalse(false)
+      - pattern: assertFalse(false, ...)
+      - pattern: assertNull(null)
+      - pattern: $Q.assertTrue(true)
+      - pattern: $Q.assertFalse(false)
+      - pattern: assertThat(true).isTrue()
+      - patterns:
+          - pattern-either:
+              - pattern: assertEquals($X, $X)
+              - pattern: assertEquals($X, $X, $M)
+              - pattern: assertSame($X, $X)
+              - pattern: $Q.assertEquals($X, $X)
+              - pattern: $Q.assertEquals($X, $X, $M)
+              - pattern: $Q.assertSame($X, $X)
+              - pattern: assertThat($X).isEqualTo($X)
+          - metavariable-regex:
+              metavariable: $X
+              regex: ^[^()]*$
+
+  - id: shl-java-broad-error
+    languages: [java]
+    severity: ERROR
+    message: "Any exception satisfies this, including a stub's \"not implemented\". Name the exact exception type the design states."
+    paths:
+      include: ["**/src/test/", "*Test.java", "*Tests.java", "*IT.java", "*TestCase.java"]
+    patterns:
+      - pattern-either:
+        - pattern: assertThrows(Exception.class, ...)
+        - pattern: assertThrows(Throwable.class, ...)
+        - pattern: $Q.assertThrows(Exception.class, ...)
+        - pattern: $Q.assertThrows(Throwable.class, ...)
+        - pattern: |
+            @Test(..., expected = Exception.class, ...)
+            $RET $M(...) {...}
+        - pattern: |
+            @Test(..., expected = Throwable.class, ...)
+            $RET $M(...) {...}
+        - pattern: |
+            @Test(..., expectedExceptions = Exception.class, ...)
+            $RET $M(...) {...}
+        - pattern: assertThatThrownBy(...).isInstanceOf(Exception.class)
+        - pattern: assertThatExceptionOfType(Exception.class)
+      # An exception captured into a variable is inspected afterwards: that narrows it.
+      - pattern-not-inside: |
+          $T $V = ...;
+
+  - id: shl-java-runtime-error
+    languages: [java]
+    severity: WARNING
+    message: "RuntimeException is a very broad expectation. Name the exact type the design states unless it really is any runtime failure."
+    paths:
+      include: ["**/src/test/", "*Test.java", "*Tests.java", "*IT.java", "*TestCase.java"]
+    pattern-either:
+      - pattern: assertThrows(RuntimeException.class, ...)
+      - pattern: $Q.assertThrows(RuntimeException.class, ...)
+      - pattern: |
+          @Test(..., expected = RuntimeException.class, ...)
+          $RET $M(...) {...}
+
+  - id: shl-java-empty-test
+    languages: [java]
+    severity: ERROR
+    message: "This test has an empty body: it always passes. (A Spring `contextLoads` smoke test is exempt.)"
+    paths:
+      include: ["**/src/test/", "*Test.java", "*Tests.java", "*IT.java", "*TestCase.java"]
+    patterns:
+      - pattern-either:
+          - pattern: |
+              @Test
+              $RET $F(...) {}
+          - pattern: |
+              @Test
+              $RET $F(...) throws $E {}
+          - pattern: |
+              @ParameterizedTest
+              $RET $F(...) {}
+      - metavariable-regex:
+          metavariable: $F
+          regex: ^(?!contextLoads$)
+
+  - id: shl-java-no-assertion
+    languages: [java]
+    severity: WARNING
+    message: "No assertion, verification or expected exception was recognised in this test. If it asserts through a helper, say which; otherwise it only proves the code ran."
+    paths:
+      include: ["**/src/test/", "*Test.java", "*Tests.java", "*IT.java", "*TestCase.java"]
+    patterns:
+      - pattern-either:
+          - pattern: |
+              @Test
+              $RET $F(...) {
+                $...BODY
+              }
+          - pattern: |
+              @Test
+              $RET $F(...) throws $E {
+                $...BODY
+              }
+          - pattern: |
+              @ParameterizedTest
+              $RET $F(...) {
+                $...BODY
+              }
+          - pattern: |
+              @RepeatedTest(...)
+              $RET $F(...) {
+                $...BODY
+              }
+      - pattern-not: |
+          @Test(..., expected = $X, ...)
+          $RET $F(...) {...}
+      - pattern-not: |
+          @Test(..., expectedExceptions = $X, ...)
+          $RET $F(...) {...}
+      - metavariable-regex:
+          metavariable: $F
+          regex: ^(?!contextLoads$)
+      - metavariable-regex:
+          metavariable: $...BODY
+          regex: (?s)^(?=\s*\S)(?!.*(\b(assert\w*|verify\w*|fail|expect\w*|andExpect\w*|should\w*|then|check\w*|require\w*|isEqualTo|isTrue|isFalse|isNull|isNotNull)\s*[.(]|@Rule\b|ExpectedException)).*$
+
+  - id: shl-java-mock-heavy
+    languages: [java]
+    severity: WARNING
+    message: "Six or more stubbed calls in one test: the test may be checking the mocks, not the behaviour. Prefer a real collaborator or a fake."
+    paths:
+      include: ["**/src/test/", "*Test.java", "*Tests.java", "*IT.java", "*TestCase.java"]
+    patterns:
+      - pattern-either:
+          - pattern: |
+              @Test
+              $RET $F(...) {
+                $...BODY
+              }
+          - pattern: |
+              @Test
+              $RET $F(...) throws $E {
+                $...BODY
+              }
+          - pattern: |
+              @ParameterizedTest
+              $RET $F(...) {
+                $...BODY
+              }
+      - metavariable-regex:
+          metavariable: $...BODY
+          regex: (?s).*?(\b(when|given|doReturn|doThrow|doAnswer|doNothing)\s*\(.*?){6}

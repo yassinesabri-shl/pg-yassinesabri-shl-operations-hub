@@ -1,0 +1,74 @@
+# Part of the harness asset library c6f3b4427d58f7c3 (see VERSION.json) · 2026-10-21
+#
+# A suggested ruleset, off until a hub adopts it: Ruby tests with RSpec and Minitest.
+# `/add-repo` offers it when a spoke holds Ruby tests the library has no rules for; adopting it
+# copies this file to rules/ and its fixture to tests/test-quality/fixtures/ruby/, in a pull request
+# a person merges. After that it is the hub's own rule, judged like the library's. Fixtures:
+# tests/test-quality/fixtures-suggested/ruby/. ERROR is a clear violation.
+rules:
+  - id: hub-ruby-skipped
+    languages: [ruby]
+    severity: ERROR
+    message: "A skipped or pending test never runs, so it proves nothing. Enable it, or delete it with the criterion it covered."
+    paths:
+      include: ["*_spec.rb", "*_test.rb", "spec/", "test/"]
+    patterns:
+      - pattern-either:
+          - pattern: xit ...
+          - pattern: xspecify ...
+          - pattern: xdescribe ...
+          - pattern: xcontext ...
+          - pattern: skip(...)
+          - pattern: pending(...)
+      - pattern-not-inside: |
+          if $C
+            ...
+          end
+      - pattern-not-inside: |
+          unless $C
+            ...
+          end
+
+  - id: hub-ruby-tautology
+    languages: [ruby]
+    severity: ERROR
+    message: "This assertion cannot fail: it compares a value with itself or asserts a constant. Assert the behaviour under test."
+    paths:
+      include: ["*_spec.rb", "*_test.rb", "spec/", "test/"]
+    pattern-either:
+      - pattern: expect(true).to be(true)
+      - pattern: expect(true).to eq(true)
+      - pattern: expect(true).to be_truthy
+      - pattern: expect($X).to eq($X)
+      - pattern: expect($X).to be($X)
+      - pattern: assert true
+      - pattern: assert_equal $X, $X
+      - pattern: assert_equal($X, $X)
+
+  - id: hub-ruby-empty-test
+    languages: [ruby]
+    severity: ERROR
+    message: "This test has an empty body: it always passes."
+    paths:
+      include: ["*_spec.rb", "*_test.rb", "spec/", "test/"]
+    pattern-either:
+      - pattern: |
+          it $T do
+          end
+      - pattern: |
+          specify $T do
+          end
+
+  - id: hub-ruby-empty-minitest
+    languages: [ruby]
+    severity: ERROR
+    message: "This test has an empty body: it always passes."
+    paths:
+      include: ["*_test.rb", "test/"]
+    patterns:
+      - pattern: |
+          def $F
+          end
+      - metavariable-regex:
+          metavariable: $F
+          regex: ^test_

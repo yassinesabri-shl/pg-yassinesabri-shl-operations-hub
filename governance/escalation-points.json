@@ -1,0 +1,1355 @@
+{
+ "schema_version": 1,
+ "note": "Every point where the harness stops for a person, as checked against library commit 211efd0: its id, stage, command, path, trigger, the two roles told first and next, the wait, the severity, the fix and the source. The line numbers in `source` are those of that commit. The delivery lead is always the third step of the ladder, so no row repeats it. A point on the question path or on no path writes no line, and `escalation.mjs raise` refuses it. A role listed under `roles.dynamic` is resolved by the command at the stop and passed in with --route-first or --route-next. `alternative` is the second path of a point that can follow two (feature.contradiction, survey-repo.stopped, connect-jira.connection), and the line names the one taken. `upstream` lists what a re-run of a review cap must find changed before it gets new rounds, and `at` says where it is read: `branch` for an artefact not merged yet, `trunk` for a merged one, and `given` for the approved test commit that the command passes with --tests-commit. The paths, waits, triggers and stages are closed sets that escalation-record.mjs reads. An id is `<command>.<stop>`: the command where the harness stops, without its slash, then a short name for the stop, such as `dev-sprint.code-review-cap`. A reader finds the command from the id alone. An id is never renamed or used again, because the record names it. A new point takes a new name, and a retired point keeps its id.",
+ "paths": {
+  "question": {
+   "wait": "none",
+   "severity": null,
+   "records": false,
+   "meaning": "the command asks the runner and waits in the session; nothing is written"
+  },
+  "merge-waiting": {
+   "wait": "same-working-day",
+   "severity": "IMPORTANT",
+   "records": true,
+   "meaning": "a planned merge that waited too long"
+  },
+  "review-cap": {
+   "wait": "same-working-day",
+   "severity": "IMPORTANT",
+   "records": true,
+   "meaning": "the worker and the critic reached the cap without APPROVED"
+  },
+  "decision-owed": {
+   "wait": "next-working-day",
+   "severity": "IMPORTANT",
+   "records": true,
+   "meaning": "the work needs an answer that only a named role may give"
+  },
+  "check-cannot-run": {
+   "wait": "same-working-day",
+   "severity": "IMPORTANT",
+   "records": true,
+   "meaning": "a script exited 2, or a tool, login or file is missing"
+  },
+  "incident": {
+   "wait": "sixty-minutes",
+   "severity": "CRITICAL",
+   "records": true,
+   "meaning": "a working credential, live data, production data or candidate data in code, a survey or a finding"
+  },
+  "handover": {
+   "wait": "standing-sweep",
+   "severity": "SUGGESTION",
+   "records": true,
+   "meaning": "the run finishes and leaves one item that only a person can do"
+  }
+ },
+ "waits": {
+  "none": "no reminder",
+  "sixty-minutes": "60 minutes, any hour",
+  "same-working-day": "until the end of the working day the stop falls in, or 2 hours after it, whichever is later",
+  "next-working-day": "until the end of the recipient's next working day",
+  "standing-sweep": "at the next standing sweep"
+ },
+ "triggers": [
+  "revision-cap",
+  "blocking-clarification",
+  "contradiction",
+  "control-undefined",
+  "cannot-verify",
+  "incident",
+  "handover",
+  "gate-waiting"
+ ],
+ "stages": [
+  "requirements",
+  "backlog",
+  "design",
+  "build",
+  "pr-review",
+  "validation",
+  "context-governance",
+  "clarification-queue"
+ ],
+ "roles": {
+  "dynamic": [
+   "role in Routed to",
+   "the role the engineer named",
+   "owner role of the document",
+   "owning role"
+  ],
+  "note": "Every other role is a name the hub maps to a person in docs/harness-decisions.md. `runner` is the person who ran the command."
+ },
+ "points": [
+  {
+   "id": "feature.interview",
+   "stage": "requirements",
+   "command": "/feature",
+   "title": "/feature interview, one question per message. The priority and the risk rating are the person's",
+   "path": "question",
+   "trigger": null,
+   "first": [
+    "runner"
+   ],
+   "next": [],
+   "wait": "none",
+   "severity": null,
+   "fix": "Answer. A runner who does not own the priority asks the feature owner, then runs /feature again",
+   "source": "accelerator/commands/feature.md:397-440, :414"
+  },
+  {
+   "id": "feature.contradiction",
+   "stage": "requirements",
+   "command": "/feature",
+   "title": "/feature finds a contradiction and asks",
+   "path": "question",
+   "trigger": "contradiction",
+   "first": [
+    "runner"
+   ],
+   "next": [
+    "lead architect"
+   ],
+   "wait": "none",
+   "severity": null,
+   "fix": "Choose the source, or route the contradiction",
+   "source": "feature.md:462",
+   "alternative": {
+    "path": "decision-owed",
+    "wait": "next-working-day",
+    "trigger": "contradiction",
+    "first": [
+     "runner"
+    ],
+    "next": [
+     "lead architect"
+    ]
+   }
+  },
+  {
+   "id": "feature.review-cap",
+   "stage": "requirements",
+   "command": "/feature",
+   "title": "Requirements review at its cap of two",
+   "path": "review-cap",
+   "trigger": "revision-cap",
+   "first": [
+    "runner"
+   ],
+   "next": [
+    "feature owner"
+   ],
+   "wait": "same-working-day",
+   "severity": "IMPORTANT",
+   "upstream": [
+    {
+     "what": "requirements",
+     "at": "branch"
+    },
+    {
+     "what": "clarification",
+     "at": "trunk"
+    }
+   ],
+   "fix": "Answer the question, amend the input, run /feature again",
+   "source": "feature.md:370, :713"
+  },
+  {
+   "id": "feature.merge",
+   "stage": "requirements",
+   "command": "/feature",
+   "title": "Requirements pull request",
+   "path": "merge-waiting",
+   "trigger": "gate-waiting",
+   "first": [
+    "feature owner"
+   ],
+   "next": [
+    "delivery lead"
+   ],
+   "wait": "same-working-day",
+   "severity": "IMPORTANT",
+   "fix": "Merge, or ask for changes",
+   "source": "docs/07-workflow.md:32, accelerator/rules/workflow.md:61"
+  },
+  {
+   "id": "decompose.review-cap",
+   "stage": "backlog",
+   "command": "/decompose",
+   "title": "Decomposition review at its cap of two",
+   "path": "review-cap",
+   "trigger": "revision-cap",
+   "first": [
+    "runner"
+   ],
+   "next": [
+    "engineering lead"
+   ],
+   "wait": "same-working-day",
+   "severity": "IMPORTANT",
+   "upstream": [
+    {
+     "what": "requirements",
+     "at": "trunk"
+    },
+    {
+     "what": "clarification",
+     "at": "trunk"
+    }
+   ],
+   "fix": "Answer the question, run /decompose again",
+   "source": "accelerator/commands/decompose.md:233-234, :346"
+  },
+  {
+   "id": "decompose.merge",
+   "stage": "backlog",
+   "command": "/decompose",
+   "title": "Decomposition pull request. Its merge authorises any tracker write",
+   "path": "merge-waiting",
+   "trigger": "gate-waiting",
+   "first": [
+    "backlog owner"
+   ],
+   "next": [
+    "delivery lead"
+   ],
+   "wait": "same-working-day",
+   "severity": "IMPORTANT",
+   "fix": "Merge, or ask for changes",
+   "source": "decompose.md:249-256, workflow.md:62"
+  },
+  {
+   "id": "decompose.parent-epic",
+   "stage": "backlog",
+   "command": "/decompose",
+   "title": "The parent epic, on a hub set to epics: ask",
+   "path": "question",
+   "trigger": null,
+   "first": [
+    "runner"
+   ],
+   "next": [],
+   "wait": "none",
+   "severity": null,
+   "fix": "Name the epic",
+   "source": "decompose.md:275-279"
+  },
+  {
+   "id": "decompose.key-ledger",
+   "stage": "backlog",
+   "command": "/decompose",
+   "title": "A key ledger fault, or exit 2",
+   "path": "check-cannot-run",
+   "trigger": "cannot-verify",
+   "first": [
+    "runner"
+   ],
+   "next": [
+    "hub owner"
+   ],
+   "wait": "same-working-day",
+   "severity": "IMPORTANT",
+   "fix": "Fix the ledger by pull request, run /decompose again",
+   "source": "decompose.md:61, :73, :263"
+  },
+  {
+   "id": "dev-spec.review-cap",
+   "stage": "design",
+   "command": "/dev-spec",
+   "title": "Design review at its cap of three",
+   "path": "review-cap",
+   "trigger": "revision-cap",
+   "first": [
+    "runner"
+   ],
+   "next": [
+    "design approver"
+   ],
+   "wait": "same-working-day",
+   "severity": "IMPORTANT",
+   "upstream": [
+    {
+     "what": "design",
+     "at": "branch"
+    },
+    {
+     "what": "clarification",
+     "at": "trunk"
+    }
+   ],
+   "fix": "Answer the question, run /dev-spec <KEY> again on the branch",
+   "source": "accelerator/commands/dev-spec.md:248, :295-298",
+   "ask_first": true
+  },
+  {
+   "id": "dev-spec.blocking-clarification",
+   "stage": "design",
+   "command": "/dev-spec",
+   "title": "A blocking clarification open when /dev-spec ends",
+   "path": "decision-owed",
+   "trigger": "blocking-clarification",
+   "first": [
+    "role in Routed to"
+   ],
+   "next": [
+    "delivery lead"
+   ],
+   "wait": "next-working-day",
+   "severity": "IMPORTANT",
+   "fix": "Answer, and run /dev-spec <KEY> again to write the answer back",
+   "source": "dev-spec.md:309-317"
+  },
+  {
+   "id": "dev-spec.open-question",
+   "stage": "design",
+   "command": "/dev-spec",
+   "title": "A design open question in the design's §9",
+   "path": "decision-owed",
+   "trigger": "blocking-clarification",
+   "first": [
+    "role in Routed to"
+   ],
+   "next": [
+    "delivery lead"
+   ],
+   "wait": "next-working-day",
+   "severity": "IMPORTANT",
+   "fix": "As dev-spec.blocking-clarification",
+   "source": "dev-spec.md:331-339"
+  },
+  {
+   "id": "dev-spec.adr-draft",
+   "stage": "design",
+   "command": "/dev-spec",
+   "title": "A decision wider than the work item, written as an ADR draft",
+   "path": "decision-owed",
+   "trigger": "blocking-clarification",
+   "first": [
+    "lead architect"
+   ],
+   "next": [
+    "delivery lead"
+   ],
+   "wait": "next-working-day",
+   "severity": "IMPORTANT",
+   "fix": "Approve or reject the decision record, then amend the design",
+   "source": "dev-spec.md:205, :292"
+  },
+  {
+   "id": "dev-spec.merge",
+   "stage": "design",
+   "command": "/dev-spec",
+   "title": "Design pull request, human gate 1",
+   "path": "merge-waiting",
+   "trigger": "gate-waiting",
+   "first": [
+    "design approver"
+   ],
+   "next": [
+    "delivery lead"
+   ],
+   "wait": "same-working-day",
+   "severity": "IMPORTANT",
+   "fix": "Merge, or ask for changes",
+   "source": "dev-spec.md:267-280, workflow.md:65"
+  },
+  {
+   "id": "dev-sprint.pickup-gate",
+   "stage": "build",
+   "command": "/dev-sprint",
+   "title": "Pickup gate exit 2",
+   "path": "check-cannot-run",
+   "trigger": "cannot-verify",
+   "first": [
+    "runner"
+   ],
+   "next": [
+    "tech lead"
+   ],
+   "wait": "same-working-day",
+   "severity": "IMPORTANT",
+   "fix": "Fix the cause it names. Never retry in a loop",
+   "source": "accelerator/commands/dev-sprint.md:114, :611"
+  },
+  {
+   "id": "dev-sprint.checks-env",
+   "stage": "build",
+   "command": "/dev-sprint",
+   "title": "checks.env unreadable, or a needed key missing, empty or UNRESOLVED",
+   "path": "check-cannot-run",
+   "trigger": "cannot-verify",
+   "first": [
+    "repository tech lead"
+   ],
+   "next": [
+    "engineering lead"
+   ],
+   "wait": "same-working-day",
+   "severity": "IMPORTANT",
+   "fix": "Fix checks.env on the repository's trunk by pull request",
+   "source": "dev-sprint.md:134-139, :613"
+  },
+  {
+   "id": "dev-sprint.spoke-rules",
+   "stage": "build",
+   "command": "/dev-sprint",
+   "title": "Malformed spoke rules set",
+   "path": "check-cannot-run",
+   "trigger": "cannot-verify",
+   "first": [
+    "repository tech lead"
+   ],
+   "next": [
+    "engineering lead"
+   ],
+   "wait": "same-working-day",
+   "severity": "IMPORTANT",
+   "fix": "Fix the rules by pull request in the spoke",
+   "source": "dev-sprint.md:158-160, :614"
+  },
+  {
+   "id": "dev-sprint.context-pin",
+   "stage": "build",
+   "command": "/dev-sprint",
+   "title": "A context pin fault on the merged design",
+   "path": "decision-owed",
+   "trigger": "blocking-clarification",
+   "first": [
+    "design approver"
+   ],
+   "next": [
+    "tech lead"
+   ],
+   "wait": "next-working-day",
+   "severity": "IMPORTANT",
+   "fix": "Re-run read-context.mjs for the design's paths, amend the design by pull request with a fresh review",
+   "source": "dev-sprint.md:175-193, :615"
+  },
+  {
+   "id": "dev-sprint.docker",
+   "stage": "build",
+   "command": "/dev-sprint",
+   "title": "Docker or the Semgrep image is not ready",
+   "path": "question",
+   "trigger": null,
+   "first": [
+    "runner"
+   ],
+   "next": [],
+   "wait": "none",
+   "severity": null,
+   "fix": "Start Docker, or choose \"continue without the scan\". A run nobody watches warns and continues",
+   "source": "dev-sprint.md:78-95"
+  },
+  {
+   "id": "dev-sprint.commit-checks",
+   "stage": "build",
+   "command": "/dev-sprint",
+   "title": "The commit checks exit 2",
+   "path": "check-cannot-run",
+   "trigger": "cannot-verify",
+   "first": [
+    "repository tech lead"
+   ],
+   "next": [
+    "engineering lead"
+   ],
+   "wait": "same-working-day",
+   "severity": "IMPORTANT",
+   "fix": "Fix the row it names. Never edit checks.env on the branch",
+   "source": "dev-sprint.md:284-290"
+  },
+  {
+   "id": "dev-sprint.guard-setup",
+   "stage": "build",
+   "command": "/dev-sprint",
+   "title": "The guard's setup refuses",
+   "path": "check-cannot-run",
+   "trigger": "cannot-verify",
+   "first": [
+    "runner"
+   ],
+   "next": [
+    "repository tech lead"
+   ],
+   "wait": "same-working-day",
+   "severity": "IMPORTANT",
+   "fix": "Fix the protected-path contract or the tests it names",
+   "source": "dev-sprint.md:351, :619"
+  },
+  {
+   "id": "dev-sprint.second-repository",
+   "stage": "build",
+   "command": "/dev-sprint",
+   "title": "A second repository found mid-run",
+   "path": "decision-owed",
+   "trigger": "blocking-clarification",
+   "first": [
+    "backlog owner"
+   ],
+   "next": [
+    "delivery lead"
+   ],
+   "wait": "next-working-day",
+   "severity": "IMPORTANT",
+   "fix": "Cut the second story with a dependency, close the row",
+   "source": "dev-sprint.md:486-492, :616"
+  },
+  {
+   "id": "dev-sprint.authorisation-change",
+   "stage": "build",
+   "command": "/dev-sprint",
+   "title": "A change to an authorisation model",
+   "path": "decision-owed",
+   "trigger": "blocking-clarification",
+   "first": [
+    "role in Routed to"
+   ],
+   "next": [
+    "delivery lead"
+   ],
+   "wait": "next-working-day",
+   "severity": "IMPORTANT",
+   "fix": "Answer the clarification",
+   "source": "dev-sprint.md:538-541"
+  },
+  {
+   "id": "dev-sprint.test-dispute",
+   "stage": "build",
+   "command": "/dev-sprint",
+   "title": "A test dispute from the build",
+   "path": "review-cap",
+   "trigger": "revision-cap",
+   "first": [
+    "runner"
+   ],
+   "next": [
+    "engineering lead"
+   ],
+   "wait": "same-working-day",
+   "severity": "IMPORTANT",
+   "upstream": [
+    {
+     "what": "tests",
+     "at": "given"
+    },
+    {
+     "what": "design",
+     "at": "trunk"
+    },
+    {
+     "what": "clarification",
+     "at": "trunk"
+    }
+   ],
+   "fix": "The test writer revises. The dispute spends a test-loop round",
+   "source": "dev-sprint.md:417-421"
+  },
+  {
+   "id": "dev-sprint.test-review-cap",
+   "stage": "build",
+   "command": "/dev-sprint",
+   "title": "The test loop at its cap of three",
+   "path": "review-cap",
+   "trigger": "revision-cap",
+   "first": [
+    "runner"
+   ],
+   "next": [
+    "engineering lead"
+   ],
+   "wait": "same-working-day",
+   "severity": "IMPORTANT",
+   "upstream": [
+    {
+     "what": "tests",
+     "at": "given"
+    },
+    {
+     "what": "design",
+     "at": "trunk"
+    },
+    {
+     "what": "clarification",
+     "at": "trunk"
+    }
+   ],
+   "fix": "Answer the question in the design's testing plan",
+   "source": "dev-sprint.md:308-309, :623"
+  },
+  {
+   "id": "dev-sprint.code-review-cap",
+   "stage": "build",
+   "command": "/dev-sprint",
+   "title": "The code loop at its cap of three",
+   "path": "review-cap",
+   "trigger": "revision-cap",
+   "first": [
+    "runner"
+   ],
+   "next": [
+    "engineering lead"
+   ],
+   "wait": "same-working-day",
+   "severity": "IMPORTANT",
+   "upstream": [
+    {
+     "what": "design",
+     "at": "trunk"
+    },
+    {
+     "what": "tests",
+     "at": "given"
+    },
+    {
+     "what": "clarification",
+     "at": "trunk"
+    }
+   ],
+   "fix": "Answer the question, amend the design",
+   "source": "dev-sprint.md:630, :691-693"
+  },
+  {
+   "id": "dev-sprint.security-critical",
+   "stage": "build",
+   "command": "/dev-sprint",
+   "title": "A security CRITICAL still open at the cap, beside dev-sprint.code-review-cap",
+   "path": "incident",
+   "trigger": "incident",
+   "first": [
+    "security role on call"
+   ],
+   "next": [
+    "engineering lead"
+   ],
+   "wait": "sixty-minutes",
+   "severity": "CRITICAL",
+   "fix": "Fix or accept by the security role's decision. A suppression needs a named approver",
+   "source": "dev-sprint.md:630, accelerator/skills/pre-merge-check/SKILL.md:351-354"
+  },
+  {
+   "id": "dev-sprint.trunk-conflict",
+   "stage": "build",
+   "command": "/dev-sprint",
+   "title": "The trunk cannot merge into the story's branch without a conflict",
+   "path": "decision-owed",
+   "trigger": "contradiction",
+   "first": [
+    "runner"
+   ],
+   "next": [
+    "repository tech lead"
+   ],
+   "wait": "next-working-day",
+   "severity": "IMPORTANT",
+   "fix": "Merge the trunk commit in the code checkout by hand, resolve each conflict, commit it, and run /dev-sprint again",
+   "source": "dev-sprint.md § Bring the branch up to the trunk"
+  },
+  {
+   "id": "dev-sprint.code-merge",
+   "stage": "build",
+   "command": "/dev-sprint",
+   "title": "Code pull request, human gate 2",
+   "path": "merge-waiting",
+   "trigger": "gate-waiting",
+   "first": [
+    "spoke reviewer"
+   ],
+   "next": [
+    "engineering lead"
+   ],
+   "wait": "same-working-day",
+   "severity": "IMPORTANT",
+   "fix": "Merge, or ask for changes and run /pr-review",
+   "source": "dev-sprint.md:595-597, workflow.md:69"
+  },
+  {
+   "id": "dev-sprint.not-merged",
+   "stage": "build",
+   "command": "/dev-sprint",
+   "title": "The second invocation reads a state other than MERGED",
+   "path": "question",
+   "trigger": null,
+   "first": [
+    "runner"
+   ],
+   "next": [],
+   "wait": "none",
+   "severity": null,
+   "fix": "Merge first, then run the second invocation again",
+   "source": "dev-sprint.md:597-600, :632"
+  },
+  {
+   "id": "dev-sprint.more-rounds",
+   "stage": "build",
+   "command": "/dev-sprint",
+   "title": "A person wants more rounds",
+   "path": "none",
+   "trigger": null,
+   "first": [],
+   "next": [],
+   "wait": "none",
+   "severity": null,
+   "fix": "Not a path. Raise a clarification and amend by pull request with a human",
+   "source": "dev-sprint.md:118-120, :636-638"
+  },
+  {
+   "id": "pr-review.which-pr",
+   "stage": "pr-review",
+   "command": "/pr-review",
+   "title": "An ambiguous pull-request number",
+   "path": "question",
+   "trigger": null,
+   "first": [
+    "runner"
+   ],
+   "next": [],
+   "wait": "none",
+   "severity": null,
+   "fix": "Say which repository. The command never picks one",
+   "source": "accelerator/commands/pr-review.md:35, :58"
+  },
+  {
+   "id": "pr-review.confirmation",
+   "stage": "pr-review",
+   "command": "/pr-review",
+   "title": "The one confirmation the session's rules still require",
+   "path": "question",
+   "trigger": null,
+   "first": [
+    "runner"
+   ],
+   "next": [],
+   "wait": "none",
+   "severity": null,
+   "fix": "Confirm, or stop",
+   "source": "accelerator/skills/fix-pr-comments/SKILL.md:27-31"
+  },
+  {
+   "id": "pr-review.cannot-run",
+   "stage": "pr-review",
+   "command": "/pr-review",
+   "title": "The pull request is not open, or a script exits 2",
+   "path": "check-cannot-run",
+   "trigger": "cannot-verify",
+   "first": [
+    "runner"
+   ],
+   "next": [
+    "tech lead"
+   ],
+   "wait": "same-working-day",
+   "severity": "IMPORTANT",
+   "fix": "Fix the cause, run /pr-review again",
+   "source": "pr-review.md:32, :36, fix-pr-comments/SKILL.md:52-54"
+  },
+  {
+   "id": "pr-review.comment-cap",
+   "stage": "pr-review",
+   "command": "/pr-review",
+   "title": "One comment at its cap, marked \"could not fix\"",
+   "path": "review-cap",
+   "trigger": "revision-cap",
+   "first": [
+    "runner"
+   ],
+   "next": [
+    "engineering lead"
+   ],
+   "wait": "same-working-day",
+   "severity": "IMPORTANT",
+   "fix": "Fix the thread by hand, or run /pr-review again. The next run tries it again",
+   "source": "fix-pr-comments/SKILL.md:148-150, :200, dev-sprint.md:633",
+   "rerun_check": false
+  },
+  {
+   "id": "pr-review.needs-person",
+   "stage": "pr-review",
+   "command": "/pr-review",
+   "title": "\"Declined, needs a person\"",
+   "path": "handover",
+   "trigger": "handover",
+   "first": [
+    "the role the engineer named"
+   ],
+   "next": [
+    "delivery lead"
+   ],
+   "wait": "standing-sweep",
+   "severity": "SUGGESTION",
+   "fix": "The role does the work in its own place",
+   "source": "fix-pr-comments/SKILL.md:136-137, :165-172, :199",
+   "ask_first": true
+  },
+  {
+   "id": "pr-review.design-conflict",
+   "stage": "pr-review",
+   "command": "/pr-review",
+   "title": "A comment or a Prime finding that the code cannot satisfy without breaking the merged design",
+   "path": "decision-owed",
+   "trigger": "contradiction",
+   "first": [
+    "design approver"
+   ],
+   "next": [
+    "delivery lead"
+   ],
+   "wait": "next-working-day",
+   "severity": "IMPORTANT",
+   "fix": "Amend the design with /dev-spec <KEY> and run /pr-review again, or answer in the thread that the design stands",
+   "source": "fix-pr-comments/SKILL.md \u00a7 One comment, \u00a7 The escalations; implement-work-item/SKILL.md \u00a7 Fixing one pull-request comment",
+   "ask_first": true
+  },
+  {
+   "id": "pr-review.run-stopped",
+   "stage": "pr-review",
+   "command": "/pr-review",
+   "title": "The run stops because the remote diverged, setup refused, or a seat returned without its output",
+   "path": "check-cannot-run",
+   "trigger": "cannot-verify",
+   "first": [
+    "runner"
+   ],
+   "next": [
+    "tech lead"
+   ],
+   "wait": "same-working-day",
+   "severity": "IMPORTANT",
+   "fix": "Fix the cause, run /pr-review again",
+   "source": "fix-pr-comments/SKILL.md:175-179, :216-221"
+  },
+  {
+   "id": "pr-review.live-data",
+   "stage": "pr-review",
+   "command": "/pr-review",
+   "title": "Live data or a working credential in a finding",
+   "path": "incident",
+   "trigger": "incident",
+   "first": [
+    "security role on call",
+    "data officer"
+   ],
+   "next": [
+    "engineering lead"
+   ],
+   "wait": "sixty-minutes",
+   "severity": "CRITICAL",
+   "fix": "As for an incident",
+   "source": "fix-pr-comments/SKILL.md:220"
+  },
+  {
+   "id": "pr-review.people-comments",
+   "stage": "pr-review",
+   "command": "/pr-review",
+   "title": "Comments that people write",
+   "path": "none",
+   "trigger": null,
+   "first": [],
+   "next": [],
+   "wait": "none",
+   "severity": null,
+   "fix": "Not a path. The harness never picks them up, so their author owns them",
+   "source": "docs/07-workflow.md:126-127"
+  },
+  {
+   "id": "qa-sprint.not-merged",
+   "stage": "validation",
+   "command": "/qa-sprint",
+   "title": "The code pull request is not merged when /qa-sprint runs",
+   "path": "question",
+   "trigger": null,
+   "first": [
+    "runner"
+   ],
+   "next": [],
+   "wait": "none",
+   "severity": null,
+   "fix": "Merge first, then run /qa-sprint again",
+   "source": "accelerator/commands/qa-sprint.md:71"
+  },
+  {
+   "id": "qa-sprint.check-validation",
+   "stage": "validation",
+   "command": "/qa-sprint",
+   "title": "check-validation.js exits 2",
+   "path": "check-cannot-run",
+   "trigger": "cannot-verify",
+   "first": [
+    "runner"
+   ],
+   "next": [
+    "tech lead"
+   ],
+   "wait": "same-working-day",
+   "severity": "IMPORTANT",
+   "fix": "Fix the cause it names",
+   "source": "qa-sprint.md:97, :223"
+  },
+  {
+   "id": "qa-sprint.ledger-fault",
+   "stage": "validation",
+   "command": "/qa-sprint",
+   "title": "A ledger or defect fault",
+   "path": "check-cannot-run",
+   "trigger": "cannot-verify",
+   "first": [
+    "runner"
+   ],
+   "next": [
+    "hub owner"
+   ],
+   "wait": "same-working-day",
+   "severity": "IMPORTANT",
+   "fix": "Fix by pull request",
+   "source": "qa-sprint.md:120, :224"
+  },
+  {
+   "id": "qa-sprint.merge",
+   "stage": "validation",
+   "command": "/qa-sprint",
+   "title": "Validation report pull request",
+   "path": "merge-waiting",
+   "trigger": "gate-waiting",
+   "first": [
+    "QA",
+    "feature owner"
+   ],
+   "next": [
+    "delivery lead"
+   ],
+   "wait": "same-working-day",
+   "severity": "IMPORTANT",
+   "fix": "Merge. It is the only human act of /qa-sprint",
+   "source": "qa-sprint.md:19, :165"
+  },
+  {
+   "id": "qa-sprint.manual-testing",
+   "stage": "validation",
+   "command": "/qa-sprint",
+   "title": "Manual testing of the running software",
+   "path": "handover",
+   "trigger": "handover",
+   "first": [
+    "QA"
+   ],
+   "next": [
+    "delivery lead"
+   ],
+   "wait": "standing-sweep",
+   "severity": "SUGGESTION",
+   "fix": "Test, and record the session",
+   "source": "docs/07-workflow.md:95-96, qa-sprint.md:153"
+  },
+  {
+   "id": "fan-in.feature-done",
+   "stage": "validation",
+   "command": "make fan-in",
+   "title": "Fan-in, which asks whether the feature is done",
+   "path": "handover",
+   "trigger": "handover",
+   "first": [
+    "delivery lead"
+   ],
+   "next": [],
+   "wait": "standing-sweep",
+   "severity": "SUGGESTION",
+   "fix": "Run make fan-in SLUG=<slug> and decide. It is never a required check",
+   "source": "accelerator/gate/check-fan-in.mjs:4-44"
+  },
+  {
+   "id": "add-context.source-file",
+   "stage": "context-governance",
+   "command": "/add-context",
+   "title": "The source document must be a file",
+   "path": "question",
+   "trigger": null,
+   "first": [
+    "runner"
+   ],
+   "next": [],
+   "wait": "none",
+   "severity": null,
+   "fix": "Save it to a file. The command fetches no URLs",
+   "source": "docs/06-adding-context.md:33"
+  },
+  {
+   "id": "add-context.merge",
+   "stage": "context-governance",
+   "command": "/add-context",
+   "title": "Every /add-context pull request",
+   "path": "merge-waiting",
+   "trigger": "gate-waiting",
+   "first": [
+    "owner role of the document"
+   ],
+   "next": [
+    "delivery lead"
+   ],
+   "wait": "same-working-day",
+   "severity": "IMPORTANT",
+   "fix": "Check a standard's summary against the original, then merge",
+   "source": "06-adding-context.md:54-58"
+  },
+  {
+   "id": "add-context.standard-contradiction",
+   "stage": "context-governance",
+   "command": "/add-context",
+   "title": "Standard contradiction questions (S5)",
+   "path": "question",
+   "trigger": null,
+   "first": [
+    "runner"
+   ],
+   "next": [],
+   "wait": "none",
+   "severity": null,
+   "fix": "Answer. An unanswered question becomes UNRESOLVED",
+   "source": "accelerator/commands/add-context.md:336-345"
+  },
+  {
+   "id": "add-context.standard-name",
+   "stage": "context-governance",
+   "command": "/add-context",
+   "title": "The machine name of a standard (S6)",
+   "path": "question",
+   "trigger": null,
+   "first": [
+    "standard owner"
+   ],
+   "next": [],
+   "wait": "none",
+   "severity": null,
+   "fix": "Approve it. It never changes after the merge",
+   "source": "add-context.md:347-351"
+  },
+  {
+   "id": "add-context.hub-vs-spoke",
+   "stage": "context-governance",
+   "command": "/add-context",
+   "title": "A hub record against a spoke record",
+   "path": "decision-owed",
+   "trigger": "contradiction",
+   "first": [
+    "lead architect"
+   ],
+   "next": [
+    "delivery lead"
+   ],
+   "wait": "next-working-day",
+   "severity": "IMPORTANT",
+   "fix": "Change one of the two records",
+   "source": "add-context.md:127-130"
+  },
+  {
+   "id": "add-context.hub-vs-hub",
+   "stage": "context-governance",
+   "command": "/add-context",
+   "title": "Two hubs against each other over a shared spoke",
+   "path": "decision-owed",
+   "trigger": "contradiction",
+   "first": [
+    "Global Architecture Board"
+   ],
+   "next": [
+    "delivery lead of each hub"
+   ],
+   "wait": "next-working-day",
+   "severity": "IMPORTANT",
+   "fix": "Choose one of the three outcomes",
+   "source": "add-context.md:504-510"
+  },
+  {
+   "id": "add-context.skip-reason",
+   "stage": "context-governance",
+   "command": "/add-context",
+   "title": "A --skip-hub or --skip-repo reason",
+   "path": "question",
+   "trigger": null,
+   "first": [
+    "runner"
+   ],
+   "next": [],
+   "wait": "none",
+   "severity": null,
+   "fix": "Give the reason in your own words. The command never writes it",
+   "source": "add-context.md:77, :514, accelerator/commands/check-global.md:128"
+  },
+  {
+   "id": "add-context.rule-override",
+   "stage": "context-governance",
+   "command": "/add-context",
+   "title": "A spoke rule that overrides a standard",
+   "path": "merge-waiting",
+   "trigger": "gate-waiting",
+   "first": [
+    "spoke tech lead"
+   ],
+   "next": [
+    "engineering lead"
+   ],
+   "wait": "same-working-day",
+   "severity": "IMPORTANT",
+   "fix": "Merge the rule in the spoke. That merge is the whole approval",
+   "source": "06-adding-context.md:190"
+  },
+  {
+   "id": "add-context.exception-interview",
+   "stage": "context-governance",
+   "command": "/add-context",
+   "title": "The global exception interview (step E2, seven questions)",
+   "path": "question",
+   "trigger": null,
+   "first": [
+    "hub tech lead"
+   ],
+   "next": [],
+   "wait": "none",
+   "severity": null,
+   "fix": "Answer, one question per turn",
+   "source": "add-context.md:580-601"
+  },
+  {
+   "id": "add-context.exception-approval",
+   "stage": "context-governance",
+   "command": "/add-context",
+   "title": "Exception approval",
+   "path": "merge-waiting",
+   "trigger": "gate-waiting",
+   "first": [
+    "Global Architecture Board"
+   ],
+   "next": [
+    "delivery lead"
+   ],
+   "wait": "same-working-day",
+   "severity": "IMPORTANT",
+   "fix": "Approve, and tag a release",
+   "source": "06-adding-context.md:145"
+  },
+  {
+   "id": "check-global.connect-findings",
+   "stage": "context-governance",
+   "command": "/check-global",
+   "title": "/check-global --connect CRITICAL findings",
+   "path": "decision-owed",
+   "trigger": "blocking-clarification",
+   "first": [
+    "lead architect"
+   ],
+   "next": [
+    "Global Architecture Board"
+   ],
+   "wait": "next-working-day",
+   "severity": "IMPORTANT",
+   "fix": "Give each finding one of three outcomes, each in its own pull request",
+   "source": "check-global.md:264-283"
+  },
+  {
+   "id": "check-global.open-requirements",
+   "stage": "context-governance",
+   "command": "/check-global",
+   "title": "A requirements pull request open at connect time",
+   "path": "decision-owed",
+   "trigger": "blocking-clarification",
+   "first": [
+    "feature owner"
+   ],
+   "next": [
+    "delivery lead"
+   ],
+   "wait": "next-working-day",
+   "severity": "IMPORTANT",
+   "fix": "Amend it with /feature to record a release",
+   "source": "check-global.md:210-213, :281-282"
+  },
+  {
+   "id": "global-report.weekly",
+   "stage": "context-governance",
+   "command": "global-report",
+   "title": "The weekly global-report",
+   "path": "handover",
+   "trigger": "handover",
+   "first": [
+    "lead architect"
+   ],
+   "next": [],
+   "wait": "standing-sweep",
+   "severity": "SUGGESTION",
+   "fix": "Read it, then run /check-global for the judgement",
+   "source": "06-adding-context.md:151-163"
+  },
+  {
+   "id": "survey-repo.merge",
+   "stage": "context-governance",
+   "command": "/survey-repo",
+   "title": "A /survey-repo pull request",
+   "path": "merge-waiting",
+   "trigger": "gate-waiting",
+   "first": [
+    "hub owner"
+   ],
+   "next": [
+    "delivery lead"
+   ],
+   "wait": "same-working-day",
+   "severity": "IMPORTANT",
+   "fix": "Merge, one per repository",
+   "source": "accelerator/commands/survey-repo.md:107, :133"
+  },
+  {
+   "id": "survey-repo.stopped",
+   "stage": "context-governance",
+   "command": "/survey-repo",
+   "title": "A survey finds a credential in code, or is too long for one reply",
+   "path": "incident",
+   "trigger": "incident",
+   "first": [
+    "security role on call"
+   ],
+   "next": [
+    "engineering lead"
+   ],
+   "wait": "sixty-minutes",
+   "severity": "CRITICAL",
+   "fix": "As for an incident, or split the survey",
+   "source": "accelerator/skills/survey-repo/SKILL.md:111-120",
+   "alternative": {
+    "path": "check-cannot-run",
+    "wait": "same-working-day",
+    "trigger": "cannot-verify",
+    "first": [
+     "tech lead"
+    ],
+    "next": [
+     "engineering lead"
+    ]
+   }
+  },
+  {
+   "id": "connect-jira.connection",
+   "stage": "context-governance",
+   "command": "/connect-jira",
+   "title": "/connect-jira answers, then its pull request",
+   "path": "question",
+   "trigger": null,
+   "first": [
+    "delivery lead"
+   ],
+   "next": [],
+   "wait": "none",
+   "severity": null,
+   "fix": "Answer each question, then merge",
+   "source": "accelerator/commands/connect-jira.md:53-95, :121",
+   "alternative": {
+    "path": "merge-waiting",
+    "wait": "same-working-day",
+    "trigger": "gate-waiting",
+    "first": [
+     "delivery lead"
+    ],
+    "next": []
+   }
+  },
+  {
+   "id": "dev-sprint.coverage-floor",
+   "stage": "context-governance",
+   "command": "/dev-sprint",
+   "title": "A coverage floor change",
+   "path": "merge-waiting",
+   "trigger": "gate-waiting",
+   "first": [
+    "tech lead"
+   ],
+   "next": [
+    "engineering lead"
+   ],
+   "wait": "same-working-day",
+   "severity": "IMPORTANT",
+   "fix": "Merge it. A floor changed on a branch changes nothing",
+   "source": "pre-merge-check/SKILL.md:355-357"
+  },
+  {
+   "id": "add-repo.remove-refused",
+   "stage": "context-governance",
+   "command": "/add-repo",
+   "title": "/add-repo --remove refused while work is in flight",
+   "path": "question",
+   "trigger": null,
+   "first": [
+    "runner"
+   ],
+   "next": [],
+   "wait": "none",
+   "severity": null,
+   "fix": "Finish or stop the keys it names, then run it again",
+   "source": "accelerator/commands/add-repo.md:55-57, :259"
+  },
+  {
+   "id": "clar-log.blocking",
+   "stage": "clarification-queue",
+   "command": "CLAR-log",
+   "title": "A blocking clarification, wherever it is raised",
+   "path": "decision-owed",
+   "trigger": "blocking-clarification",
+   "first": [
+    "role in Routed to"
+   ],
+   "next": [
+    "delivery lead"
+   ],
+   "wait": "next-working-day",
+   "severity": "IMPORTANT",
+   "fix": "Close the row. Answered does not release the item",
+   "source": "CLAR-log.template.md:50-52, :138"
+  },
+  {
+   "id": "clar-log.non-blocking",
+   "stage": "clarification-queue",
+   "command": "CLAR-log",
+   "title": "A non-blocking clarification",
+   "path": "handover",
+   "trigger": "handover",
+   "first": [
+    "owning role"
+   ],
+   "next": [],
+   "wait": "standing-sweep",
+   "severity": "SUGGESTION",
+   "fix": "Work it in the standing sweep. It never notifies",
+   "source": "CLAR-log.template.md:157-158, decisions.md:1128"
+  },
+  {
+   "id": "clar-log.undefined-control",
+   "stage": "clarification-queue",
+   "command": "CLAR-log",
+   "title": "A control left undefined",
+   "path": "handover",
+   "trigger": "control-undefined",
+   "first": [
+    "risk owner"
+   ],
+   "next": [
+    "delivery lead"
+   ],
+   "wait": "standing-sweep",
+   "severity": "SUGGESTION",
+   "fix": "Define the control. Until then the most restrictive behaviour stays applied",
+   "source": "CLAR-log.template.md:140"
+  },
+  {
+   "id": "clar-log.self-close",
+   "stage": "clarification-queue",
+   "command": "CLAR-log",
+   "title": "An agent that wants to close its own blocking row",
+   "path": "none",
+   "trigger": null,
+   "first": [],
+   "next": [],
+   "wait": "none",
+   "severity": null,
+   "fix": "Not a path. It is forbidden",
+   "source": "CLAR-log.template.md:148-149"
+  }
+ ]
+}

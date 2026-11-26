@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.internal/harness/repository-registry.schema.json",
+  "title": "Repository registry",
+  "description": "The list of repositories a hub plans for. One object at the root, so one validation covers the file. Each key under `repositories` is a repository id: the repository's bare name as its remote reports it, with no owner, no slash and no scheme. The same id appears on a design's `Repository:` line and in HARNESS_REPO when that repository's CI runs the gate, and the pattern here is the pattern the gate applies. The list is an index, never the truth: the trunk the list names must exist on the remote, and the repository's commands file must name the same trunk. Where the list and the repository disagree, the run stops with a question. Written by `/add-repo`, never by hand. Read by `read-spoke.mjs`, `check-registry.mjs`, `/decompose`, `/dev-spec`, `/dev-sprint` and `/qa-sprint`.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "repositories"],
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "const": 1
+    },
+    "repositories": {
+      "type": "object",
+      "description": "Keyed by repository id. A map, not an array, so an id cannot appear twice.",
+      "propertyNames": {
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+        "not": { "enum": ["external", "unknown", "global"] }
+      },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["url", "checks", "purpose", "readAt", "trunk"],
+        "properties": {
+          "url": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The clone URL, exactly as `/add-repo` was given it. Never a credential: a URL carrying a user name, a password or a token is refused by the checker, because this file is committed and read by every seat."
+          },
+          "checks": {
+            "type": "string",
+            "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$)).+$",
+            "description": "The path of the repository's own commands file, relative to its root. The commands live only there; this field says where to read them. A missing file at the trunk is exit 2 for any command that needs it, never a default."
+          },
+          "purpose": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 600,
+            "description": "What the repository does, in a few sentences, written by `/add-repo` from the README and the top-level tree at `readAt`. For orientation and ranking only. A plan never cites it: a plan reads the real file at a pinned commit through `read-spoke.mjs` and cites file and commit."
+          },
+          "readAt": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{40}$",
+            "description": "The trunk commit `purpose` and `checks` were read at. Makes staleness visible instead of invisible. `check-registry.mjs` reports whether it is still the trunk head; `/add-repo` moves it."
+          },
+          "trunk": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The branch the harness treats as this repository's trunk. `default` means the branch the remote reports as its default, asked at run time. Any other value is a branch name that `git check-ref-format --branch` accepts, and the branch must exist on the remote. `TRUNK_FOR_HUB` in the repository's commands file must have the same value, or every read stops with exit 2. Written by `/add-repo --trunk`."
+          }
+        }
+      }
+    }
+  }
+}

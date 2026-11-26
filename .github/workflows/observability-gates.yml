@@ -1,0 +1,74 @@
+name: observability-gates
+on:
+  pull_request:
+    types: [closed]               # the job runs only when the pull request merged
+    branches: [main]
+  workflow_dispatch:              # a spoke's signal of a story merge, or a person sending a pull request again
+    inputs:
+      pull_request:
+        description: 'The pull request number'
+        required: true
+      spoke:
+        description: 'The spoke id, for a story merge in that spoke. Empty for a hub pull request'
+        required: false
+        default: ''
+permissions:
+  contents: read                  # the hub's trunk: the registry, the designs, the validation reports
+  pull-requests: read             # the hub pull request's files and its last commit
+jobs:
+  observability-gates:
+    name: observability-gates     # the forge shows the job name, not the file name
+    if: github.event_name != 'pull_request' || github.event.pull_request.merged == true
+    # SHL's internal runner: it reaches the internal CubeAPM, which GitHub's hosted runners cannot.
+    # GitHub gives an organisation's runner only to that organisation's repositories, and a job
+    # queued for a runner that never comes waits 24 hours. So a hub outside SHL-India runs at once
+    # on a GitHub-hosted runner.
+    runs-on: ${{ github.repository_owner == 'SHL-India' && fromJSON('["self-hosted", "linux", "ecs-novadev"]') || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main            # the hub's files at its trunk, whatever started the run
+          fetch-depth: 0          # the script reads the trunk's history for the validation merge
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      # The gate script reads GitHub with gh. A self-hosted runner may not carry it.
+      - name: Install gh if not found in runner
+        run: |
+          set -euo pipefail
+          if command -v gh >/dev/null 2>&1; then gh --version | head -n 1; exit 0; fi
+          case "$(uname -m)" in
+            x86_64|amd64) arch=amd64 ;;
+            aarch64|arm64) arch=arm64 ;;
+            *) echo "::error::no gh release for the runner's machine type $(uname -m). Install gh on the runner"; exit 2 ;;
+          esac
+          v=2.62.0
+          curl -fsSL "https://github.com/cli/cli/releases/download/v${v}/gh_${v}_linux_${arch}.tar.gz" | tar -xz -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/gh_${v}_linux_${arch}/bin" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/gh_${v}_linux_${arch}/bin/gh" --version | head -n 1
+      - name: Send the gate records
+        env:
+          EVENT: ${{ github.event_name }}
+          HARNESS_TRUNK: main
+          HARNESS_OBSERVABILITY_TOKEN: ${{ secrets.HARNESS_OBSERVABILITY_TOKEN }}
+          HUB_TOKEN: ${{ github.token }}
+          SPOKE_TOKEN: ${{ secrets.HARNESS_SPOKE_READ_TOKEN }}
+          PR_NUMBER: ${{ inputs.pull_request }}
+          SPOKE: ${{ inputs.spoke }}
+        run: |
+          set -uo pipefail
+          case "$EVENT" in
+            pull_request) export GH_TOKEN="$HUB_TOKEN"; args=(--event "$GITHUB_EVENT_PATH") ;;
+            workflow_dispatch)
+              if [ -n "$SPOKE" ]; then export GH_TOKEN="$SPOKE_TOKEN"; args=(--pull-request "$PR_NUMBER" --spoke "$SPOKE")
+              else export GH_TOKEN="$HUB_TOKEN"; args=(--pull-request "$PR_NUMBER"); fi ;;
+            *) echo "::error::observability-gates does not run on $EVENT"; exit 3 ;;
+          esac
+          rc=0
+          node scripts/observability-gate.mjs "${args[@]}" || rc=$?
+          case "$rc" in
+            0) exit 0 ;;
+            1) echo "::error::a gate record was refused, or a signal named a spoke that the hub's registry does not list (exit 1). The log names it"; exit 1 ;;
+            2) echo "::warning::the gate record could not be sent (exit 2). The log names why. Run this workflow again by hand with the pull request's number"; exit 0 ;;
+            *) echo "::error::scripts/observability-gate.mjs exited $rc: exit 3 is a usage fault and exit 4 an internal fault of the installed script"; exit "$rc" ;;
+          esac

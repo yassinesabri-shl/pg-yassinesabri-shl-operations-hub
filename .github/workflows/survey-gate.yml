@@ -1,0 +1,38 @@
+name: survey-gate
+on:
+  pull_request:                   # no `paths:` filter — the script decides "no survey changed"
+permissions:
+  contents: read
+jobs:
+  survey:
+    name: survey-gate             # branch protection names the job, not the file
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # the check diffs against the base; a shallow clone checks every survey
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      # The same step, word for word, as fan-in's: a private spoke needs the hub
+      # secret HARNESS_SPOKE_READ_TOKEN, a read-only token (`contents: read`, the
+      # listed spokes only). The pull request's own copy of the script runs with
+      # it, as every gate here runs the pull request's script; a fork gets no
+      # secret. INTEGRATION POINT, the platform lead's.
+      - name: Let git read private spokes
+        env:
+          SPOKE_TOKEN: ${{ secrets.HARNESS_SPOKE_READ_TOKEN }}
+        run: |
+          set -uo pipefail
+          if [ -z "${SPOKE_TOKEN:-}" ]; then
+            echo "::notice::hub secret HARNESS_SPOKE_READ_TOKEN is not set; a private spoke will report 'cannot reach' (exit 2). See docs/04-creating-a-hub.md in the harness repository."
+            exit 0
+          fi
+          git config --global url."https://x-access-token:${SPOKE_TOKEN}@github.com/".insteadOf "https://github.com/"
+          git config --global --add url."https://x-access-token:${SPOKE_TOKEN}@github.com/".insteadOf "git@github.com:"
+      - name: Check the surveys this pull request changes
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -uo pipefail
+          node scripts/check-survey.mjs --changed-since "$BASE_SHA"

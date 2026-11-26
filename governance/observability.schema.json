@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "The hub's connection to its observability platform",
+  "description": "docs/estate/observability.json. /connect-observability-platform writes it, and a hub without it collects nothing. It names the observability platform, its URL and the hub's id, and holds no credential: with auth bearer, the default, each laptop sets HARNESS_OBSERVABILITY_TOKEN. scripts/observability/config.mjs checks the same rules.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "hub", "platform", "url"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "hub": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$", "description": "The hub's id, the same on every laptop. Each record carries it." },
+    "platform": { "enum": ["cubeapm", "grafana"], "description": "The observability platform: CubeAPM, through its JSON-lines endpoint, or Grafana, through the push endpoint of its Loki collector behind an authenticating proxy." },
+    "url": { "type": "string", "pattern": "^(https://|http://(127\\.0\\.0\\.1|localhost|\\[::1\\])(:|/|$))", "description": "The observability platform's own base URL, over https, or over http to a local instance on this laptop. It must not carry a user name or a password." },
+    "auth": { "enum": ["bearer", "none"], "default": "bearer", "description": "How the sender authorises its requests: bearer sends each laptop's HARNESS_OBSERVABILITY_TOKEN, and none sends no authorisation, for a receiver that needs no key." },
+    "note": { "type": "string" }
+  }
+}

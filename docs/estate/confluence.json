@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "site": "https://shl.atlassian.net",
+  "space": "PN",
+  "root_folder": "454460416",
+  "mode": "gateway",
+  "scopes": {
+    "Backend": [],
+    "Frontend": [],
+    "Data and database": [],
+    "CI/CD and infrastructure": []
+  }
+}

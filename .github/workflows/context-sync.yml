@@ -1,0 +1,93 @@
+name: context-sync
+# Keep this hub's ADRs and standards equal to its folder in Confluence, Key decisions > hubs > <HUB KEY>
+# (PLDC-712). Confluence is master. The run reads the approved pages, writes their summaries on the
+# branch context/confluence-sync, and opens or updates one pull request. A person merges it. The run
+# never writes to Confluence and never merges. A hub without docs/estate/confluence.json has no sync,
+# and the run says so and stops.
+on:
+  schedule:
+    - cron: '0 0 * * *'           # every day at 00:00 UTC (R-17)
+  workflow_dispatch:              # on demand, for example after a page is approved
+permissions:
+  contents: write                 # push the branch context/confluence-sync
+  pull-requests: write            # open, update or close its pull request
+concurrency:
+  group: context-sync             # one run at a time: they share one branch
+  cancel-in-progress: false
+jobs:
+  context-sync:
+    name: context-sync            # the forge shows the job name, not the file name
+    runs-on: ubuntu-latest
+    steps:
+      # HARNESS_CONTEXT_SYNC_TOKEN pushes the branch and opens the pull request. GitHub starts no
+      # workflow for a pull request opened with the job's own GITHUB_TOKEN, so without this secret the
+      # hub's required checks never report and the pull request cannot merge. A GitHub App token or a
+      # fine-grained token with contents and pull-requests write on this repository. INTEGRATION
+      # POINT, the platform lead's.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # the sync reads each summary's history to find a harness edit (R-13)
+          token: ${{ secrets.HARNESS_CONTEXT_SYNC_TOKEN || github.token }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Sync from Confluence
+        id: sync
+        env:
+          # The read-only service account (R-19). The sync never prints the token or writes it to a file.
+          CONFLUENCE_USER: ${{ secrets.HARNESS_CONFLUENCE_USER }}
+          CONFLUENCE_API_TOKEN: ${{ secrets.HARNESS_CONFLUENCE_TOKEN }}
+        run: |
+          set -uo pipefail
+          # The install writes the connection, so the sync waits only for its two secrets.
+          if [ -z "${CONFLUENCE_USER:-}" ] || [ -z "${CONFLUENCE_API_TOKEN:-}" ]; then
+            echo "::notice::the secrets HARNESS_CONFLUENCE_USER and HARNESS_CONFLUENCE_TOKEN are not set, so the Confluence sync does not run yet. Set both, or turn the sync off with /connect-confluence --remove"
+            echo 'configured=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git config --global user.name 'SHL harness context sync'
+          git config --global user.email 'shl-harness-context-sync@users.noreply.github.com'
+          out="$RUNNER_TEMP/context-sync"
+          rc=0
+          node scripts/confluence-sync.mjs apply --level hub --out "$out" > "$RUNNER_TEMP/context-sync.json" || rc=$?
+          if [ -f "$out/job-summary.md" ]; then cat "$out/job-summary.md" >> "$GITHUB_STEP_SUMMARY"; fi
+          if [ "$rc" -ne 0 ]; then
+            echo "::error::scripts/confluence-sync.mjs exited $rc: 1 the connection file is not well formed, 2 Confluence, its credential or the remote cannot be reached, 3 usage, 4 an internal fault"
+            exit "$rc"
+          fi
+          node -e '
+            const r = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"));
+            const out = [`configured=${r.configured === true}`, `changed=${r.changed === true}`, `trunk=${r.trunk || ""}`, `subject=${r.subject || ""}`, `branch=${r.branch || ""}`];
+            require("fs").appendFileSync(process.env.GITHUB_OUTPUT, out.join("\n") + "\n");
+            if (r.configured === false) console.log(r.reason);
+          ' "$RUNNER_TEMP/context-sync.json"
+      - name: Open, update or close the sync pull request
+        if: steps.sync.outputs.configured == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.HARNESS_CONTEXT_SYNC_TOKEN || github.token }}
+          OWN_TOKEN: ${{ secrets.HARNESS_CONTEXT_SYNC_TOKEN }}
+          CHANGED: ${{ steps.sync.outputs.changed }}
+          TRUNK: ${{ steps.sync.outputs.trunk }}
+          SUBJECT: ${{ steps.sync.outputs.subject }}
+          BRANCH: ${{ steps.sync.outputs.branch }}
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/context-sync"
+          if [ -z "${OWN_TOKEN:-}" ]; then
+            echo "::warning::secret HARNESS_CONTEXT_SYNC_TOKEN is not set: a pull request opened with GITHUB_TOKEN starts no workflow, so its required checks will not report"
+          fi
+          number="$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty')"
+          if [ "$CHANGED" = 'true' ]; then
+            git -C "$out/worktree" push --force origin "HEAD:refs/heads/$BRANCH"
+            if [ -n "$number" ]; then
+              gh pr edit "$number" --body-file "$out/pr-body.md"
+              echo "Updated pull request #$number."
+            else
+              gh pr create --base "$TRUNK" --head "$BRANCH" --title "$SUBJECT" --body-file "$out/pr-body.md"
+            fi
+          elif [ -n "$number" ]; then
+            gh pr close "$number" --delete-branch --comment 'Confluence and the harness agree again, so this sync pull request has nothing left to merge.'
+            echo "Closed pull request #$number."
+          else
+            echo 'No summary changes, so no pull request.'
+          fi

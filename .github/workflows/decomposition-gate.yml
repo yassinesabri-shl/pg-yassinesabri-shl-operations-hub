@@ -1,0 +1,91 @@
+name: decomposition-gate
+on:
+  pull_request:                   # no `paths:` filter — the script decides "nothing to check"
+permissions:
+  contents: read
+jobs:
+  decomposition:
+    name: decomposition-gate      # branch protection names the job, not the file
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      # The same step, word for word, as fan-in's. Here it lets the check read the
+      # global context repository that docs/estate/global.json names, for a
+      # global Context: entry, with the credential this hub gives git for its
+      # spokes; the token covers that repository too. A hub without the file
+      # reads no other repository. INTEGRATION POINT, the platform lead's.
+      - name: Let git read private spokes
+        env:
+          SPOKE_TOKEN: ${{ secrets.HARNESS_SPOKE_READ_TOKEN }}
+        run: |
+          set -uo pipefail
+          if [ -z "${SPOKE_TOKEN:-}" ]; then
+            echo "::notice::hub secret HARNESS_SPOKE_READ_TOKEN is not set; a private spoke will report 'cannot reach' (exit 2). See docs/04-creating-a-hub.md in the harness repository."
+            exit 0
+          fi
+          git config --global url."https://x-access-token:${SPOKE_TOKEN}@github.com/".insteadOf "https://github.com/"
+          git config --global --add url."https://x-access-token:${SPOKE_TOKEN}@github.com/".insteadOf "git@github.com:"
+      - name: Check the decompositions changed in this pull request
+        env:
+          HARNESS_TRUNK: main
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -uo pipefail
+
+          if git cat-file -e "${BASE_SHA}^{commit}" 2>/dev/null; then
+            changed=$(git diff --name-only "$BASE_SHA" HEAD -- docs/backlog docs/requirements) || {
+              echo "::error::could not diff $BASE_SHA..HEAD"; exit 4; }
+          else
+            echo "::notice::base commit unavailable; checking every decomposition in this branch"
+            changed=$(git ls-tree -r --name-only HEAD -- docs/backlog docs/requirements)
+          fi
+
+          records=$(git ls-tree -r --name-only HEAD -- docs/backlog \
+                    | sed -nE 's#^docs/backlog/([a-z0-9]+(-[a-z0-9]+)*)\.decomposition\.md$#\1#p' | sort -u)
+
+          if printf '%s\n' "$changed" | grep -qx 'docs/backlog/keys.json'; then
+            echo "::notice::keys.json changed; checking every decomposition on this branch"
+            slugs="$records"
+          else
+            # The record or its review; an item under the slug's directory; the
+            # source document with the same slug.
+            slugs=$(printf '%s\n' "$changed" \
+                    | sed -nE -e 's#^docs/backlog/([a-z0-9]+(-[a-z0-9]+)*)\.decomposition(-review)?\.md$#\1#p' \
+                              -e 's#^docs/backlog/([a-z0-9]+(-[a-z0-9]+)*)/[A-Z][A-Z0-9]{1,9}-[0-9]+\.item\.md$#\1#p' \
+                              -e 's#^docs/requirements/([a-z0-9]+(-[a-z0-9]+)*)/requirements\.md$#\1#p' | sort -u)
+          fi
+
+          [ -z "$slugs" ] && { echo "no decomposition changes"; exit 0; }
+
+          candidate="$RUNNER_TEMP/candidate-trunk.git"
+          {
+            git init --bare --quiet --initial-branch="$HARNESS_TRUNK" "$candidate" &&
+            git push --quiet "$candidate" "HEAD:refs/heads/$HARNESS_TRUNK" &&
+            git clone --quiet "$candidate" "$RUNNER_TEMP/candidate" &&
+            cd "$RUNNER_TEMP/candidate"
+          } || { echo "::error::could not build the candidate trunk"; exit 4; }
+
+          worst=0
+          for s in $slugs; do
+            if ! printf '%s\n' "$records" | grep -qx "$s"; then
+              echo "$s: no decomposition record on this branch; nothing to check"
+              continue
+            fi
+            # A pull request that changes none of the slug's record, review and
+            # item files cannot bring the record in step with a newer source.
+            if printf '%s\n' "$changed" | grep -qE "^docs/backlog/$s(\.decomposition(-review)?\.md|/[^/]+\.item\.md)$"; then
+              ahead=0
+            else
+              ahead=1
+            fi
+            HARNESS_SOURCE_AHEAD=$ahead node scripts/check-decomposition.js "$s" || rc=$?
+            rc=${rc:-0}
+            [ "$rc" -gt "$worst" ] && worst=$rc
+            unset rc
+          done
+          exit "$worst"

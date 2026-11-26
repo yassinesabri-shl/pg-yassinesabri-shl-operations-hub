@@ -1,0 +1,162 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.internal/harness/iteration-record.schema.json",
+  "title": "Worker-critic iteration record",
+  "description": "One record per worker-critic round, emitted by the loop and by the evaluation runner. This is the canonical superset: the live loop populates the core fields, the evaluation runner additionally populates case_id, case_set_id and assertion results. Recovery rate (alpha) is nullable and computed downstream — never self-reported by the loop being measured.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "emitted_at",
+    "run_id",
+    "artefact_id",
+    "artefact_type",
+    "iteration",
+    "quality",
+    "signal_source",
+    "verdict"
+  ],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "emitted_at": { "type": "string", "format": "date-time" },
+    "run_id": { "type": "string", "description": "One loop, all iterations" },
+    "artefact_id": { "type": "string", "description": "e.g. PROJ-412 or a document slug" },
+    "artefact_type": { "enum": ["code", "tests", "specification", "design", "document"] },
+    "iteration": { "type": "integer", "minimum": 0 },
+
+    "origin": {
+      "enum": ["production", "evaluation", "frozen-set"],
+      "description": "Frozen-set runs are what separate model drift from context drift. Keep them in the same store as production runs or you cannot compare them."
+    },
+    "case_id": { "type": ["string", "null"] },
+    "case_set_id": { "type": ["string", "null"] },
+
+    "quality": { "type": "number", "minimum": 0, "maximum": 1 },
+    "quality_basis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["measure", "gate_status"],
+      "properties": {
+        "measure": { "enum": ["ac_pass_rate", "open_gaps", "citation_validity"] },
+        "numerator": { "type": "number" },
+        "denominator": { "type": "number" },
+        "gate_status": { "enum": ["pass", "fail", "not_run"] },
+        "gate_ids": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "signal_source": { "enum": ["machine", "human", "mixed"] },
+
+    "severity_counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["critical", "important", "suggestion"],
+      "properties": {
+        "critical": { "type": "integer", "minimum": 0 },
+        "important": { "type": "integer", "minimum": 0 },
+        "suggestion": { "type": "integer", "minimum": 0 }
+      }
+    },
+
+    "assertions": {
+      "type": "array",
+      "description": "Populated on evaluation runs only. One entry per assertion in the case.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "blocking", "passed"],
+        "properties": {
+          "id": { "type": "string" },
+          "type": { "type": "string" },
+          "blocking": { "type": "boolean" },
+          "passed": { "type": "boolean" },
+          "observed": { "type": ["string", "number", "boolean", "null"] },
+          "expected": { "type": ["string", "number", "boolean", "null"] }
+        }
+      }
+    },
+
+    "tokens": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input", "output"],
+      "properties": {
+        "input": { "type": "integer", "minimum": 0 },
+        "output": { "type": "integer", "minimum": 0 },
+        "cached": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "cost_usd": { "type": ["number", "null"], "minimum": 0 },
+    "wall_time_ms": { "type": "integer", "minimum": 0 },
+
+    "worker": { "$ref": "#/$defs/actor" },
+    "critic": { "$ref": "#/$defs/actor" },
+
+    "verdict": {
+      "enum": ["APPROVED", "CHANGES_REQUESTED", "ESCALATED"],
+      "description": "The round's verdict, in the loop's token vocabulary — a critic's, or the finalizer's machine rejection, as verdict_source says. Maps one-for-one onto the review file: '### VERDICT: APPROVED' -> APPROVED, '### VERDICT: CHANGES REQUESTED' -> CHANGES_REQUESTED. The other token sets belong to other surfaces and never appear here: READY / NOT_READY is the Spec Quality field of the readiness block, and GATE_PASS / GATE_FAIL is the author's self-check. NEEDS_WORK is not a verdict anywhere. Widen this enum and the aggregation silently drops the non-approving rounds, which are the whole signal for escalation rate and recovery rate."
+    },
+    "verdict_source": {
+      "enum": ["critic", "finalizer"],
+      "description": "Who issued this round's verdict. `critic`: a critic seat's verdict token, mapped as `verdict` describes; in a code round it reviewed a candidate the finalizer had passed, and `finalizer` records that run. `finalizer`: test-guard.mjs finalize exited 1 on the round — a deterministic machine rejection (nothing to review, the guard's hooks tampered with, or the repository's own checks on the candidate), never a critic's; a protected change alone is undone, not rejected. No critic was dispatched, so `critic` is absent, `signal_source` is `machine`, `verdict` is `CHANGES_REQUESTED` and `quality` is 0. The round still spends one of the code loop's rounds. A record without this field predates the finalizer and carries a critic's verdict."
+    },
+    "finalizer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["candidate_sha", "tree_sha", "result"],
+      "description": "The finalizer's run on the round (test-guard.mjs finalize): the engineer's HEAD it took, the one candidate commit and tree it built from that HEAD and checked — every approved test as in the approved test commit, every refused new path taken out — and what it found. Detail beyond these counts stays in the temporary run directory and is removed with it.",
+      "properties": {
+        "candidate_sha": { "type": "string", "pattern": "^([0-9a-f]{40}|[0-9a-f]{64})$", "description": "The candidate commit, or the engineer's HEAD where the round was refused before one was built." },
+        "raw_sha": { "type": "string", "pattern": "^([0-9a-f]{40}|[0-9a-f]{64})$", "description": "The engineer's HEAD as handed in." },
+        "tree_sha": { "type": "string", "pattern": "^([0-9a-f]{40}|[0-9a-f]{64})$" },
+        "result": { "enum": ["pass", "fail"] },
+        "restored": { "type": "integer", "minimum": 0, "description": "Approved entries the engineer's HEAD edited, deleted, replaced or re-moded, restored by the finalizer. Never a reason on its own to fail the round." },
+        "removed": { "type": "integer", "minimum": 0, "description": "New paths the engineer's HEAD added in protected locations — a test it wrote included — taken out by the finalizer." },
+        "failed_checks": { "type": "array", "items": { "type": "string" }, "description": "The checks.env keys whose command failed in the finalizer's checkout." }
+      }
+    },
+    "escalated_to_role": { "type": ["string", "null"] },
+
+    "alpha": {
+      "type": ["number", "null"],
+      "description": "Null at iteration 0. Computed downstream, never self-reported."
+    },
+    "context_fingerprint": {
+      "type": "string",
+      "description": "Hash of constitution + rule pack + skills in force for this run. Without it you can see drift and cannot explain it."
+    }
+  },
+  "allOf": [
+    {
+      "if": { "required": ["verdict_source"], "properties": { "verdict_source": { "const": "finalizer" } } },
+      "then": {
+        "required": ["finalizer"],
+        "properties": {
+          "signal_source": { "const": "machine" },
+          "verdict": { "const": "CHANGES_REQUESTED" },
+          "finalizer": { "properties": { "result": { "const": "fail" } } }
+        },
+        "not": { "required": ["critic"] }
+      }
+    },
+    {
+      "if": { "required": ["verdict_source", "finalizer"], "properties": { "verdict_source": { "const": "critic" } } },
+      "then": { "properties": { "finalizer": { "properties": { "result": { "const": "pass" } } } } }
+    }
+  ],
+  "$defs": {
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["agent", "model"],
+      "properties": {
+        "agent": {
+          "type": "string",
+          "description": "agent_id as it appears in the agent registry. An unregistered agent_id here is a governance failure, and the aggregation job should reject the record."
+        },
+        "provider": { "type": "string" },
+        "model": { "type": "string" },
+        "runtime": { "type": "string" }
+      }
+    }
+  }
+}

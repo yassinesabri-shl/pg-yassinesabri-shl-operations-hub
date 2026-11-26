@@ -1,0 +1,167 @@
+# Part of the harness asset library c6f3b4427d58f7c3 (see VERSION.json) · 2026-10-15
+#
+# Test-quality rules for JavaScript and TypeScript: Jest (with Angular's jest-preset-angular and
+# TestBed), Vitest, Testing Library, and the same describe/it/test/expect shape in Mocha, Jasmine,
+# Cypress and Playwright; node:test with node:assert. ERROR is a clear violation; WARNING is for
+# the critic. Fixtures: tests/test-quality/fixtures/js/. Add a rule here, add its fixture.
+# Semgrep rules cannot share a block, so each rule repeats its `paths:` and a few messages: that
+# is deliberate, and a change to one is a change to all of them.
+rules:
+  - id: shl-js-skipped
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: "A skipped, focused or to-do test is not a test that checks anything: skip and todo never run it, and only runs nothing else. Remove the marker, or the test."
+    paths:
+      include: ["*.test.*", "*.spec.*", "*.cy.*", "__tests__/", "_tests_/", "test/", "tests/"]
+    pattern-either:
+      - patterns:
+          - pattern-either:
+              - pattern: $F.skip(...)
+              - pattern: $F.only(...)
+              - pattern: $F.todo(...)
+              - pattern: $F.fixme(...)
+              - pattern: $F.failing(...)
+              - pattern: $F.skip.each(...)
+              - pattern: $F.only.each(...)
+          - metavariable-regex:
+              metavariable: $F
+              regex: ^(it|test|describe|suite|context|specify)$
+      - pattern: xit(...)
+      - pattern: xtest(...)
+      - pattern: xdescribe(...)
+      - pattern: xspecify(...)
+      - pattern: fit(...)
+      - pattern: fdescribe(...)
+      - pattern: this.skip()
+      - pattern: it($T)
+      - pattern: test($T)
+      - patterns:
+          - pattern-either:
+              - pattern: '$F($T, {..., skip: $V, ...}, ...)'
+              - pattern: '$F($T, {..., todo: $V, ...}, ...)'
+              - pattern: '$F($T, {..., only: $V, ...}, ...)'
+          - pattern-not: '$F($T, {..., skip: false, ...}, ...)'
+          - pattern-not: '$F($T, {..., todo: false, ...}, ...)'
+          - pattern-not: '$F($T, {..., only: false, ...}, ...)'
+          - metavariable-regex:
+              metavariable: $F
+              regex: ^(it|test|describe|suite)$
+
+  - id: shl-js-tautology
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: "This assertion cannot fail: it compares a value with itself or asserts a constant. Assert the behaviour under test."
+    paths:
+      include: ["*.test.*", "*.spec.*", "*.cy.*", "__tests__/", "_tests_/", "test/", "tests/"]
+    pattern-either:
+      - pattern: expect(true).toBe(true)
+      - pattern: expect(true).toBeTruthy()
+      - pattern: expect(false).toBeFalsy()
+      - pattern: expect(true).to.be.true
+      - pattern: assert(true)
+      - pattern: assert.ok(true)
+      - pattern: $A.ok(true)
+      - patterns:
+          - pattern-either:
+              - pattern: expect($X).toBe($X)
+              - pattern: expect($X).toEqual($X)
+              - pattern: expect($X).toStrictEqual($X)
+              - pattern: expect($X).to.equal($X)
+              - pattern: expect($X).to.eql($X)
+              - pattern: assert.equal($X, $X)
+              - pattern: assert.strictEqual($X, $X)
+              - pattern: assert.deepEqual($X, $X)
+              - pattern: assert.deepStrictEqual($X, $X)
+          - metavariable-regex:
+              metavariable: $X
+              regex: ^[^()]*$
+
+  - id: shl-js-broad-error
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: "Any error satisfies this, including a stub's \"not implemented\". Name the exact error: a class that is not just Error, a message or a pattern."
+    paths:
+      include: ["*.test.*", "*.spec.*", "*.cy.*", "__tests__/", "_tests_/", "test/", "tests/"]
+    pattern-either:
+      - pattern: expect($F).toThrow()
+      - pattern: expect($F).toThrowError()
+      - pattern: expect($F).toThrow(Error)
+      - pattern: expect($F).toThrowError(Error)
+      - pattern: expect($F).rejects.toThrow()
+      - pattern: expect($F).rejects.toThrowError()
+      - pattern: expect($F).rejects.toThrow(Error)
+      - pattern: expect($F).to.throw()
+      - pattern: expect($F).to.throw(Error)
+      - pattern: assert.throws($F)
+      - pattern: assert.throws($F, Error)
+      - pattern: assert.rejects($F)
+      - pattern: assert.rejects($F, Error)
+
+  - id: shl-js-empty-test
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: "This test has an empty body: it always passes."
+    paths:
+      include: ["*.test.*", "*.spec.*", "*.cy.*", "__tests__/", "_tests_/", "test/", "tests/"]
+    patterns:
+      - pattern-either:
+          - pattern: $F($T, () => {})
+          - pattern: $F($T, async () => {})
+          - pattern: $F($T, function () {})
+          - pattern: $F($T, async function () {})
+      - metavariable-regex:
+          metavariable: $F
+          regex: ^(it|test)$
+
+  - id: shl-js-no-assertion
+    languages: [javascript, typescript]
+    severity: WARNING
+    message: "No assertion or expectation was recognised in this test. If it asserts through a helper, say which; otherwise it only proves the code ran."
+    paths:
+      include: ["*.test.*", "*.spec.*", "*.cy.*", "__tests__/", "_tests_/", "test/", "tests/"]
+    patterns:
+      - pattern-either:
+          - pattern: $F($T, $CB)
+          - pattern: $F.each(...)($T, $CB)
+          - patterns:
+              - pattern: $F($T, $OPTS, $CB)
+              - metavariable-regex:
+                  metavariable: $OPTS
+                  regex: ^\s*\{
+          - patterns:
+              - pattern: $F($T, $CB, $TIMEOUT)
+              - metavariable-regex:
+                  metavariable: $CB
+                  regex: ^(?!\s*\{)
+      - metavariable-regex:
+          metavariable: $F
+          regex: ^(it|test)$
+      - metavariable-regex:
+          metavariable: $CB
+          regex: (?s)^(?!.*(\b(expect\w*|assert\w*|should|verify\w*|fail|check\w*|require|toBe\w*|toHave\w*|(get|find)(All)?By\w+)\s*[.(]|\bdone\s*\(|\.expect\())(?!.*\{\s*\}\s*\)*\s*$).*$
+
+  - id: shl-js-mock-heavy
+    languages: [javascript, typescript]
+    severity: WARNING
+    message: "Seven or more mock set-ups in one test: the test may be checking the mocks, not the behaviour. Prefer a real collaborator or a fake."
+    paths:
+      include: ["*.test.*", "*.spec.*", "*.cy.*", "__tests__/", "_tests_/", "test/", "tests/"]
+    patterns:
+      - pattern-either:
+          - pattern: $F($T, $CB)
+          - patterns:
+              - pattern: $F($T, $OPTS, $CB)
+              - metavariable-regex:
+                  metavariable: $OPTS
+                  regex: ^\s*\{
+          - patterns:
+              - pattern: $F($T, $CB, $TIMEOUT)
+              - metavariable-regex:
+                  metavariable: $CB
+                  regex: ^(?!\s*\{)
+      - metavariable-regex:
+          metavariable: $F
+          regex: ^(it|test)$
+      - metavariable-regex:
+          metavariable: $CB
+          regex: (?s).*?((\b(jest|vi)\.(fn|spyOn|mock|doMock)\(|\bspyOn\(|\bsinon\.(stub|spy|mock)\(|\.mock(ReturnValue|ResolvedValue|RejectedValue|Implementation)(Once)?\()(?:.*?)){7}

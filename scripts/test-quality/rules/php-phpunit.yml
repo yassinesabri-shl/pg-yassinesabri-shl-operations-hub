@@ -1,0 +1,190 @@
+# Part of the harness asset library c6f3b4427d58f7c3 (see VERSION.json) · 2026-10-15
+#
+# Test-quality rules for PHP: PHPUnit (7.5 and later) with Mockery and PHPUnit's own mock
+# builder. ERROR is a clear violation; WARNING is for the critic.
+# Fixtures: tests/test-quality/fixtures/php/. Add a rule here, add its fixture.
+# Semgrep rules cannot share a block, so each rule repeats its `paths:` and a few messages: that
+# is deliberate, and a change to one is a change to all of them.
+rules:
+  - id: shl-php-skipped
+    languages: [php]
+    severity: ERROR
+    message: "A test that is skipped or marked incomplete never proves anything. Finish it, or delete it with the criterion it covered."
+    paths:
+      include: ["*Test.php", "*Tests.php", "tests/", "test/"]
+    patterns:
+      - pattern-either:
+          - pattern: $this->markTestSkipped(...)
+          - pattern: $this->markTestIncomplete(...)
+          - pattern: self::markTestSkipped(...)
+          - pattern: self::markTestIncomplete(...)
+      - pattern-not-inside: |
+          if ($COND) {
+            ...
+          }
+
+  - id: shl-php-skipped-conditional
+    languages: [php]
+    severity: WARNING
+    message: "This skips when its condition holds (a missing extension, service or environment). Confirm CI sets the condition so the test really runs."
+    paths:
+      include: ["*Test.php", "*Tests.php", "tests/", "test/"]
+    patterns:
+      - pattern-either:
+          - pattern: $this->markTestSkipped(...)
+          - pattern: self::markTestSkipped(...)
+      - pattern-inside: |
+          if ($COND) {
+            ...
+          }
+
+  - id: shl-php-tautology
+    languages: [php]
+    severity: ERROR
+    message: "This assertion cannot fail: it compares a value with itself or asserts a constant. Assert the behaviour under test."
+    paths:
+      include: ["*Test.php", "*Tests.php", "tests/", "test/"]
+    pattern-either:
+      - pattern: $this->assertTrue(true, ...)
+      - pattern: $this->assertFalse(false, ...)
+      - pattern: $this->assertNull(null, ...)
+      - pattern: self::assertTrue(true, ...)
+      - pattern: self::assertFalse(false, ...)
+      - patterns:
+          - pattern-either:
+              - pattern: $this->assertEquals($X, $X, ...)
+              - pattern: $this->assertSame($X, $X, ...)
+              - pattern: $this->assertEqualsCanonicalizing($X, $X, ...)
+              - pattern: self::assertEquals($X, $X, ...)
+              - pattern: self::assertSame($X, $X, ...)
+          - metavariable-regex:
+              metavariable: $X
+              regex: ^[^()]*$
+
+  - id: shl-php-broad-error
+    languages: [php]
+    severity: ERROR
+    message: "Any exception satisfies this, including a stub's \"not implemented\". Name the exact exception class the design states."
+    paths:
+      include: ["*Test.php", "*Tests.php", "tests/", "test/"]
+    patterns:
+      - pattern-either:
+          - pattern: $this->expectException(\Exception::class)
+          - pattern: $this->expectException(Exception::class)
+          - pattern: $this->expectException(\Throwable::class)
+          - pattern: $this->expectException(Throwable::class)
+          - pattern: $this->expectException('Exception')
+          - pattern: $this->expectException('\Exception')
+          - pattern: $this->setExpectedException('Exception')
+          - pattern: $this->setExpectedException('\Exception')
+          - pattern: self::expectException(\Exception::class)
+          - pattern: self::expectException(Exception::class)
+      # A message or a code narrows it: the test names which failure it expects.
+      - pattern-not-inside: |
+          function $F(...) {
+            ...
+            $this->expectExceptionMessage(...);
+            ...
+          }
+      - pattern-not-inside: |
+          function $F(...) {
+            ...
+            $this->expectExceptionMessageMatches(...);
+            ...
+          }
+      - pattern-not-inside: |
+          function $F(...) {
+            ...
+            $this->expectExceptionMessageRegExp(...);
+            ...
+          }
+      - pattern-not-inside: |
+          function $F(...) {
+            ...
+            $this->expectExceptionCode(...);
+            ...
+          }
+      - pattern-not-inside: |
+          function $F(...): void {
+            ...
+            $this->expectExceptionMessage(...);
+            ...
+          }
+      - pattern-not-inside: |
+          function $F(...): void {
+            ...
+            $this->expectExceptionMessageMatches(...);
+            ...
+          }
+      - pattern-not-inside: |
+          function $F(...): void {
+            ...
+            $this->expectExceptionCode(...);
+            ...
+          }
+
+  - id: shl-php-broad-error-annotation
+    languages: [generic]
+    severity: ERROR
+    message: "Any exception satisfies this docblock expectation, including a stub's \"not implemented\". Name the exact exception class the design states."
+    paths:
+      include: ["*Test.php", "*Tests.php", "tests/", "test/"]
+    pattern-regex: '@expectedException[ \t]+\\?(Exception|Throwable)[ \t]*$'
+
+  - id: shl-php-empty-test
+    languages: [php]
+    severity: ERROR
+    message: "This test has an empty body: it always passes."
+    paths:
+      include: ["*Test.php", "*Tests.php", "tests/", "test/"]
+    patterns:
+      - pattern-either:
+          - pattern: function $F(...) {}
+          - pattern: "function $F(...): void {}"
+      - metavariable-regex:
+          metavariable: $F
+          regex: ^test
+
+  - id: shl-php-no-assertion
+    languages: [php]
+    severity: WARNING
+    message: "No assertion, expectation or mock verification was recognised in this test. If it asserts through a helper, say which; otherwise it only proves the code ran."
+    paths:
+      include: ["*Test.php", "*Tests.php", "tests/", "test/"]
+    patterns:
+      - pattern-either:
+          - pattern: |
+              function $F(...) {
+                $X;
+                ...
+              }
+          - pattern: |
+              function $F(...): void {
+                $X;
+                ...
+              }
+      - metavariable-regex:
+          metavariable: $F
+          regex: ^test
+      - pattern-not-regex: (?s)(\$this|self|static)\s*(->|::)\s*(assert\w*|expect\w*|fail|markTest\w*|once|exactly|never|atLeast|atMost)\b|\bassert\w*\s*\(|->shouldReceive|->shouldHaveReceived|->expects\(|->verify\(|Mockery::|->(assert|expect|check|verify|validate|ensure)\w*\(
+
+  - id: shl-php-mock-heavy
+    languages: [php]
+    severity: WARNING
+    message: "Six or more mock set-ups in one test: the test may be checking the mocks, not the behaviour. Prefer a real collaborator or a fake."
+    paths:
+      include: ["*Test.php", "*Tests.php", "tests/", "test/"]
+    patterns:
+      - pattern-either:
+          - pattern: |
+              function $F(...) {
+                ...
+              }
+          - pattern: |
+              function $F(...): void {
+                ...
+              }
+      - metavariable-regex:
+          metavariable: $F
+          regex: ^test
+      - pattern-regex: (?s)((createMock|getMockBuilder|Mockery::mock|shouldReceive|->method\(|->expects\()(?:(?!\bfunction\s+\w+\s*\().)*?){6}

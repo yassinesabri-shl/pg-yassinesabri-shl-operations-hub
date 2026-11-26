@@ -1,0 +1,187 @@
+# Part of the harness asset library c6f3b4427d58f7c3 (see VERSION.json) · 2026-10-15
+#
+# Test-quality rules for Python: pytest and unittest, with unittest.mock, pytest-mock and
+# monkeypatch. ERROR is a clear violation; WARNING is for the critic.
+# Fixtures: tests/test-quality/fixtures/python/. Add a rule here, add its fixture.
+# Semgrep rules cannot share a block, so each rule repeats its `paths:` and a few messages: that
+# is deliberate, and a change to one is a change to all of them.
+rules:
+  - id: shl-python-skipped
+    languages: [python]
+    severity: ERROR
+    message: "A skipped or expected-to-fail test never proves anything. Remove the marker, or the test."
+    paths:
+      include: ["test_*.py", "*_test.py", "tests/", "test/"]
+    pattern-either:
+      - pattern: |
+          @pytest.mark.skip
+          def $F(...): ...
+      - pattern: |
+          @pytest.mark.skip(...)
+          def $F(...): ...
+      - pattern: |
+          @pytest.mark.xfail
+          def $F(...): ...
+      - pattern: |
+          @pytest.mark.xfail(...)
+          def $F(...): ...
+      - pattern: |
+          @pytest.mark.skip(...)
+          class $C: ...
+      - pattern: |
+          @unittest.skip(...)
+          def $F(...): ...
+      - pattern: |
+          @unittest.skip(...)
+          class $C: ...
+      - pattern: |
+          @unittest.expectedFailure
+          def $F(...): ...
+      - pattern: pytestmark = pytest.mark.skip(...)
+      - pattern: pytest.xfail(...)
+      - pattern: pytest.importorskip(...)
+      - patterns:
+          - pattern-either:
+              - pattern: pytest.skip(...)
+              - pattern: $S.skipTest(...)
+          - pattern-not-inside: |
+              if $COND:
+                  ...
+
+  - id: shl-python-skipped-conditional
+    languages: [python]
+    severity: WARNING
+    message: "This skips when its condition holds (a platform, a missing service). Confirm CI sets the condition so the test really runs."
+    paths:
+      include: ["test_*.py", "*_test.py", "tests/", "test/"]
+    pattern-either:
+      - pattern: |
+          @pytest.mark.skipif(...)
+          def $F(...): ...
+      - pattern: |
+          @unittest.skipIf(...)
+          def $F(...): ...
+      - pattern: |
+          @unittest.skipUnless(...)
+          def $F(...): ...
+      - patterns:
+          - pattern-either:
+              - pattern: pytest.skip(...)
+              - pattern: $S.skipTest(...)
+          - pattern-inside: |
+              if $COND:
+                  ...
+
+  - id: shl-python-tautology
+    languages: [python]
+    severity: ERROR
+    message: "This assertion cannot fail: it compares a value with itself or asserts a constant. Assert the behaviour under test."
+    paths:
+      include: ["test_*.py", "*_test.py", "tests/", "test/"]
+    pattern-either:
+      - pattern: assert True
+      - pattern: assert True, ...
+      - pattern: assert not False
+      - pattern: $S.assertTrue(True, ...)
+      - pattern: $S.assertFalse(False, ...)
+      - pattern: $S.assertIsNone(None, ...)
+      - patterns:
+          - pattern-either:
+              - pattern: assert $X == $X
+              - pattern: assert $X == $X, ...
+              - pattern: assert $X is $X
+              - pattern: $S.assertEqual($X, $X, ...)
+              - pattern: $S.assertIs($X, $X, ...)
+          - metavariable-regex:
+              metavariable: $X
+              regex: ^[^()]*$
+
+  - id: shl-python-broad-error
+    languages: [python]
+    severity: ERROR
+    message: "Any exception satisfies this, including a stub's \"not implemented\". Name the exact exception type the design states."
+    paths:
+      include: ["test_*.py", "*_test.py", "tests/", "test/"]
+    patterns:
+      - pattern-either:
+          - pattern: pytest.raises(Exception)
+          - pattern: pytest.raises(BaseException)
+          - pattern: pytest.raises(Exception, ...)
+          - pattern: pytest.raises(BaseException, ...)
+          - pattern: $S.assertRaises(Exception)
+          - pattern: $S.assertRaises(BaseException)
+          - pattern: $S.assertRaises(Exception, ...)
+          - pattern: $S.assertRaises(BaseException, ...)
+      - pattern-not: pytest.raises($E, ..., match=..., ...)
+      # `with ... as excinfo:` is inspected afterwards: that narrows it.
+      - pattern-not-inside: |
+          with $CTX as $V:
+              ...
+
+  - id: shl-python-empty-test
+    languages: [python]
+    severity: ERROR
+    message: "This test has an empty body: it always passes."
+    paths:
+      include: ["test_*.py", "*_test.py", "tests/", "test/"]
+    patterns:
+      - pattern: |
+          def $F(...):
+              pass
+      - metavariable-regex:
+          metavariable: $F
+          regex: ^test
+
+  - id: shl-python-no-assertion
+    languages: [python]
+    severity: WARNING
+    message: "No assertion, expected exception or mock verification was recognised in this test. If it asserts through a helper, say which; otherwise it only proves the code ran."
+    paths:
+      include: ["test_*.py", "*_test.py", "tests/", "test/"]
+    patterns:
+      - pattern: |
+          def $F(...):
+              $...BODY
+      - metavariable-regex:
+          metavariable: $F
+          regex: ^test
+      - metavariable-regex:
+          metavariable: $...BODY
+          regex: (?s)^(?!\s*pass\s*$)(?!.*(\bassert\b|\bassert[A-Z_]\w*\s*\(|\.assert\w*\s*\(|\bpytest\.(raises|warns|fail|approx)|\bself\.fail\s*\(|\bsubTest\b|\b(check|verify|expect|ensure|validate)\w*\s*\()).*$
+
+  - id: shl-python-mock-heavy
+    languages: [python]
+    severity: WARNING
+    message: "Seven or more patches or mocks in one test: the test may be checking the mocks, not the behaviour. Prefer a real collaborator or a fake."
+    paths:
+      include: ["test_*.py", "*_test.py", "tests/", "test/"]
+    patterns:
+      - pattern: |
+          def $F(...):
+              $...BODY
+      - metavariable-regex:
+          metavariable: $F
+          regex: ^test
+      - metavariable-regex:
+          metavariable: $...BODY
+          regex: (?s).*?((\bpatch(\.object|\.dict)?\(|\bMagicMock\(|\bMock\(|\bmocker\.patch|\bmonkeypatch\.setattr).*?){7}
+
+  - id: shl-python-patch-stack
+    languages: [python]
+    severity: WARNING
+    message: "Four stacked patch decorators: the test may be checking the mocks, not the behaviour. Prefer a real collaborator or a fake."
+    paths:
+      include: ["test_*.py", "*_test.py", "tests/", "test/"]
+    pattern-either:
+      - pattern: |
+          @patch(...)
+          @patch(...)
+          @patch(...)
+          @patch(...)
+          def $F(...): ...
+      - pattern: |
+          @mock.patch(...)
+          @mock.patch(...)
+          @mock.patch(...)
+          @mock.patch(...)
+          def $F(...): ...

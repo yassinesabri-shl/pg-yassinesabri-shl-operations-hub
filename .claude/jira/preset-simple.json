@@ -1,0 +1,28 @@
+{
+  "note": "A plain Backlog, In Progress, In Review, Done workflow. `/connect-jira` copies `types` into docs/estate/trackers.json and fills the rest. The harness moves a ticket to In Progress when work starts and to In Review when the pull request opens, and never to Done: merge and validation add a label and a comment.",
+  "types": {
+    "story": {
+      "issue_type": "Story",
+      "moves": {
+        "started": { "route": ["Backlog", "In Progress"] },
+        "in-review": { "route": ["In Progress", "In Review"] }
+      },
+      "annotations": {
+        "merged": { "label": "shl-merged" },
+        "validated": { "label": "shl-validated" }
+      }
+    },
+    "defect": {
+      "issue_type": "Sub-task",
+      "parent": "story",
+      "moves": {
+        "started": { "route": ["Backlog", "In Progress"] },
+        "in-review": { "route": ["In Progress", "In Review"] }
+      },
+      "annotations": {
+        "merged": { "label": "shl-merged" },
+        "validated": { "label": "shl-validated" }
+      }
+    }
+  }
+}

@@ -1,0 +1,80 @@
+name: fan-in
+on:
+  push:
+    branches: [main]           # post-merge: the only ref the check can read
+    paths:
+      - 'docs/designs/**'         # a design, a review or a validation report landed
+      - 'docs/backlog/**'         # a record, an item or the ledger changed
+  workflow_dispatch:              # on demand, for one slug
+    inputs:
+      slug:
+        description: 'Requirements slug, e.g. payments-onboarding'
+        required: false
+permissions:
+  contents: read
+  issues: read                    # the escalation record: the hub's [shl-harness] issues
+jobs:
+  fan-in:
+    name: fan-in                  # the forge shows the job name, not the file name
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # the two checks it runs read history; a shallow clone exits 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      # The check fetches each spoke's trunk by the URL the list carries. A public
+      # spoke needs nothing. A private spoke needs a read-only token that can clone
+      # it, held in this hub as the secret HARNESS_SPOKE_READ_TOKEN and handed to
+      # git here by a URL rewrite, so the list never carries a credential. Without
+      # the secret this step says so and the check still runs: a private spoke is
+      # then exit 2 with `cannot reach`, which is the honest answer. Who issues the
+      # token, and that it stays `contents: read` on the listed spokes only, is the
+      # platform lead's -- INTEGRATION POINT. On a host other than github.com,
+      # change the two host names below.
+      - name: Let git read private spokes
+        env:
+          SPOKE_TOKEN: ${{ secrets.HARNESS_SPOKE_READ_TOKEN }}
+        run: |
+          set -uo pipefail
+          if [ -z "${SPOKE_TOKEN:-}" ]; then
+            echo "::notice::hub secret HARNESS_SPOKE_READ_TOKEN is not set; a private spoke will report 'cannot reach' (exit 2). See docs/04-creating-a-hub.md in the harness repository."
+            exit 0
+          fi
+          git config --global url."https://x-access-token:${SPOKE_TOKEN}@github.com/".insteadOf "https://github.com/"
+          git config --global --add url."https://x-access-token:${SPOKE_TOKEN}@github.com/".insteadOf "git@github.com:"
+      - name: Ask whether each feature is finished
+        env:
+          GH_TOKEN: ${{ github.token }}   # reads the escalation record, the hub's [shl-harness] issues
+          HARNESS_TRUNK: main    # the check defaults to `main`; on any other trunk
+                                    # it exits 2 at every invocation without this
+          INPUT_SLUG: ${{ inputs.slug }}
+        run: |
+          set -uo pipefail
+
+          if [ -n "${INPUT_SLUG:-}" ]; then
+            # A conservative prefilter, not the grammar itself: the check enforces
+            # ^[a-z0-9]+(-[a-z0-9]+)*$ and exits 3 on anything else. The point here
+            # is to keep untrusted free text out of the shell.
+            case "$INPUT_SLUG" in
+              [a-z0-9]*) slugs="$INPUT_SLUG" ;;
+              *) echo "::error::invalid slug '$INPUT_SLUG' (expected e.g. payments-onboarding)"; exit 3 ;;
+            esac
+          else
+            # Which slug a changed report belongs to is a question about the item
+            # files, so a push asks about every record on the trunk. Records are
+            # few and the check is cheap after its first fetch of each spoke.
+            slugs=$(git ls-tree -r --name-only HEAD -- docs/backlog \
+                    | sed -nE 's#^docs/backlog/([a-z0-9]+(-[a-z0-9]+)*)\.decomposition\.md$#\1#p' | sort -u)
+          fi
+
+          [ -z "$slugs" ] && { echo "no decomposition record on the trunk; nothing to ask"; exit 0; }
+          worst=0
+          for s in $slugs; do
+            node scripts/check-fan-in.mjs "$s" || rc=$?
+            rc=${rc:-0}
+            [ "$rc" -gt "$worst" ] && worst=$rc
+            unset rc
+          done
+          exit "$worst"

@@ -1,0 +1,114 @@
+# Part of the harness asset library c6f3b4427d58f7c3 (see VERSION.json) · 2026-10-15
+#
+# Test-quality rules for Go: the standard `testing` package, testify (assert, require, mock,
+# suite) and gomock-style EXPECT chains. ERROR is a clear violation; WARNING is for the critic.
+# Fixtures: tests/test-quality/fixtures/go/. Add a rule here, add its fixture.
+# Semgrep rules cannot share a block, so each rule repeats its `paths:` and a few messages: that
+# is deliberate, and a change to one is a change to all of them.
+rules:
+  - id: shl-go-skip
+    languages: [go]
+    severity: ERROR
+    message: "An unconditional skip means the test never runs, so it proves nothing. Remove the skip, or the test."
+    paths:
+      include: ["*_test.go"]
+    patterns:
+      - pattern-either:
+          - pattern: $T.Skip(...)
+          - pattern: $T.Skipf(...)
+          - pattern: $T.SkipNow()
+          - pattern: $S.T().Skip(...)
+      - pattern-inside: |
+          func $F(...) {
+            ...
+          }
+      - pattern-not-inside: |
+          if $COND {
+            ...
+          }
+
+  - id: shl-go-skip-conditional
+    languages: [go]
+    severity: WARNING
+    message: "This skips when its condition holds (a short run, a missing service). Confirm CI sets the condition so the test really runs."
+    paths:
+      include: ["*_test.go"]
+    patterns:
+      - pattern-either:
+          - pattern: $T.Skip(...)
+          - pattern: $T.Skipf(...)
+          - pattern: $T.SkipNow()
+          - pattern: $S.T().Skip(...)
+      - pattern-inside: |
+          if $COND {
+            ...
+          }
+
+  - id: shl-go-tautology
+    languages: [go]
+    severity: ERROR
+    message: "This assertion cannot fail: it compares a value with itself or asserts a constant. Assert the behaviour under test."
+    paths:
+      include: ["*_test.go"]
+    patterns:
+      - pattern-either:
+          - pattern: $A.True($T, true, ...)
+          - pattern: $A.False($T, false, ...)
+          - pattern: $A.Nil($T, nil, ...)
+          - patterns:
+              - pattern-either:
+                  - pattern: $A.Equal($T, $X, $X, ...)
+                  - pattern: $A.EqualValues($T, $X, $X, ...)
+                  - pattern: $A.Exactly($T, $X, $X, ...)
+                  - pattern: $A.Same($T, $X, $X, ...)
+              - metavariable-regex:
+                  metavariable: $X
+                  regex: ^[^()]*$
+      - metavariable-regex:
+          metavariable: $A
+          regex: ^(assert|require)$
+
+  - id: shl-go-empty-test
+    languages: [go]
+    severity: ERROR
+    message: "This test has an empty body: it always passes."
+    paths:
+      include: ["*_test.go"]
+    patterns:
+      - pattern: func $F($T *testing.T) {}
+      - metavariable-regex:
+          metavariable: $F
+          regex: ^Test
+
+  - id: shl-go-no-assertion
+    languages: [go]
+    severity: WARNING
+    message: "No assertion, failure call or helper taking t was recognised in this test. If it checks through a helper, say which; otherwise it only proves the code ran."
+    paths:
+      include: ["*_test.go"]
+    patterns:
+      - pattern: |
+          func $F($T *testing.T) {
+            $...BODY
+          }
+      - metavariable-regex:
+          metavariable: $F
+          regex: ^Test
+      - metavariable-regex:
+          metavariable: $...BODY
+          regex: (?s)^(?=\s*\S)(?!.*(\bt\.(Error|Errorf|Fatal|Fatalf|Fail|FailNow)\s*\(|\b(assert|require|is|qt)\.\w+\(|\bcmp\.Diff|\.(Assert|Require)\w*\(|AssertExpectations|\b(check|verify|expect|assert|require|must|should)\w*\(|\w\(\s*t\s*[,)]|\bt\.Run\()).*$
+
+  - id: shl-go-mock-heavy
+    languages: [go]
+    severity: WARNING
+    message: "Six or more mock expectations in one test: the test may be checking the mocks, not the behaviour. Prefer a real collaborator or a fake."
+    paths:
+      include: ["*_test.go"]
+    patterns:
+      - pattern: |
+          func $F($T *testing.T) {
+            $...BODY
+          }
+      - metavariable-regex:
+          metavariable: $...BODY
+          regex: (?s).*?((\.On\(\s*"|\.EXPECT\(\)).*?){6}

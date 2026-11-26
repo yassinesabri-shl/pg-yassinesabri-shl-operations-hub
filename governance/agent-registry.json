@@ -1,0 +1,2495 @@
+[
+  {
+    "schema_version": 1,
+    "agent_id": "bug-investigator",
+    "name": "bug-investigator",
+    "entry_version": 1,
+    "purpose": "Triages one reported bug from its ticket and the code at a pinned commit. Returns a verdict, the chain to the root cause, the size of the fix, the reproducing test and the files to change. Reads only; writes and runs nothing.",
+    "role": "worker",
+    "status": "active",
+    "owning_role": "harness lead, delivery engineering",
+    "created_on": "2026-11-26",
+    "registered_by_role": "platform architect, agentic delivery",
+    "runtime": {
+      "platform": "primary agent runtime",
+      "platform_version": "2.x",
+      "isolation": "subagent-fresh-context",
+      "tool_policy_id": "bug-investigator-v1",
+      "health_check": {
+        "check_ref": "runtime-adapter://primary/health",
+        "interval_seconds": 300,
+        "timeout_seconds": 10,
+        "on_failure": "refuse-dispatch"
+      },
+      "definition_path": ".claude/agents/bug-investigator.md",
+      "skill_refs": [
+        ".claude/skills/investigate-bug/SKILL.md"
+      ]
+    },
+    "model": {
+      "provider": "primary-provider",
+      "pinned_id": "claude-opus-5-5",
+      "tier": "frontier",
+      "fallback_pinned_id": "claude-opus-5-5",
+      "temperature": 0,
+      "cross_provider_pair": "cross-provider-reviewer"
+    },
+    "capability_scope": {
+      "tools": {
+        "allow": [
+          "read",
+          "grep",
+          "glob",
+          "bash"
+        ],
+        "deny": [
+          "write",
+          "edit",
+          "tracker-write"
+        ]
+      },
+      "paths": {
+        "read_allow": [
+          "src/**",
+          "tests/**",
+          "docs/designs/**",
+          ".claude/rules/**"
+        ],
+        "read_deny": [
+          "secrets/**",
+          "fixtures/production-extracts/**"
+        ],
+        "write_allow": [],
+        "write_deny": [
+          "src/**",
+          "tests/**",
+          "db/changelog/**",
+          ".claude/**"
+        ]
+      },
+      "network": {
+        "egress_allow": [],
+        "egress_default": "deny"
+      },
+      "side_effects": [
+        "repository-write"
+      ],
+      "enforcement": "prompt-only",
+      "compensating_controls": [
+        "The tool list is a prompt instruction in this hub; nothing at a tool server imposes it.",
+        "Every change the agent makes reaches a branch through a pull request, and a person merges it.",
+        "Each artefact it produces is checked by the script on its pull request before the merge."
+      ]
+    },
+    "escalation": {
+      "revision_cap": 3,
+      "targets": [
+        {
+          "condition": "revision cap reached without an APPROVED verdict",
+          "route_role": "engineering lead, owning squad",
+          "response_time_minutes": 240,
+          "fallback": "block"
+        },
+        {
+          "condition": "finding requires a change to an approved cross-system contract",
+          "route_role": "integration architect",
+          "response_time_minutes": 480,
+          "fallback": "block"
+        },
+        {
+          "condition": "security finding at CRITICAL severity",
+          "route_role": "security reviewer on call",
+          "response_time_minutes": 60,
+          "fallback": "deny"
+        }
+      ]
+    },
+    "evaluation": {
+      "case_set_ref": null,
+      "frozen_set_ref": null,
+      "last_run": null,
+      "pass_rate": null,
+      "alpha_median": null,
+      "context_fingerprint": "ctx:9f2c41ab"
+    },
+    "cost": {
+      "cost_centre": "PLATFORM-AGENTIC-DELIVERY",
+      "budget_run_usd": 4,
+      "budget_month_usd": 900,
+      "alert_at_pct": 80,
+      "on_budget_breach": "alert"
+    },
+    "data_handling": {
+      "classification": "confidential",
+      "pii_permitted": false,
+      "log_retention_days": 400,
+      "residency": "in-country processing only",
+      "prompt_logging": "redacted"
+    },
+    "review": {
+      "cadence_days": 90,
+      "last_review": "2026-06-30",
+      "next_review": "2026-09-28",
+      "reviewer_role": "harness lead, delivery engineering",
+      "invocations_since_last_review": 1184
+    },
+    "retirement": {
+      "trigger": "Superseded when the deterministic gate covers architecture and test-adequacy checks that currently require judgement, or when pass rate on the frozen set falls below 0.80 for two consecutive cycles.",
+      "successor_agent_id": null,
+      "decommission_steps": [
+        "Flip status to deprecated; orchestrator stops dispatching on the next release.",
+        "Run the case set against the successor and record the comparison.",
+        "Archive the charter file and the skill at the commit that last dispatched it.",
+        "Retain run records and verdict files for the evidence retention period.",
+        "Never reuse agent_id."
+      ],
+      "retired_on": null,
+      "evidence_retention_days": 2555
+    },
+    "revocation": {
+      "mechanism": [
+        "registry-status-suspended",
+        "orchestrator-dispatch-block",
+        "credential-revoked-at-tool-server"
+      ],
+      "authorising_roles": [
+        "harness lead, delivery engineering",
+        "security reviewer on call",
+        "engineering lead on duty (out of hours)"
+      ],
+      "invocation": "Commit status: suspended to the registry on the trunk, then run the platform script that revokes this agent's tool-server credential. Either half alone is a partial stop; the script prints which enforcement points it changed.",
+      "in_flight": {
+        "work_items": "flag-and-pause",
+        "worktrees": "retain-for-evidence",
+        "open_pull_requests": "convert-to-draft"
+      },
+      "propagation_target_minutes": 15,
+      "last_tested": null,
+      "test_cadence_days": 90
+    },
+    "change_log": [
+      {
+        "date": "2026-11-26",
+        "entry_version": 1,
+        "change": "Initial registration by the SHL harness playground, derived from the charter. Not an interview.",
+        "approved_by_role": "harness lead"
+      }
+    ]
+  },
+  {
+    "schema_version": 1,
+    "agent_id": "build-error-resolver",
+    "name": "build-error-resolver",
+    "entry_version": 1,
+    "purpose": "Clears one mechanical build, type or lint failure with the smallest diff that clears it. Never edits a test, never changes a contract, never suppresses a rule to reach green.",
+    "role": "worker",
+    "status": "active",
+    "owning_role": "harness lead, delivery engineering",
+    "created_on": "2026-11-26",
+    "registered_by_role": "platform architect, agentic delivery",
+    "runtime": {
+      "platform": "primary agent runtime",
+      "platform_version": "2.x",
+      "isolation": "subagent-fresh-context",
+      "tool_policy_id": "build-error-resolver-v1",
+      "health_check": {
+        "check_ref": "runtime-adapter://primary/health",
+        "interval_seconds": 300,
+        "timeout_seconds": 10,
+        "on_failure": "refuse-dispatch"
+      },
+      "definition_path": ".claude/agents/build-error-resolver.md",
+      "skill_refs": [
+        ".claude/skills/resolve-build-error/SKILL.md"
+      ]
+    },
+    "model": {
+      "provider": "primary-provider",
+      "pinned_id": "claude-haiku-5-5",
+      "tier": "frontier",
+      "fallback_pinned_id": "claude-haiku-5-5",
+      "temperature": 0,
+      "cross_provider_pair": "cross-provider-reviewer"
+    },
+    "capability_scope": {
+      "tools": {
+        "allow": [
+          "read",
+          "edit",
+          "bash"
+        ],
+        "deny": [
+          "grep",
+          "glob",
+          "write",
+          "tracker-write"
+        ]
+      },
+      "paths": {
+        "read_allow": [
+          "src/**",
+          "tests/**",
+          "docs/designs/**",
+          ".claude/rules/**"
+        ],
+        "read_deny": [
+          "secrets/**",
+          "fixtures/production-extracts/**"
+        ],
+        "write_allow": [
+          "docs/**"
+        ],
+        "write_deny": [
+          "src/**",
+          "tests/**",
+          "db/changelog/**",
+          ".claude/**"
+        ]
+      },
+      "network": {
+        "egress_allow": [],
+        "egress_default": "deny"
+      },
+      "side_effects": [
+        "repository-write"
+      ],
+      "enforcement": "prompt-only",
+      "compensating_controls": [
+        "The tool list is a prompt instruction in this hub; nothing at a tool server imposes it.",
+        "Every change the agent makes reaches a branch through a pull request, and a person merges it.",
+        "Each artefact it produces is checked by the script on its pull request before the merge."
+      ]
+    },
+    "escalation": {
+      "revision_cap": 3,
+      "targets": [
+        {
+          "condition": "revision cap reached without an APPROVED verdict",
+          "route_role": "engineering lead, owning squad",
+          "response_time_minutes": 240,
+          "fallback": "block"
+        },
+        {
+          "condition": "finding requires a change to an approved cross-system contract",
+          "route_role": "integration architect",
+          "response_time_minutes": 480,
+          "fallback": "block"
+        },
+        {
+          "condition": "security finding at CRITICAL severity",
+          "route_role": "security reviewer on call",
+          "response_time_minutes": 60,
+          "fallback": "deny"
+        }
+      ]
+    },
+    "evaluation": {
+      "case_set_ref": null,
+      "frozen_set_ref": null,
+      "last_run": null,
+      "pass_rate": null,
+      "alpha_median": null,
+      "context_fingerprint": "ctx:9f2c41ab"
+    },
+    "cost": {
+      "cost_centre": "PLATFORM-AGENTIC-DELIVERY",
+      "budget_run_usd": 4,
+      "budget_month_usd": 900,
+      "alert_at_pct": 80,
+      "on_budget_breach": "alert"
+    },
+    "data_handling": {
+      "classification": "confidential",
+      "pii_permitted": false,
+      "log_retention_days": 400,
+      "residency": "in-country processing only",
+      "prompt_logging": "redacted"
+    },
+    "review": {
+      "cadence_days": 90,
+      "last_review": "2026-06-30",
+      "next_review": "2026-09-28",
+      "reviewer_role": "harness lead, delivery engineering",
+      "invocations_since_last_review": 1184
+    },
+    "retirement": {
+      "trigger": "Superseded when the deterministic gate covers architecture and test-adequacy checks that currently require judgement, or when pass rate on the frozen set falls below 0.80 for two consecutive cycles.",
+      "successor_agent_id": null,
+      "decommission_steps": [
+        "Flip status to deprecated; orchestrator stops dispatching on the next release.",
+        "Run the case set against the successor and record the comparison.",
+        "Archive the charter file and the skill at the commit that last dispatched it.",
+        "Retain run records and verdict files for the evidence retention period.",
+        "Never reuse agent_id."
+      ],
+      "retired_on": null,
+      "evidence_retention_days": 2555
+    },
+    "revocation": {
+      "mechanism": [
+        "registry-status-suspended",
+        "orchestrator-dispatch-block",
+        "credential-revoked-at-tool-server"
+      ],
+      "authorising_roles": [
+        "harness lead, delivery engineering",
+        "security reviewer on call",
+        "engineering lead on duty (out of hours)"
+      ],
+      "invocation": "Commit status: suspended to the registry on the trunk, then run the platform script that revokes this agent's tool-server credential. Either half alone is a partial stop; the script prints which enforcement points it changed.",
+      "in_flight": {
+        "work_items": "flag-and-pause",
+        "worktrees": "retain-for-evidence",
+        "open_pull_requests": "convert-to-draft"
+      },
+      "propagation_target_minutes": 15,
+      "last_tested": null,
+      "test_cadence_days": 90
+    },
+    "change_log": [
+      {
+        "date": "2026-11-26",
+        "entry_version": 1,
+        "change": "Initial registration by the SHL harness playground, derived from the charter. Not an interview.",
+        "approved_by_role": "harness lead"
+      }
+    ]
+  },
+  {
+    "schema_version": 1,
+    "agent_id": "dual-mode-critic",
+    "name": "dual-mode-critic",
+    "entry_version": 1,
+    "purpose": "Judges designs, tests and code against the approved design and the rules handed in, the repository's own included, and on demand the hub's records against the global layer. Emits a verdict token. Never writes or edits the artefact under review.",
+    "role": "critic",
+    "status": "active",
+    "owning_role": "harness lead, delivery engineering",
+    "created_on": "2026-11-26",
+    "registered_by_role": "platform architect, agentic delivery",
+    "runtime": {
+      "platform": "primary agent runtime",
+      "platform_version": "2.x",
+      "isolation": "subagent-fresh-context",
+      "tool_policy_id": "dual-mode-critic-v1",
+      "health_check": {
+        "check_ref": "runtime-adapter://primary/health",
+        "interval_seconds": 300,
+        "timeout_seconds": 10,
+        "on_failure": "refuse-dispatch"
+      },
+      "definition_path": ".claude/agents/dual-mode-critic.md",
+      "skill_refs": [
+        ".claude/skills/review-artefact/SKILL.md"
+      ]
+    },
+    "model": {
+      "provider": "primary-provider",
+      "pinned_id": "claude-opus-5-5",
+      "tier": "frontier",
+      "fallback_pinned_id": "claude-opus-5-5",
+      "temperature": 0,
+      "cross_provider_pair": "cross-provider-reviewer"
+    },
+    "capability_scope": {
+      "tools": {
+        "allow": [
+          "read",
+          "bash",
+          "write"
+        ],
+        "deny": [
+          "grep",
+          "glob",
+          "edit",
+          "tracker-write"
+        ]
+      },
+      "paths": {
+        "read_allow": [
+          "src/**",
+          "tests/**",
+          "docs/designs/**",
+          ".claude/rules/**"
+        ],
+        "read_deny": [
+          "secrets/**",
+          "fixtures/production-extracts/**"
+        ],
+        "write_allow": [
+          "docs/designs/*.lld-review.md"
+        ],
+        "write_deny": [
+          "src/**",
+          "tests/**",
+          "db/changelog/**",
+          ".claude/**"
+        ]
+      },
+      "network": {
+        "egress_allow": [],
+        "egress_default": "deny"
+      },
+      "side_effects": [
+        "repository-write"
+      ],
+      "enforcement": "prompt-only",
+      "compensating_controls": [
+        "The tool list is a prompt instruction in this hub; nothing at a tool server imposes it.",
+        "Every change the agent makes reaches a branch through a pull request, and a person merges it.",
+        "Each artefact it produces is checked by the script on its pull request before the merge."
+      ]
+    },
+    "escalation": {
+      "revision_cap": 3,
+      "targets": [
+        {
+          "condition": "revision cap reached without an APPROVED verdict",
+          "route_role": "engineering lead, owning squad",
+          "response_time_minutes": 240,
+          "fallback": "block"
+        },
+        {
+          "condition": "finding requires a change to an approved cross-system contract",
+          "route_role": "integration architect",
+          "response_time_minutes": 480,
+          "fallback": "block"
+        },
+        {
+          "condition": "security finding at CRITICAL severity",
+          "route_role": "security reviewer on call",
+          "response_time_minutes": 60,
+          "fallback": "deny"
+        }
+      ]
+    },
+    "evaluation": {
+      "case_set_ref": null,
+      "frozen_set_ref": null,
+      "last_run": null,
+      "pass_rate": null,
+      "alpha_median": null,
+      "context_fingerprint": "ctx:9f2c41ab"
+    },
+    "cost": {
+      "cost_centre": "PLATFORM-AGENTIC-DELIVERY",
+      "budget_run_usd": 4,
+      "budget_month_usd": 900,
+      "alert_at_pct": 80,
+      "on_budget_breach": "alert"
+    },
+    "data_handling": {
+      "classification": "confidential",
+      "pii_permitted": false,
+      "log_retention_days": 400,
+      "residency": "in-country processing only",
+      "prompt_logging": "redacted"
+    },
+    "review": {
+      "cadence_days": 90,
+      "last_review": "2026-06-30",
+      "next_review": "2026-09-28",
+      "reviewer_role": "harness lead, delivery engineering",
+      "invocations_since_last_review": 1184
+    },
+    "retirement": {
+      "trigger": "Superseded when the deterministic gate covers architecture and test-adequacy checks that currently require judgement, or when pass rate on the frozen set falls below 0.80 for two consecutive cycles.",
+      "successor_agent_id": null,
+      "decommission_steps": [
+        "Flip status to deprecated; orchestrator stops dispatching on the next release.",
+        "Run the case set against the successor and record the comparison.",
+        "Archive the charter file and the skill at the commit that last dispatched it.",
+        "Retain run records and verdict files for the evidence retention period.",
+        "Never reuse agent_id."
+      ],
+      "retired_on": null,
+      "evidence_retention_days": 2555
+    },
+    "revocation": {
+      "mechanism": [
+        "registry-status-suspended",
+        "orchestrator-dispatch-block",
+        "credential-revoked-at-tool-server"
+      ],
+      "authorising_roles": [
+        "harness lead, delivery engineering",
+        "security reviewer on call",
+        "engineering lead on duty (out of hours)"
+      ],
+      "invocation": "Commit status: suspended to the registry on the trunk, then run the platform script that revokes this agent's tool-server credential. Either half alone is a partial stop; the script prints which enforcement points it changed.",
+      "in_flight": {
+        "work_items": "flag-and-pause",
+        "worktrees": "retain-for-evidence",
+        "open_pull_requests": "convert-to-draft"
+      },
+      "propagation_target_minutes": 15,
+      "last_tested": null,
+      "test_cadence_days": 90
+    },
+    "change_log": [
+      {
+        "date": "2026-11-26",
+        "entry_version": 1,
+        "change": "Initial registration by the SHL harness playground, derived from the charter. Not an interview.",
+        "approved_by_role": "harness lead"
+      }
+    ]
+  },
+  {
+    "schema_version": 1,
+    "agent_id": "engineer",
+    "name": "engineer",
+    "entry_version": 1,
+    "purpose": "Authors the per-work-item design in /dev-spec and, in /dev-sprint, implements it against the tests the test writer wrote and the critic approved, inside its own clone of the story's repository. Never approves its own output.",
+    "role": "worker",
+    "status": "active",
+    "owning_role": "harness lead, delivery engineering",
+    "created_on": "2026-11-26",
+    "registered_by_role": "platform architect, agentic delivery",
+    "runtime": {
+      "platform": "primary agent runtime",
+      "platform_version": "2.x",
+      "isolation": "subagent-fresh-context",
+      "tool_policy_id": "engineer-v1",
+      "health_check": {
+        "check_ref": "runtime-adapter://primary/health",
+        "interval_seconds": 300,
+        "timeout_seconds": 10,
+        "on_failure": "refuse-dispatch"
+      },
+      "definition_path": ".claude/agents/engineer.md",
+      "skill_refs": [
+        ".claude/skills/implement-work-item/SKILL.md"
+      ]
+    },
+    "model": {
+      "provider": "primary-provider",
+      "pinned_id": "claude-opus-5-5",
+      "tier": "frontier",
+      "fallback_pinned_id": "claude-opus-5-5",
+      "temperature": 0,
+      "cross_provider_pair": "cross-provider-reviewer"
+    },
+    "capability_scope": {
+      "tools": {
+        "allow": [
+          "read",
+          "write",
+          "edit",
+          "bash"
+        ],
+        "deny": [
+          "grep",
+          "glob",
+          "tracker-write"
+        ]
+      },
+      "paths": {
+        "read_allow": [
+          "src/**",
+          "tests/**",
+          "docs/designs/**",
+          ".claude/rules/**"
+        ],
+        "read_deny": [
+          "secrets/**",
+          "fixtures/production-extracts/**"
+        ],
+        "write_allow": [
+          "docs/**"
+        ],
+        "write_deny": [
+          "src/**",
+          "tests/**",
+          "db/changelog/**",
+          ".claude/**"
+        ]
+      },
+      "network": {
+        "egress_allow": [],
+        "egress_default": "deny"
+      },
+      "side_effects": [
+        "repository-write"
+      ],
+      "enforcement": "prompt-only",
+      "compensating_controls": [
+        "The tool list is a prompt instruction in this hub; nothing at a tool server imposes it.",
+        "Every change the agent makes reaches a branch through a pull request, and a person merges it.",
+        "Each artefact it produces is checked by the script on its pull request before the merge."
+      ]
+    },
+    "escalation": {
+      "revision_cap": 3,
+      "targets": [
+        {
+          "condition": "revision cap reached without an APPROVED verdict",
+          "route_role": "engineering lead, owning squad",
+          "response_time_minutes": 240,
+          "fallback": "block"
+        },
+        {
+          "condition": "finding requires a change to an approved cross-system contract",
+          "route_role": "integration architect",
+          "response_time_minutes": 480,
+          "fallback": "block"
+        },
+        {
+          "condition": "security finding at CRITICAL severity",
+          "route_role": "security reviewer on call",
+          "response_time_minutes": 60,
+          "fallback": "deny"
+        }
+      ]
+    },
+    "evaluation": {
+      "case_set_ref": null,
+      "frozen_set_ref": null,
+      "last_run": null,
+      "pass_rate": null,
+      "alpha_median": null,
+      "context_fingerprint": "ctx:9f2c41ab"
+    },
+    "cost": {
+      "cost_centre": "PLATFORM-AGENTIC-DELIVERY",
+      "budget_run_usd": 4,
+      "budget_month_usd": 900,
+      "alert_at_pct": 80,
+      "on_budget_breach": "alert"
+    },
+    "data_handling": {
+      "classification": "confidential",
+      "pii_permitted": false,
+      "log_retention_days": 400,
+      "residency": "in-country processing only",
+      "prompt_logging": "redacted"
+    },
+    "review": {
+      "cadence_days": 90,
+      "last_review": "2026-06-30",
+      "next_review": "2026-09-28",
+      "reviewer_role": "harness lead, delivery engineering",
+      "invocations_since_last_review": 1184
+    },
+    "retirement": {
+      "trigger": "Superseded when the deterministic gate covers architecture and test-adequacy checks that currently require judgement, or when pass rate on the frozen set falls below 0.80 for two consecutive cycles.",
+      "successor_agent_id": null,
+      "decommission_steps": [
+        "Flip status to deprecated; orchestrator stops dispatching on the next release.",
+        "Run the case set against the successor and record the comparison.",
+        "Archive the charter file and the skill at the commit that last dispatched it.",
+        "Retain run records and verdict files for the evidence retention period.",
+        "Never reuse agent_id."
+      ],
+      "retired_on": null,
+      "evidence_retention_days": 2555
+    },
+    "revocation": {
+      "mechanism": [
+        "registry-status-suspended",
+        "orchestrator-dispatch-block",
+        "credential-revoked-at-tool-server"
+      ],
+      "authorising_roles": [
+        "harness lead, delivery engineering",
+        "security reviewer on call",
+        "engineering lead on duty (out of hours)"
+      ],
+      "invocation": "Commit status: suspended to the registry on the trunk, then run the platform script that revokes this agent's tool-server credential. Either half alone is a partial stop; the script prints which enforcement points it changed.",
+      "in_flight": {
+        "work_items": "flag-and-pause",
+        "worktrees": "retain-for-evidence",
+        "open_pull_requests": "convert-to-draft"
+      },
+      "propagation_target_minutes": 15,
+      "last_tested": null,
+      "test_cadence_days": 90
+    },
+    "change_log": [
+      {
+        "date": "2026-11-26",
+        "entry_version": 1,
+        "change": "Initial registration by the SHL harness playground, derived from the charter. Not an interview.",
+        "approved_by_role": "harness lead"
+      }
+    ]
+  },
+  {
+    "schema_version": 1,
+    "agent_id": "feature-writer",
+    "name": "feature-writer",
+    "entry_version": 1,
+    "purpose": "Turns business input — a requirement, a brief, stakeholder notes, or an existing document of unknown quality — into one traceable requirements document. Writes nothing the source does not support, and never accepts its own output.",
+    "role": "worker",
+    "status": "active",
+    "owning_role": "harness lead, delivery engineering",
+    "created_on": "2026-11-26",
+    "registered_by_role": "platform architect, agentic delivery",
+    "runtime": {
+      "platform": "primary agent runtime",
+      "platform_version": "2.x",
+      "isolation": "subagent-fresh-context",
+      "tool_policy_id": "feature-writer-v1",
+      "health_check": {
+        "check_ref": "runtime-adapter://primary/health",
+        "interval_seconds": 300,
+        "timeout_seconds": 10,
+        "on_failure": "refuse-dispatch"
+      },
+      "definition_path": ".claude/agents/feature-writer.md",
+      "skill_refs": [
+        ".claude/skills/write-requirements/SKILL.md"
+      ]
+    },
+    "model": {
+      "provider": "primary-provider",
+      "pinned_id": "claude-opus-5-5",
+      "tier": "frontier",
+      "fallback_pinned_id": "claude-opus-5-5",
+      "temperature": 0,
+      "cross_provider_pair": "cross-provider-reviewer"
+    },
+    "capability_scope": {
+      "tools": {
+        "allow": [
+          "read",
+          "write",
+          "edit",
+          "bash"
+        ],
+        "deny": [
+          "grep",
+          "glob",
+          "tracker-write"
+        ]
+      },
+      "paths": {
+        "read_allow": [
+          "src/**",
+          "tests/**",
+          "docs/designs/**",
+          ".claude/rules/**"
+        ],
+        "read_deny": [
+          "secrets/**",
+          "fixtures/production-extracts/**"
+        ],
+        "write_allow": [
+          "docs/**"
+        ],
+        "write_deny": [
+          "src/**",
+          "tests/**",
+          "db/changelog/**",
+          ".claude/**"
+        ]
+      },
+      "network": {
+        "egress_allow": [],
+        "egress_default": "deny"
+      },
+      "side_effects": [
+        "repository-write"
+      ],
+      "enforcement": "prompt-only",
+      "compensating_controls": [
+        "The tool list is a prompt instruction in this hub; nothing at a tool server imposes it.",
+        "Every change the agent makes reaches a branch through a pull request, and a person merges it.",
+        "Each artefact it produces is checked by the script on its pull request before the merge."
+      ]
+    },
+    "escalation": {
+      "revision_cap": 3,
+      "targets": [
+        {
+          "condition": "revision cap reached without an APPROVED verdict",
+          "route_role": "engineering lead, owning squad",
+          "response_time_minutes": 240,
+          "fallback": "block"
+        },
+        {
+          "condition": "finding requires a change to an approved cross-system contract",
+          "route_role": "integration architect",
+          "response_time_minutes": 480,
+          "fallback": "block"
+        },
+        {
+          "condition": "security finding at CRITICAL severity",
+          "route_role": "security reviewer on call",
+          "response_time_minutes": 60,
+          "fallback": "deny"
+        }
+      ]
+    },
+    "evaluation": {
+      "case_set_ref": null,
+      "frozen_set_ref": null,
+      "last_run": null,
+      "pass_rate": null,
+      "alpha_median": null,
+      "context_fingerprint": "ctx:9f2c41ab"
+    },
+    "cost": {
+      "cost_centre": "PLATFORM-AGENTIC-DELIVERY",
+      "budget_run_usd": 4,
+      "budget_month_usd": 900,
+      "alert_at_pct": 80,
+      "on_budget_breach": "alert"
+    },
+    "data_handling": {
+      "classification": "confidential",
+      "pii_permitted": false,
+      "log_retention_days": 400,
+      "residency": "in-country processing only",
+      "prompt_logging": "redacted"
+    },
+    "review": {
+      "cadence_days": 90,
+      "last_review": "2026-06-30",
+      "next_review": "2026-09-28",
+      "reviewer_role": "harness lead, delivery engineering",
+      "invocations_since_last_review": 1184
+    },
+    "retirement": {
+      "trigger": "Superseded when the deterministic gate covers architecture and test-adequacy checks that currently require judgement, or when pass rate on the frozen set falls below 0.80 for two consecutive cycles.",
+      "successor_agent_id": null,
+      "decommission_steps": [
+        "Flip status to deprecated; orchestrator stops dispatching on the next release.",
+        "Run the case set against the successor and record the comparison.",
+        "Archive the charter file and the skill at the commit that last dispatched it.",
+        "Retain run records and verdict files for the evidence retention period.",
+        "Never reuse agent_id."
+      ],
+      "retired_on": null,
+      "evidence_retention_days": 2555
+    },
+    "revocation": {
+      "mechanism": [
+        "registry-status-suspended",
+        "orchestrator-dispatch-block",
+        "credential-revoked-at-tool-server"
+      ],
+      "authorising_roles": [
+        "harness lead, delivery engineering",
+        "security reviewer on call",
+        "engineering lead on duty (out of hours)"
+      ],
+      "invocation": "Commit status: suspended to the registry on the trunk, then run the platform script that revokes this agent's tool-server credential. Either half alone is a partial stop; the script prints which enforcement points it changed.",
+      "in_flight": {
+        "work_items": "flag-and-pause",
+        "worktrees": "retain-for-evidence",
+        "open_pull_requests": "convert-to-draft"
+      },
+      "propagation_target_minutes": 15,
+      "last_tested": null,
+      "test_cadence_days": 90
+    },
+    "change_log": [
+      {
+        "date": "2026-11-26",
+        "entry_version": 1,
+        "change": "Initial registration by the SHL harness playground, derived from the charter. Not an interview.",
+        "approved_by_role": "harness lead"
+      }
+    ]
+  },
+  {
+    "schema_version": 1,
+    "agent_id": "gate-runner",
+    "name": "gate-runner",
+    "entry_version": 1,
+    "purpose": "Runs the executable pickup gate for one work-item key and reports its output verbatim. A deterministic transform wearing a model. No interpretation, no fixes.",
+    "role": "utility",
+    "status": "active",
+    "owning_role": "harness lead, delivery engineering",
+    "created_on": "2026-11-26",
+    "registered_by_role": "platform architect, agentic delivery",
+    "runtime": {
+      "platform": "primary agent runtime",
+      "platform_version": "2.x",
+      "isolation": "subagent-fresh-context",
+      "tool_policy_id": "gate-runner-v1",
+      "health_check": {
+        "check_ref": "runtime-adapter://primary/health",
+        "interval_seconds": 300,
+        "timeout_seconds": 10,
+        "on_failure": "refuse-dispatch"
+      },
+      "definition_path": ".claude/agents/gate-runner.md",
+      "skill_refs": []
+    },
+    "model": {
+      "provider": "primary-provider",
+      "pinned_id": "claude-haiku-5-5",
+      "tier": "frontier",
+      "fallback_pinned_id": "claude-haiku-5-5",
+      "temperature": 0,
+      "cross_provider_pair": "cross-provider-reviewer"
+    },
+    "capability_scope": {
+      "tools": {
+        "allow": [
+          "bash",
+          "read"
+        ],
+        "deny": [
+          "grep",
+          "glob",
+          "write",
+          "edit",
+          "tracker-write"
+        ]
+      },
+      "paths": {
+        "read_allow": [
+          "src/**",
+          "tests/**",
+          "docs/designs/**",
+          ".claude/rules/**"
+        ],
+        "read_deny": [
+          "secrets/**",
+          "fixtures/production-extracts/**"
+        ],
+        "write_allow": [],
+        "write_deny": [
+          "src/**",
+          "tests/**",
+          "db/changelog/**",
+          ".claude/**"
+        ]
+      },
+      "network": {
+        "egress_allow": [],
+        "egress_default": "deny"
+      },
+      "side_effects": [
+        "repository-write"
+      ],
+      "enforcement": "prompt-only",
+      "compensating_controls": [
+        "The tool list is a prompt instruction in this hub; nothing at a tool server imposes it.",
+        "Every change the agent makes reaches a branch through a pull request, and a person merges it.",
+        "Each artefact it produces is checked by the script on its pull request before the merge."
+      ]
+    },
+    "escalation": {
+      "revision_cap": 3,
+      "targets": [
+        {
+          "condition": "revision cap reached without an APPROVED verdict",
+          "route_role": "engineering lead, owning squad",
+          "response_time_minutes": 240,
+          "fallback": "block"
+        },
+        {
+          "condition": "finding requires a change to an approved cross-system contract",
+          "route_role": "integration architect",
+          "response_time_minutes": 480,
+          "fallback": "block"
+        },
+        {
+          "condition": "security finding at CRITICAL severity",
+          "route_role": "security reviewer on call",
+          "response_time_minutes": 60,
+          "fallback": "deny"
+        }
+      ]
+    },
+    "evaluation": {
+      "case_set_ref": null,
+      "frozen_set_ref": null,
+      "last_run": null,
+      "pass_rate": null,
+      "alpha_median": null,
+      "context_fingerprint": "ctx:9f2c41ab"
+    },
+    "cost": {
+      "cost_centre": "PLATFORM-AGENTIC-DELIVERY",
+      "budget_run_usd": 4,
+      "budget_month_usd": 900,
+      "alert_at_pct": 80,
+      "on_budget_breach": "alert"
+    },
+    "data_handling": {
+      "classification": "confidential",
+      "pii_permitted": false,
+      "log_retention_days": 400,
+      "residency": "in-country processing only",
+      "prompt_logging": "redacted"
+    },
+    "review": {
+      "cadence_days": 90,
+      "last_review": "2026-06-30",
+      "next_review": "2026-09-28",
+      "reviewer_role": "harness lead, delivery engineering",
+      "invocations_since_last_review": 1184
+    },
+    "retirement": {
+      "trigger": "Superseded when the deterministic gate covers architecture and test-adequacy checks that currently require judgement, or when pass rate on the frozen set falls below 0.80 for two consecutive cycles.",
+      "successor_agent_id": null,
+      "decommission_steps": [
+        "Flip status to deprecated; orchestrator stops dispatching on the next release.",
+        "Run the case set against the successor and record the comparison.",
+        "Archive the charter file and the skill at the commit that last dispatched it.",
+        "Retain run records and verdict files for the evidence retention period.",
+        "Never reuse agent_id."
+      ],
+      "retired_on": null,
+      "evidence_retention_days": 2555
+    },
+    "revocation": {
+      "mechanism": [
+        "registry-status-suspended",
+        "orchestrator-dispatch-block",
+        "credential-revoked-at-tool-server"
+      ],
+      "authorising_roles": [
+        "harness lead, delivery engineering",
+        "security reviewer on call",
+        "engineering lead on duty (out of hours)"
+      ],
+      "invocation": "Commit status: suspended to the registry on the trunk, then run the platform script that revokes this agent's tool-server credential. Either half alone is a partial stop; the script prints which enforcement points it changed.",
+      "in_flight": {
+        "work_items": "flag-and-pause",
+        "worktrees": "retain-for-evidence",
+        "open_pull_requests": "convert-to-draft"
+      },
+      "propagation_target_minutes": 15,
+      "last_tested": null,
+      "test_cadence_days": 90
+    },
+    "change_log": [
+      {
+        "date": "2026-11-26",
+        "entry_version": 1,
+        "change": "Initial registration by the SHL harness playground, derived from the charter. Not an interview.",
+        "approved_by_role": "harness lead"
+      }
+    ]
+  },
+  {
+    "schema_version": 1,
+    "agent_id": "pm-critic",
+    "name": "pm-critic",
+    "entry_version": 1,
+    "purpose": "Judges a requirements document against its business input, a decomposition record against its source document, a Jira ticket's snapshot and its work item against the quality bar, and a bug record's chain against the ticket and the code. Emits a verdict token in-loop. Writes no file, and never decides business priority.",
+    "role": "critic",
+    "status": "active",
+    "owning_role": "harness lead, delivery engineering",
+    "created_on": "2026-11-26",
+    "registered_by_role": "platform architect, agentic delivery",
+    "runtime": {
+      "platform": "primary agent runtime",
+      "platform_version": "2.x",
+      "isolation": "subagent-fresh-context",
+      "tool_policy_id": "pm-critic-v1",
+      "health_check": {
+        "check_ref": "runtime-adapter://primary/health",
+        "interval_seconds": 300,
+        "timeout_seconds": 10,
+        "on_failure": "refuse-dispatch"
+      },
+      "definition_path": ".claude/agents/pm-critic.md",
+      "skill_refs": [
+        ".claude/skills/review-artefact/SKILL.md"
+      ]
+    },
+    "model": {
+      "provider": "primary-provider",
+      "pinned_id": "claude-opus-5-5",
+      "tier": "frontier",
+      "fallback_pinned_id": "claude-opus-5-5",
+      "temperature": 0,
+      "cross_provider_pair": "cross-provider-reviewer"
+    },
+    "capability_scope": {
+      "tools": {
+        "allow": [
+          "read",
+          "bash"
+        ],
+        "deny": [
+          "grep",
+          "glob",
+          "write",
+          "edit",
+          "tracker-write"
+        ]
+      },
+      "paths": {
+        "read_allow": [
+          "src/**",
+          "tests/**",
+          "docs/designs/**",
+          ".claude/rules/**"
+        ],
+        "read_deny": [
+          "secrets/**",
+          "fixtures/production-extracts/**"
+        ],
+        "write_allow": [],
+        "write_deny": [
+          "src/**",
+          "tests/**",
+          "db/changelog/**",
+          ".claude/**"
+        ]
+      },
+      "network": {
+        "egress_allow": [],
+        "egress_default": "deny"
+      },
+      "side_effects": [
+        "repository-write"
+      ],
+      "enforcement": "prompt-only",
+      "compensating_controls": [
+        "The tool list is a prompt instruction in this hub; nothing at a tool server imposes it.",
+        "Every change the agent makes reaches a branch through a pull request, and a person merges it.",
+        "Each artefact it produces is checked by the script on its pull request before the merge."
+      ]
+    },
+    "escalation": {
+      "revision_cap": 3,
+      "targets": [
+        {
+          "condition": "revision cap reached without an APPROVED verdict",
+          "route_role": "engineering lead, owning squad",
+          "response_time_minutes": 240,
+          "fallback": "block"
+        },
+        {
+          "condition": "finding requires a change to an approved cross-system contract",
+          "route_role": "integration architect",
+          "response_time_minutes": 480,
+          "fallback": "block"
+        },
+        {
+          "condition": "security finding at CRITICAL severity",
+          "route_role": "security reviewer on call",
+          "response_time_minutes": 60,
+          "fallback": "deny"
+        }
+      ]
+    },
+    "evaluation": {
+      "case_set_ref": null,
+      "frozen_set_ref": null,
+      "last_run": null,
+      "pass_rate": null,
+      "alpha_median": null,
+      "context_fingerprint": "ctx:9f2c41ab"
+    },
+    "cost": {
+      "cost_centre": "PLATFORM-AGENTIC-DELIVERY",
+      "budget_run_usd": 4,
+      "budget_month_usd": 900,
+      "alert_at_pct": 80,
+      "on_budget_breach": "alert"
+    },
+    "data_handling": {
+      "classification": "confidential",
+      "pii_permitted": false,
+      "log_retention_days": 400,
+      "residency": "in-country processing only",
+      "prompt_logging": "redacted"
+    },
+    "review": {
+      "cadence_days": 90,
+      "last_review": "2026-06-30",
+      "next_review": "2026-09-28",
+      "reviewer_role": "harness lead, delivery engineering",
+      "invocations_since_last_review": 1184
+    },
+    "retirement": {
+      "trigger": "Superseded when the deterministic gate covers architecture and test-adequacy checks that currently require judgement, or when pass rate on the frozen set falls below 0.80 for two consecutive cycles.",
+      "successor_agent_id": null,
+      "decommission_steps": [
+        "Flip status to deprecated; orchestrator stops dispatching on the next release.",
+        "Run the case set against the successor and record the comparison.",
+        "Archive the charter file and the skill at the commit that last dispatched it.",
+        "Retain run records and verdict files for the evidence retention period.",
+        "Never reuse agent_id."
+      ],
+      "retired_on": null,
+      "evidence_retention_days": 2555
+    },
+    "revocation": {
+      "mechanism": [
+        "registry-status-suspended",
+        "orchestrator-dispatch-block",
+        "credential-revoked-at-tool-server"
+      ],
+      "authorising_roles": [
+        "harness lead, delivery engineering",
+        "security reviewer on call",
+        "engineering lead on duty (out of hours)"
+      ],
+      "invocation": "Commit status: suspended to the registry on the trunk, then run the platform script that revokes this agent's tool-server credential. Either half alone is a partial stop; the script prints which enforcement points it changed.",
+      "in_flight": {
+        "work_items": "flag-and-pause",
+        "worktrees": "retain-for-evidence",
+        "open_pull_requests": "convert-to-draft"
+      },
+      "propagation_target_minutes": 15,
+      "last_tested": null,
+      "test_cadence_days": 90
+    },
+    "change_log": [
+      {
+        "date": "2026-11-26",
+        "entry_version": 1,
+        "change": "Initial registration by the SHL harness playground, derived from the charter. Not an interview.",
+        "approved_by_role": "harness lead"
+      }
+    ]
+  },
+  {
+    "schema_version": 1,
+    "agent_id": "pr-reviewer",
+    "name": "pr-reviewer",
+    "entry_version": 1,
+    "purpose": "Reviews one story's open pull request as one change — the lines it changed, against the design, the rules and its own description — and writes what is wrong with it to findings.json. Changes no code; the pr-verifier checks every finding before anything is posted.",
+    "role": "worker",
+    "status": "active",
+    "owning_role": "harness lead, delivery engineering",
+    "created_on": "2026-11-26",
+    "registered_by_role": "platform architect, agentic delivery",
+    "runtime": {
+      "platform": "primary agent runtime",
+      "platform_version": "2.x",
+      "isolation": "subagent-fresh-context",
+      "tool_policy_id": "pr-reviewer-v1",
+      "health_check": {
+        "check_ref": "runtime-adapter://primary/health",
+        "interval_seconds": 300,
+        "timeout_seconds": 10,
+        "on_failure": "refuse-dispatch"
+      },
+      "definition_path": ".claude/agents/pr-reviewer.md",
+      "skill_refs": [
+        ".claude/skills/review-pull-request/SKILL.md"
+      ]
+    },
+    "model": {
+      "provider": "primary-provider",
+      "pinned_id": "claude-opus-5-5",
+      "tier": "frontier",
+      "fallback_pinned_id": "claude-opus-5-5",
+      "temperature": 0,
+      "cross_provider_pair": "cross-provider-reviewer"
+    },
+    "capability_scope": {
+      "tools": {
+        "allow": [
+          "read",
+          "grep",
+          "glob",
+          "write"
+        ],
+        "deny": [
+          "edit",
+          "bash",
+          "tracker-write"
+        ]
+      },
+      "paths": {
+        "read_allow": [
+          "src/**",
+          "tests/**",
+          "docs/designs/**",
+          ".claude/rules/**"
+        ],
+        "read_deny": [
+          "secrets/**",
+          "fixtures/production-extracts/**"
+        ],
+        "write_allow": [
+          "docs/**"
+        ],
+        "write_deny": [
+          "src/**",
+          "tests/**",
+          "db/changelog/**",
+          ".claude/**"
+        ]
+      },
+      "network": {
+        "egress_allow": [],
+        "egress_default": "deny"
+      },
+      "side_effects": [
+        "repository-write"
+      ],
+      "enforcement": "prompt-only",
+      "compensating_controls": [
+        "The tool list is a prompt instruction in this hub; nothing at a tool server imposes it.",
+        "Every change the agent makes reaches a branch through a pull request, and a person merges it.",
+        "Each artefact it produces is checked by the script on its pull request before the merge."
+      ]
+    },
+    "escalation": {
+      "revision_cap": 3,
+      "targets": [
+        {
+          "condition": "revision cap reached without an APPROVED verdict",
+          "route_role": "engineering lead, owning squad",
+          "response_time_minutes": 240,
+          "fallback": "block"
+        },
+        {
+          "condition": "finding requires a change to an approved cross-system contract",
+          "route_role": "integration architect",
+          "response_time_minutes": 480,
+          "fallback": "block"
+        },
+        {
+          "condition": "security finding at CRITICAL severity",
+          "route_role": "security reviewer on call",
+          "response_time_minutes": 60,
+          "fallback": "deny"
+        }
+      ]
+    },
+    "evaluation": {
+      "case_set_ref": null,
+      "frozen_set_ref": null,
+      "last_run": null,
+      "pass_rate": null,
+      "alpha_median": null,
+      "context_fingerprint": "ctx:9f2c41ab"
+    },
+    "cost": {
+      "cost_centre": "PLATFORM-AGENTIC-DELIVERY",
+      "budget_run_usd": 4,
+      "budget_month_usd": 900,
+      "alert_at_pct": 80,
+      "on_budget_breach": "alert"
+    },
+    "data_handling": {
+      "classification": "confidential",
+      "pii_permitted": false,
+      "log_retention_days": 400,
+      "residency": "in-country processing only",
+      "prompt_logging": "redacted"
+    },
+    "review": {
+      "cadence_days": 90,
+      "last_review": "2026-06-30",
+      "next_review": "2026-09-28",
+      "reviewer_role": "harness lead, delivery engineering",
+      "invocations_since_last_review": 1184
+    },
+    "retirement": {
+      "trigger": "Superseded when the deterministic gate covers architecture and test-adequacy checks that currently require judgement, or when pass rate on the frozen set falls below 0.80 for two consecutive cycles.",
+      "successor_agent_id": null,
+      "decommission_steps": [
+        "Flip status to deprecated; orchestrator stops dispatching on the next release.",
+        "Run the case set against the successor and record the comparison.",
+        "Archive the charter file and the skill at the commit that last dispatched it.",
+        "Retain run records and verdict files for the evidence retention period.",
+        "Never reuse agent_id."
+      ],
+      "retired_on": null,
+      "evidence_retention_days": 2555
+    },
+    "revocation": {
+      "mechanism": [
+        "registry-status-suspended",
+        "orchestrator-dispatch-block",
+        "credential-revoked-at-tool-server"
+      ],
+      "authorising_roles": [
+        "harness lead, delivery engineering",
+        "security reviewer on call",
+        "engineering lead on duty (out of hours)"
+      ],
+      "invocation": "Commit status: suspended to the registry on the trunk, then run the platform script that revokes this agent's tool-server credential. Either half alone is a partial stop; the script prints which enforcement points it changed.",
+      "in_flight": {
+        "work_items": "flag-and-pause",
+        "worktrees": "retain-for-evidence",
+        "open_pull_requests": "convert-to-draft"
+      },
+      "propagation_target_minutes": 15,
+      "last_tested": null,
+      "test_cadence_days": 90
+    },
+    "change_log": [
+      {
+        "date": "2026-11-26",
+        "entry_version": 1,
+        "change": "Initial registration by the SHL harness playground, derived from the charter. Not an interview.",
+        "approved_by_role": "harness lead"
+      }
+    ]
+  },
+  {
+    "schema_version": 1,
+    "agent_id": "pr-verifier",
+    "name": "pr-verifier",
+    "entry_version": 1,
+    "purpose": "Independent skeptic that re-traces every pr-reviewer finding against the pull request's changed code before it is posted, and votes each real, refuted or uncertain with a confidence and a reason in verified-findings.json. Defaults to refuted when it cannot trace the defect. Changes no code and adds no finding.",
+    "role": "worker",
+    "status": "active",
+    "owning_role": "harness lead, delivery engineering",
+    "created_on": "2026-11-26",
+    "registered_by_role": "platform architect, agentic delivery",
+    "runtime": {
+      "platform": "primary agent runtime",
+      "platform_version": "2.x",
+      "isolation": "subagent-fresh-context",
+      "tool_policy_id": "pr-verifier-v1",
+      "health_check": {
+        "check_ref": "runtime-adapter://primary/health",
+        "interval_seconds": 300,
+        "timeout_seconds": 10,
+        "on_failure": "refuse-dispatch"
+      },
+      "definition_path": ".claude/agents/pr-verifier.md",
+      "skill_refs": [
+        ".claude/skills/verify-pr-findings/SKILL.md"
+      ]
+    },
+    "model": {
+      "provider": "primary-provider",
+      "pinned_id": "claude-opus-5-5",
+      "tier": "frontier",
+      "fallback_pinned_id": "claude-opus-5-5",
+      "temperature": 0,
+      "cross_provider_pair": "cross-provider-reviewer"
+    },
+    "capability_scope": {
+      "tools": {
+        "allow": [
+          "read",
+          "grep",
+          "glob",
+          "write"
+        ],
+        "deny": [
+          "edit",
+          "bash",
+          "tracker-write"
+        ]
+      },
+      "paths": {
+        "read_allow": [
+          "src/**",
+          "tests/**",
+          "docs/designs/**",
+          ".claude/rules/**"
+        ],
+        "read_deny": [
+          "secrets/**",
+          "fixtures/production-extracts/**"
+        ],
+        "write_allow": [
+          "docs/**"
+        ],
+        "write_deny": [
+          "src/**",
+          "tests/**",
+          "db/changelog/**",
+          ".claude/**"
+        ]
+      },
+      "network": {
+        "egress_allow": [],
+        "egress_default": "deny"
+      },
+      "side_effects": [
+        "repository-write"
+      ],
+      "enforcement": "prompt-only",
+      "compensating_controls": [
+        "The tool list is a prompt instruction in this hub; nothing at a tool server imposes it.",
+        "Every change the agent makes reaches a branch through a pull request, and a person merges it.",
+        "Each artefact it produces is checked by the script on its pull request before the merge."
+      ]
+    },
+    "escalation": {
+      "revision_cap": 3,
+      "targets": [
+        {
+          "condition": "revision cap reached without an APPROVED verdict",
+          "route_role": "engineering lead, owning squad",
+          "response_time_minutes": 240,
+          "fallback": "block"
+        },
+        {
+          "condition": "finding requires a change to an approved cross-system contract",
+          "route_role": "integration architect",
+          "response_time_minutes": 480,
+          "fallback": "block"
+        },
+        {
+          "condition": "security finding at CRITICAL severity",
+          "route_role": "security reviewer on call",
+          "response_time_minutes": 60,
+          "fallback": "deny"
+        }
+      ]
+    },
+    "evaluation": {
+      "case_set_ref": null,
+      "frozen_set_ref": null,
+      "last_run": null,
+      "pass_rate": null,
+      "alpha_median": null,
+      "context_fingerprint": "ctx:9f2c41ab"
+    },
+    "cost": {
+      "cost_centre": "PLATFORM-AGENTIC-DELIVERY",
+      "budget_run_usd": 4,
+      "budget_month_usd": 900,
+      "alert_at_pct": 80,
+      "on_budget_breach": "alert"
+    },
+    "data_handling": {
+      "classification": "confidential",
+      "pii_permitted": false,
+      "log_retention_days": 400,
+      "residency": "in-country processing only",
+      "prompt_logging": "redacted"
+    },
+    "review": {
+      "cadence_days": 90,
+      "last_review": "2026-06-30",
+      "next_review": "2026-09-28",
+      "reviewer_role": "harness lead, delivery engineering",
+      "invocations_since_last_review": 1184
+    },
+    "retirement": {
+      "trigger": "Superseded when the deterministic gate covers architecture and test-adequacy checks that currently require judgement, or when pass rate on the frozen set falls below 0.80 for two consecutive cycles.",
+      "successor_agent_id": null,
+      "decommission_steps": [
+        "Flip status to deprecated; orchestrator stops dispatching on the next release.",
+        "Run the case set against the successor and record the comparison.",
+        "Archive the charter file and the skill at the commit that last dispatched it.",
+        "Retain run records and verdict files for the evidence retention period.",
+        "Never reuse agent_id."
+      ],
+      "retired_on": null,
+      "evidence_retention_days": 2555
+    },
+    "revocation": {
+      "mechanism": [
+        "registry-status-suspended",
+        "orchestrator-dispatch-block",
+        "credential-revoked-at-tool-server"
+      ],
+      "authorising_roles": [
+        "harness lead, delivery engineering",
+        "security reviewer on call",
+        "engineering lead on duty (out of hours)"
+      ],
+      "invocation": "Commit status: suspended to the registry on the trunk, then run the platform script that revokes this agent's tool-server credential. Either half alone is a partial stop; the script prints which enforcement points it changed.",
+      "in_flight": {
+        "work_items": "flag-and-pause",
+        "worktrees": "retain-for-evidence",
+        "open_pull_requests": "convert-to-draft"
+      },
+      "propagation_target_minutes": 15,
+      "last_tested": null,
+      "test_cadence_days": 90
+    },
+    "change_log": [
+      {
+        "date": "2026-11-26",
+        "entry_version": 1,
+        "change": "Initial registration by the SHL harness playground, derived from the charter. Not an interview.",
+        "approved_by_role": "harness lead"
+      }
+    ]
+  },
+  {
+    "schema_version": 1,
+    "agent_id": "product-planner",
+    "name": "product-planner",
+    "entry_version": 1,
+    "purpose": "Cuts one requirements source into traceable work items, and repairs a single item that arrived unclear. Mints keys from the hub's ledger. Never approves its own decomposition and never creates anything in a tracker.",
+    "role": "worker",
+    "status": "active",
+    "owning_role": "harness lead, delivery engineering",
+    "created_on": "2026-11-26",
+    "registered_by_role": "platform architect, agentic delivery",
+    "runtime": {
+      "platform": "primary agent runtime",
+      "platform_version": "2.x",
+      "isolation": "subagent-fresh-context",
+      "tool_policy_id": "product-planner-v1",
+      "health_check": {
+        "check_ref": "runtime-adapter://primary/health",
+        "interval_seconds": 300,
+        "timeout_seconds": 10,
+        "on_failure": "refuse-dispatch"
+      },
+      "definition_path": ".claude/agents/product-planner.md",
+      "skill_refs": [
+        ".claude/skills/decompose-requirements/SKILL.md"
+      ]
+    },
+    "model": {
+      "provider": "primary-provider",
+      "pinned_id": "claude-opus-5-5",
+      "tier": "frontier",
+      "fallback_pinned_id": "claude-opus-5-5",
+      "temperature": 0,
+      "cross_provider_pair": "cross-provider-reviewer"
+    },
+    "capability_scope": {
+      "tools": {
+        "allow": [
+          "read",
+          "write",
+          "edit",
+          "bash"
+        ],
+        "deny": [
+          "grep",
+          "glob",
+          "tracker-write"
+        ]
+      },
+      "paths": {
+        "read_allow": [
+          "src/**",
+          "tests/**",
+          "docs/designs/**",
+          ".claude/rules/**"
+        ],
+        "read_deny": [
+          "secrets/**",
+          "fixtures/production-extracts/**"
+        ],
+        "write_allow": [
+          "docs/**"
+        ],
+        "write_deny": [
+          "src/**",
+          "tests/**",
+          "db/changelog/**",
+          ".claude/**"
+        ]
+      },
+      "network": {
+        "egress_allow": [],
+        "egress_default": "deny"
+      },
+      "side_effects": [
+        "repository-write"
+      ],
+      "enforcement": "prompt-only",
+      "compensating_controls": [
+        "The tool list is a prompt instruction in this hub; nothing at a tool server imposes it.",
+        "Every change the agent makes reaches a branch through a pull request, and a person merges it.",
+        "Each artefact it produces is checked by the script on its pull request before the merge."
+      ]
+    },
+    "escalation": {
+      "revision_cap": 3,
+      "targets": [
+        {
+          "condition": "revision cap reached without an APPROVED verdict",
+          "route_role": "engineering lead, owning squad",
+          "response_time_minutes": 240,
+          "fallback": "block"
+        },
+        {
+          "condition": "finding requires a change to an approved cross-system contract",
+          "route_role": "integration architect",
+          "response_time_minutes": 480,
+          "fallback": "block"
+        },
+        {
+          "condition": "security finding at CRITICAL severity",
+          "route_role": "security reviewer on call",
+          "response_time_minutes": 60,
+          "fallback": "deny"
+        }
+      ]
+    },
+    "evaluation": {
+      "case_set_ref": null,
+      "frozen_set_ref": null,
+      "last_run": null,
+      "pass_rate": null,
+      "alpha_median": null,
+      "context_fingerprint": "ctx:9f2c41ab"
+    },
+    "cost": {
+      "cost_centre": "PLATFORM-AGENTIC-DELIVERY",
+      "budget_run_usd": 4,
+      "budget_month_usd": 900,
+      "alert_at_pct": 80,
+      "on_budget_breach": "alert"
+    },
+    "data_handling": {
+      "classification": "confidential",
+      "pii_permitted": false,
+      "log_retention_days": 400,
+      "residency": "in-country processing only",
+      "prompt_logging": "redacted"
+    },
+    "review": {
+      "cadence_days": 90,
+      "last_review": "2026-06-30",
+      "next_review": "2026-09-28",
+      "reviewer_role": "harness lead, delivery engineering",
+      "invocations_since_last_review": 1184
+    },
+    "retirement": {
+      "trigger": "Superseded when the deterministic gate covers architecture and test-adequacy checks that currently require judgement, or when pass rate on the frozen set falls below 0.80 for two consecutive cycles.",
+      "successor_agent_id": null,
+      "decommission_steps": [
+        "Flip status to deprecated; orchestrator stops dispatching on the next release.",
+        "Run the case set against the successor and record the comparison.",
+        "Archive the charter file and the skill at the commit that last dispatched it.",
+        "Retain run records and verdict files for the evidence retention period.",
+        "Never reuse agent_id."
+      ],
+      "retired_on": null,
+      "evidence_retention_days": 2555
+    },
+    "revocation": {
+      "mechanism": [
+        "registry-status-suspended",
+        "orchestrator-dispatch-block",
+        "credential-revoked-at-tool-server"
+      ],
+      "authorising_roles": [
+        "harness lead, delivery engineering",
+        "security reviewer on call",
+        "engineering lead on duty (out of hours)"
+      ],
+      "invocation": "Commit status: suspended to the registry on the trunk, then run the platform script that revokes this agent's tool-server credential. Either half alone is a partial stop; the script prints which enforcement points it changed.",
+      "in_flight": {
+        "work_items": "flag-and-pause",
+        "worktrees": "retain-for-evidence",
+        "open_pull_requests": "convert-to-draft"
+      },
+      "propagation_target_minutes": 15,
+      "last_tested": null,
+      "test_cadence_days": 90
+    },
+    "change_log": [
+      {
+        "date": "2026-11-26",
+        "entry_version": 1,
+        "change": "Initial registration by the SHL harness playground, derived from the charter. Not an interview.",
+        "approved_by_role": "harness lead"
+      }
+    ]
+  },
+  {
+    "schema_version": 1,
+    "agent_id": "security-reviewer",
+    "name": "security-reviewer",
+    "entry_version": 1,
+    "purpose": "Reviews one change for security defects when it touches a triggering surface. Runs code-review mode with the security lens. Emits a verdict token, and never edits the change.",
+    "role": "critic",
+    "status": "active",
+    "owning_role": "harness lead, delivery engineering",
+    "created_on": "2026-11-26",
+    "registered_by_role": "platform architect, agentic delivery",
+    "runtime": {
+      "platform": "primary agent runtime",
+      "platform_version": "2.x",
+      "isolation": "subagent-fresh-context",
+      "tool_policy_id": "security-reviewer-v1",
+      "health_check": {
+        "check_ref": "runtime-adapter://primary/health",
+        "interval_seconds": 300,
+        "timeout_seconds": 10,
+        "on_failure": "refuse-dispatch"
+      },
+      "definition_path": ".claude/agents/security-reviewer.md",
+      "skill_refs": [
+        ".claude/skills/review-artefact/SKILL.md"
+      ]
+    },
+    "model": {
+      "provider": "primary-provider",
+      "pinned_id": "claude-opus-5-5",
+      "tier": "frontier",
+      "fallback_pinned_id": "claude-opus-5-5",
+      "temperature": 0,
+      "cross_provider_pair": "cross-provider-reviewer"
+    },
+    "capability_scope": {
+      "tools": {
+        "allow": [
+          "read",
+          "bash"
+        ],
+        "deny": [
+          "grep",
+          "glob",
+          "write",
+          "edit",
+          "tracker-write"
+        ]
+      },
+      "paths": {
+        "read_allow": [
+          "src/**",
+          "tests/**",
+          "docs/designs/**",
+          ".claude/rules/**"
+        ],
+        "read_deny": [
+          "secrets/**",
+          "fixtures/production-extracts/**"
+        ],
+        "write_allow": [],
+        "write_deny": [
+          "src/**",
+          "tests/**",
+          "db/changelog/**",
+          ".claude/**"
+        ]
+      },
+      "network": {
+        "egress_allow": [],
+        "egress_default": "deny"
+      },
+      "side_effects": [
+        "repository-write"
+      ],
+      "enforcement": "prompt-only",
+      "compensating_controls": [
+        "The tool list is a prompt instruction in this hub; nothing at a tool server imposes it.",
+        "Every change the agent makes reaches a branch through a pull request, and a person merges it.",
+        "Each artefact it produces is checked by the script on its pull request before the merge."
+      ]
+    },
+    "escalation": {
+      "revision_cap": 3,
+      "targets": [
+        {
+          "condition": "revision cap reached without an APPROVED verdict",
+          "route_role": "engineering lead, owning squad",
+          "response_time_minutes": 240,
+          "fallback": "block"
+        },
+        {
+          "condition": "finding requires a change to an approved cross-system contract",
+          "route_role": "integration architect",
+          "response_time_minutes": 480,
+          "fallback": "block"
+        },
+        {
+          "condition": "security finding at CRITICAL severity",
+          "route_role": "security reviewer on call",
+          "response_time_minutes": 60,
+          "fallback": "deny"
+        }
+      ]
+    },
+    "evaluation": {
+      "case_set_ref": null,
+      "frozen_set_ref": null,
+      "last_run": null,
+      "pass_rate": null,
+      "alpha_median": null,
+      "context_fingerprint": "ctx:9f2c41ab"
+    },
+    "cost": {
+      "cost_centre": "PLATFORM-AGENTIC-DELIVERY",
+      "budget_run_usd": 4,
+      "budget_month_usd": 900,
+      "alert_at_pct": 80,
+      "on_budget_breach": "alert"
+    },
+    "data_handling": {
+      "classification": "confidential",
+      "pii_permitted": false,
+      "log_retention_days": 400,
+      "residency": "in-country processing only",
+      "prompt_logging": "redacted"
+    },
+    "review": {
+      "cadence_days": 90,
+      "last_review": "2026-06-30",
+      "next_review": "2026-09-28",
+      "reviewer_role": "harness lead, delivery engineering",
+      "invocations_since_last_review": 1184
+    },
+    "retirement": {
+      "trigger": "Superseded when the deterministic gate covers architecture and test-adequacy checks that currently require judgement, or when pass rate on the frozen set falls below 0.80 for two consecutive cycles.",
+      "successor_agent_id": null,
+      "decommission_steps": [
+        "Flip status to deprecated; orchestrator stops dispatching on the next release.",
+        "Run the case set against the successor and record the comparison.",
+        "Archive the charter file and the skill at the commit that last dispatched it.",
+        "Retain run records and verdict files for the evidence retention period.",
+        "Never reuse agent_id."
+      ],
+      "retired_on": null,
+      "evidence_retention_days": 2555
+    },
+    "revocation": {
+      "mechanism": [
+        "registry-status-suspended",
+        "orchestrator-dispatch-block",
+        "credential-revoked-at-tool-server"
+      ],
+      "authorising_roles": [
+        "harness lead, delivery engineering",
+        "security reviewer on call",
+        "engineering lead on duty (out of hours)"
+      ],
+      "invocation": "Commit status: suspended to the registry on the trunk, then run the platform script that revokes this agent's tool-server credential. Either half alone is a partial stop; the script prints which enforcement points it changed.",
+      "in_flight": {
+        "work_items": "flag-and-pause",
+        "worktrees": "retain-for-evidence",
+        "open_pull_requests": "convert-to-draft"
+      },
+      "propagation_target_minutes": 15,
+      "last_tested": null,
+      "test_cadence_days": 90
+    },
+    "change_log": [
+      {
+        "date": "2026-11-26",
+        "entry_version": 1,
+        "change": "Initial registration by the SHL harness playground, derived from the charter. Not an interview.",
+        "approved_by_role": "harness lead"
+      }
+    ]
+  },
+  {
+    "schema_version": 1,
+    "agent_id": "service-surveyor",
+    "name": "service-surveyor",
+    "entry_version": 1,
+    "purpose": "Reads one part of one repository at one pinned commit and returns the partial survey of that part. It records what the part serves, what it calls, the data stores and the libraries it uses, every row keyed and pointed at its lines. Writes nothing, and judges nothing.",
+    "role": "worker",
+    "status": "active",
+    "owning_role": "harness lead, delivery engineering",
+    "created_on": "2026-11-26",
+    "registered_by_role": "platform architect, agentic delivery",
+    "runtime": {
+      "platform": "primary agent runtime",
+      "platform_version": "2.x",
+      "isolation": "subagent-fresh-context",
+      "tool_policy_id": "service-surveyor-v1",
+      "health_check": {
+        "check_ref": "runtime-adapter://primary/health",
+        "interval_seconds": 300,
+        "timeout_seconds": 10,
+        "on_failure": "refuse-dispatch"
+      },
+      "definition_path": ".claude/agents/service-surveyor.md",
+      "skill_refs": [
+        ".claude/skills/survey-repo/SKILL.md"
+      ]
+    },
+    "model": {
+      "provider": "primary-provider",
+      "pinned_id": "claude-opus-5-5",
+      "tier": "frontier",
+      "fallback_pinned_id": "claude-opus-5-5",
+      "temperature": 0,
+      "cross_provider_pair": "cross-provider-reviewer"
+    },
+    "capability_scope": {
+      "tools": {
+        "allow": [
+          "read",
+          "bash"
+        ],
+        "deny": [
+          "grep",
+          "glob",
+          "write",
+          "edit",
+          "tracker-write"
+        ]
+      },
+      "paths": {
+        "read_allow": [
+          "src/**",
+          "tests/**",
+          "docs/designs/**",
+          ".claude/rules/**"
+        ],
+        "read_deny": [
+          "secrets/**",
+          "fixtures/production-extracts/**"
+        ],
+        "write_allow": [],
+        "write_deny": [
+          "src/**",
+          "tests/**",
+          "db/changelog/**",
+          ".claude/**"
+        ]
+      },
+      "network": {
+        "egress_allow": [],
+        "egress_default": "deny"
+      },
+      "side_effects": [
+        "repository-write"
+      ],
+      "enforcement": "prompt-only",
+      "compensating_controls": [
+        "The tool list is a prompt instruction in this hub; nothing at a tool server imposes it.",
+        "Every change the agent makes reaches a branch through a pull request, and a person merges it.",
+        "Each artefact it produces is checked by the script on its pull request before the merge."
+      ]
+    },
+    "escalation": {
+      "revision_cap": 3,
+      "targets": [
+        {
+          "condition": "revision cap reached without an APPROVED verdict",
+          "route_role": "engineering lead, owning squad",
+          "response_time_minutes": 240,
+          "fallback": "block"
+        },
+        {
+          "condition": "finding requires a change to an approved cross-system contract",
+          "route_role": "integration architect",
+          "response_time_minutes": 480,
+          "fallback": "block"
+        },
+        {
+          "condition": "security finding at CRITICAL severity",
+          "route_role": "security reviewer on call",
+          "response_time_minutes": 60,
+          "fallback": "deny"
+        }
+      ]
+    },
+    "evaluation": {
+      "case_set_ref": null,
+      "frozen_set_ref": null,
+      "last_run": null,
+      "pass_rate": null,
+      "alpha_median": null,
+      "context_fingerprint": "ctx:9f2c41ab"
+    },
+    "cost": {
+      "cost_centre": "PLATFORM-AGENTIC-DELIVERY",
+      "budget_run_usd": 4,
+      "budget_month_usd": 900,
+      "alert_at_pct": 80,
+      "on_budget_breach": "alert"
+    },
+    "data_handling": {
+      "classification": "confidential",
+      "pii_permitted": false,
+      "log_retention_days": 400,
+      "residency": "in-country processing only",
+      "prompt_logging": "redacted"
+    },
+    "review": {
+      "cadence_days": 90,
+      "last_review": "2026-06-30",
+      "next_review": "2026-09-28",
+      "reviewer_role": "harness lead, delivery engineering",
+      "invocations_since_last_review": 1184
+    },
+    "retirement": {
+      "trigger": "Superseded when the deterministic gate covers architecture and test-adequacy checks that currently require judgement, or when pass rate on the frozen set falls below 0.80 for two consecutive cycles.",
+      "successor_agent_id": null,
+      "decommission_steps": [
+        "Flip status to deprecated; orchestrator stops dispatching on the next release.",
+        "Run the case set against the successor and record the comparison.",
+        "Archive the charter file and the skill at the commit that last dispatched it.",
+        "Retain run records and verdict files for the evidence retention period.",
+        "Never reuse agent_id."
+      ],
+      "retired_on": null,
+      "evidence_retention_days": 2555
+    },
+    "revocation": {
+      "mechanism": [
+        "registry-status-suspended",
+        "orchestrator-dispatch-block",
+        "credential-revoked-at-tool-server"
+      ],
+      "authorising_roles": [
+        "harness lead, delivery engineering",
+        "security reviewer on call",
+        "engineering lead on duty (out of hours)"
+      ],
+      "invocation": "Commit status: suspended to the registry on the trunk, then run the platform script that revokes this agent's tool-server credential. Either half alone is a partial stop; the script prints which enforcement points it changed.",
+      "in_flight": {
+        "work_items": "flag-and-pause",
+        "worktrees": "retain-for-evidence",
+        "open_pull_requests": "convert-to-draft"
+      },
+      "propagation_target_minutes": 15,
+      "last_tested": null,
+      "test_cadence_days": 90
+    },
+    "change_log": [
+      {
+        "date": "2026-11-26",
+        "entry_version": 1,
+        "change": "Initial registration by the SHL harness playground, derived from the charter. Not an interview.",
+        "approved_by_role": "harness lead"
+      }
+    ]
+  },
+  {
+    "schema_version": 1,
+    "agent_id": "sprint-orchestrator",
+    "name": "sprint-orchestrator",
+    "entry_version": 1,
+    "purpose": "Runs the delivery flow for one work item. Dispatches specialists, collects verdicts, moves state. Produces no work itself.",
+    "role": "orchestrator",
+    "status": "active",
+    "owning_role": "harness lead, delivery engineering",
+    "created_on": "2026-11-26",
+    "registered_by_role": "platform architect, agentic delivery",
+    "runtime": {
+      "platform": "primary agent runtime",
+      "platform_version": "2.x",
+      "isolation": "subagent-fresh-context",
+      "tool_policy_id": "sprint-orchestrator-v1",
+      "health_check": {
+        "check_ref": "runtime-adapter://primary/health",
+        "interval_seconds": 300,
+        "timeout_seconds": 10,
+        "on_failure": "refuse-dispatch"
+      },
+      "definition_path": ".claude/agents/sprint-orchestrator.md",
+      "skill_refs": []
+    },
+    "model": {
+      "provider": "primary-provider",
+      "pinned_id": "claude-sonnet-5-5",
+      "tier": "frontier",
+      "fallback_pinned_id": "claude-sonnet-5-5",
+      "temperature": 0,
+      "cross_provider_pair": "cross-provider-reviewer"
+    },
+    "capability_scope": {
+      "tools": {
+        "allow": [
+          "read",
+          "task",
+          "bash",
+          "write"
+        ],
+        "deny": [
+          "grep",
+          "glob",
+          "edit",
+          "tracker-write"
+        ]
+      },
+      "paths": {
+        "read_allow": [
+          "src/**",
+          "tests/**",
+          "docs/designs/**",
+          ".claude/rules/**"
+        ],
+        "read_deny": [
+          "secrets/**",
+          "fixtures/production-extracts/**"
+        ],
+        "write_allow": [
+          "docs/**"
+        ],
+        "write_deny": [
+          "src/**",
+          "tests/**",
+          "db/changelog/**",
+          ".claude/**"
+        ]
+      },
+      "network": {
+        "egress_allow": [],
+        "egress_default": "deny"
+      },
+      "side_effects": [
+        "repository-write"
+      ],
+      "enforcement": "prompt-only",
+      "compensating_controls": [
+        "The tool list is a prompt instruction in this hub; nothing at a tool server imposes it.",
+        "Every change the agent makes reaches a branch through a pull request, and a person merges it.",
+        "Each artefact it produces is checked by the script on its pull request before the merge."
+      ]
+    },
+    "escalation": {
+      "revision_cap": 3,
+      "targets": [
+        {
+          "condition": "revision cap reached without an APPROVED verdict",
+          "route_role": "engineering lead, owning squad",
+          "response_time_minutes": 240,
+          "fallback": "block"
+        },
+        {
+          "condition": "finding requires a change to an approved cross-system contract",
+          "route_role": "integration architect",
+          "response_time_minutes": 480,
+          "fallback": "block"
+        },
+        {
+          "condition": "security finding at CRITICAL severity",
+          "route_role": "security reviewer on call",
+          "response_time_minutes": 60,
+          "fallback": "deny"
+        }
+      ]
+    },
+    "evaluation": {
+      "case_set_ref": null,
+      "frozen_set_ref": null,
+      "last_run": null,
+      "pass_rate": null,
+      "alpha_median": null,
+      "context_fingerprint": "ctx:9f2c41ab"
+    },
+    "cost": {
+      "cost_centre": "PLATFORM-AGENTIC-DELIVERY",
+      "budget_run_usd": 4,
+      "budget_month_usd": 900,
+      "alert_at_pct": 80,
+      "on_budget_breach": "alert"
+    },
+    "data_handling": {
+      "classification": "confidential",
+      "pii_permitted": false,
+      "log_retention_days": 400,
+      "residency": "in-country processing only",
+      "prompt_logging": "redacted"
+    },
+    "review": {
+      "cadence_days": 90,
+      "last_review": "2026-06-30",
+      "next_review": "2026-09-28",
+      "reviewer_role": "harness lead, delivery engineering",
+      "invocations_since_last_review": 1184
+    },
+    "retirement": {
+      "trigger": "Superseded when the deterministic gate covers architecture and test-adequacy checks that currently require judgement, or when pass rate on the frozen set falls below 0.80 for two consecutive cycles.",
+      "successor_agent_id": null,
+      "decommission_steps": [
+        "Flip status to deprecated; orchestrator stops dispatching on the next release.",
+        "Run the case set against the successor and record the comparison.",
+        "Archive the charter file and the skill at the commit that last dispatched it.",
+        "Retain run records and verdict files for the evidence retention period.",
+        "Never reuse agent_id."
+      ],
+      "retired_on": null,
+      "evidence_retention_days": 2555
+    },
+    "revocation": {
+      "mechanism": [
+        "registry-status-suspended",
+        "orchestrator-dispatch-block",
+        "credential-revoked-at-tool-server"
+      ],
+      "authorising_roles": [
+        "harness lead, delivery engineering",
+        "security reviewer on call",
+        "engineering lead on duty (out of hours)"
+      ],
+      "invocation": "Commit status: suspended to the registry on the trunk, then run the platform script that revokes this agent's tool-server credential. Either half alone is a partial stop; the script prints which enforcement points it changed.",
+      "in_flight": {
+        "work_items": "flag-and-pause",
+        "worktrees": "retain-for-evidence",
+        "open_pull_requests": "convert-to-draft"
+      },
+      "propagation_target_minutes": 15,
+      "last_tested": null,
+      "test_cadence_days": 90
+    },
+    "change_log": [
+      {
+        "date": "2026-11-26",
+        "entry_version": 1,
+        "change": "Initial registration by the SHL harness playground, derived from the charter. Not an interview.",
+        "approved_by_role": "harness lead"
+      }
+    ]
+  },
+  {
+    "schema_version": 1,
+    "agent_id": "test-writer",
+    "name": "test-writer",
+    "entry_version": 1,
+    "purpose": "Writes the stubs and the failing tests for one work item from its merged design in /dev-sprint, before any behaviour exists, inside the story's repository checkout. Never writes behaviour; never approves its own output.",
+    "role": "worker",
+    "status": "active",
+    "owning_role": "harness lead, delivery engineering",
+    "created_on": "2026-11-26",
+    "registered_by_role": "platform architect, agentic delivery",
+    "runtime": {
+      "platform": "primary agent runtime",
+      "platform_version": "2.x",
+      "isolation": "subagent-fresh-context",
+      "tool_policy_id": "test-writer-v1",
+      "health_check": {
+        "check_ref": "runtime-adapter://primary/health",
+        "interval_seconds": 300,
+        "timeout_seconds": 10,
+        "on_failure": "refuse-dispatch"
+      },
+      "definition_path": ".claude/agents/test-writer.md",
+      "skill_refs": [
+        ".claude/skills/write-tests/SKILL.md"
+      ]
+    },
+    "model": {
+      "provider": "primary-provider",
+      "pinned_id": "claude-opus-5-5",
+      "tier": "frontier",
+      "fallback_pinned_id": "claude-opus-5-5",
+      "temperature": 0,
+      "cross_provider_pair": "cross-provider-reviewer"
+    },
+    "capability_scope": {
+      "tools": {
+        "allow": [
+          "read",
+          "write",
+          "edit",
+          "bash"
+        ],
+        "deny": [
+          "grep",
+          "glob",
+          "tracker-write"
+        ]
+      },
+      "paths": {
+        "read_allow": [
+          "src/**",
+          "tests/**",
+          "docs/designs/**",
+          ".claude/rules/**"
+        ],
+        "read_deny": [
+          "secrets/**",
+          "fixtures/production-extracts/**"
+        ],
+        "write_allow": [
+          "docs/**"
+        ],
+        "write_deny": [
+          "src/**",
+          "tests/**",
+          "db/changelog/**",
+          ".claude/**"
+        ]
+      },
+      "network": {
+        "egress_allow": [],
+        "egress_default": "deny"
+      },
+      "side_effects": [
+        "repository-write"
+      ],
+      "enforcement": "prompt-only",
+      "compensating_controls": [
+        "The tool list is a prompt instruction in this hub; nothing at a tool server imposes it.",
+        "Every change the agent makes reaches a branch through a pull request, and a person merges it.",
+        "Each artefact it produces is checked by the script on its pull request before the merge."
+      ]
+    },
+    "escalation": {
+      "revision_cap": 3,
+      "targets": [
+        {
+          "condition": "revision cap reached without an APPROVED verdict",
+          "route_role": "engineering lead, owning squad",
+          "response_time_minutes": 240,
+          "fallback": "block"
+        },
+        {
+          "condition": "finding requires a change to an approved cross-system contract",
+          "route_role": "integration architect",
+          "response_time_minutes": 480,
+          "fallback": "block"
+        },
+        {
+          "condition": "security finding at CRITICAL severity",
+          "route_role": "security reviewer on call",
+          "response_time_minutes": 60,
+          "fallback": "deny"
+        }
+      ]
+    },
+    "evaluation": {
+      "case_set_ref": null,
+      "frozen_set_ref": null,
+      "last_run": null,
+      "pass_rate": null,
+      "alpha_median": null,
+      "context_fingerprint": "ctx:9f2c41ab"
+    },
+    "cost": {
+      "cost_centre": "PLATFORM-AGENTIC-DELIVERY",
+      "budget_run_usd": 4,
+      "budget_month_usd": 900,
+      "alert_at_pct": 80,
+      "on_budget_breach": "alert"
+    },
+    "data_handling": {
+      "classification": "confidential",
+      "pii_permitted": false,
+      "log_retention_days": 400,
+      "residency": "in-country processing only",
+      "prompt_logging": "redacted"
+    },
+    "review": {
+      "cadence_days": 90,
+      "last_review": "2026-06-30",
+      "next_review": "2026-09-28",
+      "reviewer_role": "harness lead, delivery engineering",
+      "invocations_since_last_review": 1184
+    },
+    "retirement": {
+      "trigger": "Superseded when the deterministic gate covers architecture and test-adequacy checks that currently require judgement, or when pass rate on the frozen set falls below 0.80 for two consecutive cycles.",
+      "successor_agent_id": null,
+      "decommission_steps": [
+        "Flip status to deprecated; orchestrator stops dispatching on the next release.",
+        "Run the case set against the successor and record the comparison.",
+        "Archive the charter file and the skill at the commit that last dispatched it.",
+        "Retain run records and verdict files for the evidence retention period.",
+        "Never reuse agent_id."
+      ],
+      "retired_on": null,
+      "evidence_retention_days": 2555
+    },
+    "revocation": {
+      "mechanism": [
+        "registry-status-suspended",
+        "orchestrator-dispatch-block",
+        "credential-revoked-at-tool-server"
+      ],
+      "authorising_roles": [
+        "harness lead, delivery engineering",
+        "security reviewer on call",
+        "engineering lead on duty (out of hours)"
+      ],
+      "invocation": "Commit status: suspended to the registry on the trunk, then run the platform script that revokes this agent's tool-server credential. Either half alone is a partial stop; the script prints which enforcement points it changed.",
+      "in_flight": {
+        "work_items": "flag-and-pause",
+        "worktrees": "retain-for-evidence",
+        "open_pull_requests": "convert-to-draft"
+      },
+      "propagation_target_minutes": 15,
+      "last_tested": null,
+      "test_cadence_days": 90
+    },
+    "change_log": [
+      {
+        "date": "2026-11-26",
+        "entry_version": 1,
+        "change": "Initial registration by the SHL harness playground, derived from the charter. Not an interview.",
+        "approved_by_role": "harness lead"
+      }
+    ]
+  }
+]

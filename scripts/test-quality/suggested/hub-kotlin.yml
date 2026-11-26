@@ -1,0 +1,58 @@
+# Part of the harness asset library c6f3b4427d58f7c3 (see VERSION.json) · 2026-10-21
+#
+# A suggested ruleset, off until a hub adopts it: Kotlin tests with JUnit 4 or 5 and kotlin.test.
+# `/add-repo` offers it when a spoke holds Kotlin tests the library has no rules for; adopting it
+# copies this file to rules/ and its fixture to tests/test-quality/fixtures/kotlin/, in a pull request
+# a person merges. After that it is the hub's own rule, judged like the library's. Fixtures:
+# tests/test-quality/fixtures-suggested/kotlin/. ERROR is a clear violation.
+rules:
+  - id: hub-kotlin-disabled
+    languages: [kotlin]
+    severity: ERROR
+    message: "A disabled test never runs, so it proves nothing. Enable it, or delete it with the criterion it covered."
+    paths:
+      include: ["**/src/test/", "*Test.kt", "*Tests.kt"]
+    pattern-either:
+      - pattern: |
+          @Ignore
+          fun $F(...) { ... }
+      - pattern: |
+          @Ignore(...)
+          fun $F(...) { ... }
+      - pattern: |
+          @Disabled
+          fun $F(...) { ... }
+      - pattern: |
+          @Disabled(...)
+          fun $F(...) { ... }
+
+  - id: hub-kotlin-tautology
+    languages: [kotlin]
+    severity: ERROR
+    message: "This assertion cannot fail: it compares a value with itself or asserts a constant. Assert the behaviour under test."
+    paths:
+      include: ["**/src/test/", "*Test.kt", "*Tests.kt"]
+    pattern-either:
+      - pattern: assertTrue(true)
+      - pattern: assertTrue(true, ...)
+      - pattern: assertFalse(false)
+      - pattern: assertFalse(false, ...)
+      - pattern: assertEquals($X, $X)
+      - pattern: assertEquals($X, $X, ...)
+      - pattern: assertSame($X, $X)
+      - pattern: Assertions.assertTrue(true)
+      - pattern: Assertions.assertEquals($X, $X)
+
+  - id: hub-kotlin-empty-test
+    languages: [kotlin]
+    severity: ERROR
+    message: "This test has an empty body: it always passes."
+    paths:
+      include: ["**/src/test/", "*Test.kt", "*Tests.kt"]
+    pattern-either:
+      - pattern: |
+          @Test
+          fun $F() {}
+      - pattern: |
+          @ParameterizedTest
+          fun $F(...) {}

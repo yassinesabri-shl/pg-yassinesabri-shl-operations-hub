@@ -1,0 +1,17 @@
+{
+  "session_id": "{{SESSION}}",
+  "transcript_path": "/home/dev/.claude/projects/-home-dev-hub/{{SESSION}}.jsonl",
+  "cwd": "{{HUB}}",
+  "scratchpad_dir": "/tmp/claude-1000/-home-dev-hub/{{SESSION}}/scratchpad",
+  "prompt_id": "7d1c2e9a-4b6f-4f0e-9a51-0c3f2b8e6d14",
+  "permission_mode": "acceptEdits",
+  "agent_id": "{{AGENT}}",
+  "agent_type": "engineer",
+  "effort": "high",
+  "hook_event_name": "SubagentStop",
+  "stop_hook_active": false,
+  "agent_transcript_path": "/home/dev/.claude/projects/-home-dev-hub/{{SESSION}}/subagents/agent-{{AGENT}}.jsonl",
+  "last_assistant_message": "The tests are green.",
+  "background_tasks": [],
+  "session_crons": []
+}

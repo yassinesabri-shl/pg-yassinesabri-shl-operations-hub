@@ -1,0 +1,61 @@
+name: requirements-gate
+on:
+  pull_request:                   # no `paths:` filter — the script decides "nothing to check"
+permissions:
+  contents: read
+jobs:
+  requirements:
+    name: requirements-gate       # branch protection names the job, not the file
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      # The same step, word for word, as fan-in's. Here it lets the check read the
+      # global context repository that docs/estate/global.json names, with the
+      # credential this hub gives git for its spokes; the token covers that
+      # repository too. A hub without the file reads no other repository.
+      # INTEGRATION POINT, the platform lead's.
+      - name: Let git read private spokes
+        env:
+          SPOKE_TOKEN: ${{ secrets.HARNESS_SPOKE_READ_TOKEN }}
+        run: |
+          set -uo pipefail
+          if [ -z "${SPOKE_TOKEN:-}" ]; then
+            echo "::notice::hub secret HARNESS_SPOKE_READ_TOKEN is not set; a private spoke will report 'cannot reach' (exit 2). See docs/04-creating-a-hub.md in the harness repository."
+            exit 0
+          fi
+          git config --global url."https://x-access-token:${SPOKE_TOKEN}@github.com/".insteadOf "https://github.com/"
+          git config --global --add url."https://x-access-token:${SPOKE_TOKEN}@github.com/".insteadOf "git@github.com:"
+      - name: Check the requirements documents changed in this pull request
+        env:
+          HARNESS_TRUNK: main
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -uo pipefail
+
+          if git cat-file -e "${BASE_SHA}^{commit}" 2>/dev/null; then
+            changed=$(git diff --name-only "$BASE_SHA" HEAD -- docs/requirements) || {
+              echo "::error::could not diff $BASE_SHA..HEAD"; exit 4; }
+          else
+            echo "::notice::base commit unavailable; checking every requirements document in this branch"
+            changed=$(git ls-tree -r --name-only HEAD -- docs/requirements)
+          fi
+
+          # The document and its review both select their slug: the folder they sit
+          # in. The template (_TEMPLATE.requirements.md) sits in no folder and a copied
+          # brief sits under runs/, so neither matches.
+          slugs=$(printf '%s\n' "$changed" \
+                  | sed -nE 's#^docs/requirements/([a-z0-9]+(-[a-z0-9]+)*)/requirements(-review)?\.md$#\1#p' | sort -u)
+
+          [ -z "$slugs" ] && { echo "no requirements document or review changes"; exit 0; }
+
+          # The candidate trunk -- a bare repository with HEAD pushed to it as the
+          # trunk, cloned, the committed check run inside the clone once per slug,
+          # worst exit code returned -- is built by one script, so this job, /feature
+          # and a person at a terminal run the same construction. The script finds
+          # the check under either of its installed names.
+          node scripts/check-requirements-candidate.mjs $slugs

@@ -1,0 +1,137 @@
+name: design-gate
+on:
+  pull_request:                   # no `paths:` filter — see generation.md §5, design-gate
+    types: [opened, synchronize, reopened, edited]   # edited: the watermark step reads the description
+permissions:
+  contents: read                  # a check-only job needs nothing else
+jobs:
+  design:
+    name: design-gate             # branch protection names the job, not the file
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # the gate reads history; a shallow clone exits 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      # The same step, word for word, as fan-in's. Here it lets the gate read the
+      # global context repository that docs/estate/global.json names, for a
+      # global Context: entry, with the credential this hub gives git for its
+      # spokes; the token covers that repository too. A hub without the file
+      # reads no other repository. INTEGRATION POINT, the platform lead's.
+      - name: Let git read private spokes
+        env:
+          SPOKE_TOKEN: ${{ secrets.HARNESS_SPOKE_READ_TOKEN }}
+        run: |
+          set -uo pipefail
+          if [ -z "${SPOKE_TOKEN:-}" ]; then
+            echo "::notice::hub secret HARNESS_SPOKE_READ_TOKEN is not set; a private spoke will report 'cannot reach' (exit 2). See docs/04-creating-a-hub.md in the harness repository."
+            exit 0
+          fi
+          git config --global url."https://x-access-token:${SPOKE_TOKEN}@github.com/".insteadOf "https://github.com/"
+          git config --global --add url."https://x-access-token:${SPOKE_TOKEN}@github.com/".insteadOf "git@github.com:"
+      # Every work item whose design or review changed in this pull request,
+      # gated against the pull request's own commit.
+      #
+      # Nothing here is attacker-controlled, and values still reach the shell
+      # through env rather than ${{ }} inside run. The habit is what survives
+      # the next edit; the exception is what gets copied into the one job that
+      # does take free text.
+      - name: Validate the designs changed in this pull request
+        env:
+          HARNESS_TRUNK: main    # names the branch on the candidate trunk below,
+                                    # and is the name the gate confirms against it
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -uo pipefail
+
+          # On a pull_request event the checkout leaves the merge result at HEAD
+          # and BASE_SHA is one of its parents, so this diff is exactly the pull
+          # request's own change. A base that is not in the clone -- a force-push
+          # while the run was queued -- must not read as "nothing changed":
+          # widening is the safe direction, silence is not.
+          if git cat-file -e "${BASE_SHA}^{commit}" 2>/dev/null; then
+            changed=$(git diff --name-only "$BASE_SHA" HEAD -- docs/designs) || {
+              echo "::error::could not diff $BASE_SHA..HEAD"; exit 4; }
+          else
+            echo "::notice::base commit unavailable; validating every design in this branch"
+            changed=$(git ls-tree -r --name-only HEAD -- docs/designs)
+          fi
+
+          # All three suffixes. A commit that touches only PROJ-412.lld-review.md
+          # changes the verdict the gate reads, and matching '*.lld.md' alone
+          # lets exactly that commit through reporting "nothing to do". A commit
+          # that touches only PROJ-412.discovery.md changes the map that the
+          # gate reads against the design's Discovery: pin.
+          keys=$(printf '%s\n' "$changed" \
+                 | sed -nE 's#.*/([A-Z][A-Z0-9]{1,9}-[0-9]+)\.(lld(-review)?|discovery)\.md$#\1#p' | sort -u)
+
+          [ -z "$keys" ] && { echo "no design, review or discovery map changes"; exit 0; }
+
+          # The candidate trunk. The gate confirms its branch name against the
+          # remote's own default branch and refuses to read anything else, which
+          # is correct and stays correct. So build a throwaway remote whose
+          # default branch IS this pull request's content and ask the gate there.
+          # The real origin is never touched and no claim is made about it.
+          candidate="$RUNNER_TEMP/candidate-trunk.git"
+          {
+            git init --bare --quiet --initial-branch="$HARNESS_TRUNK" "$candidate" &&
+            git push --quiet "$candidate" "HEAD:refs/heads/$HARNESS_TRUNK" &&
+            git clone --quiet "$candidate" "$RUNNER_TEMP/candidate" &&
+            cd "$RUNNER_TEMP/candidate"
+          } || { echo "::error::could not build the candidate trunk"; exit 4; }
+
+          # A design waits for the designs that it depends on. The dependency
+          # check reads only the hub, here the candidate trunk, so it needs no
+          # spoke token.
+          worst=0
+          for k in $keys; do
+            node scripts/check-dev-ready.js "$k" || rc=$?
+            rc=${rc:-0}
+            [ "$rc" -gt "$worst" ] && worst=$rc
+            unset rc
+            node scripts/check-dependencies.mjs "$k" --step design || rc=$?
+            rc=${rc:-0}
+            [ "$rc" -gt "$worst" ] && worst=$rc
+            unset rc
+          done
+          exit "$worst"
+
+      # The harness watermark (row 121): commits that carry it need a description
+      # that ends with it, and a description that carries it needs at least one
+      # commit that does; a person's commits and pull requests pass unchanged. The
+      # description comes from the pull-request event, never from a file in the
+      # branch, and the checker from the base commit, never from the pull request —
+      # unless the pull request is the one that brings it. It runs after the design
+      # step, and even when that step failed, so one run lists every finding.
+      - name: The harness watermark on this pull request's commits and description
+        if: ${{ !cancelled() }}
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          set -euo pipefail
+          checker="$RUNNER_TEMP/check-watermark.mjs"
+          if git cat-file -e "$BASE_SHA:scripts/check-watermark.mjs" 2>/dev/null; then
+            git show "$BASE_SHA:scripts/check-watermark.mjs" > "$checker"
+          elif [ -f scripts/check-watermark.mjs ]; then
+            echo "::notice::scripts/check-watermark.mjs is new in this pull request; running its copy"
+            cp scripts/check-watermark.mjs "$checker"
+          else
+            echo "::error::no scripts/check-watermark.mjs on the base or in this pull request. Cannot verify the watermark"; exit 2
+          fi
+          printf '%s\n' "${PR_BODY:-}" > "$RUNNER_TEMP/pr-body.md"
+          node "$checker" --pr-body "$RUNNER_TEMP/pr-body.md" "$BASE_SHA..$HEAD_SHA"
+
+  charters:
+    name: charters                # a second job is a second required check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node scripts/check-charters.mjs
+      - run: node scripts/check-agent-registry.mjs

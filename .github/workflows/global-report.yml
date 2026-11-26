@@ -1,0 +1,58 @@
+name: global-report
+on:
+  schedule:
+    - cron: '17 6 * * 1'          # every Monday at 06:17 UTC; the team may choose another time
+  workflow_dispatch:              # on demand, for example before a feature moves to a new release
+permissions:
+  contents: read
+jobs:
+  global-report:
+    name: global-report           # the forge shows the job name, not the file name
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # the script reads the trunk's history and the requirements branches
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      # The same step, word for word, as fan-in's. Here it lets the report read
+      # the global context repository that docs/estate/global.json names, and
+      # each listed spoke's HUBS line, with the credential this hub gives git for
+      # its spokes. The token covers the global repository too. It never reads a
+      # sibling hub. INTEGRATION POINT, the platform lead's.
+      - name: Let git read private spokes
+        env:
+          SPOKE_TOKEN: ${{ secrets.HARNESS_SPOKE_READ_TOKEN }}
+        run: |
+          set -uo pipefail
+          if [ -z "${SPOKE_TOKEN:-}" ]; then
+            echo "::notice::hub secret HARNESS_SPOKE_READ_TOKEN is not set; a private spoke will report 'cannot reach' (exit 2). See docs/04-creating-a-hub.md in the harness repository."
+            exit 0
+          fi
+          git config --global url."https://x-access-token:${SPOKE_TOKEN}@github.com/".insteadOf "https://github.com/"
+          git config --global --add url."https://x-access-token:${SPOKE_TOKEN}@github.com/".insteadOf "git@github.com:"
+      # The report lists, and nothing waits on it. A finding or a part that
+      # cannot be read never fails the step. Only a fault of the installed
+      # script does. The log and the job summary carry the same text.
+      - name: Report how far this hub is behind the global layer
+        env:
+          HARNESS_TRUNK: main    # the script defaults to `main`. On any other trunk
+                                    # it exits 2 at every run without this
+        run: |
+          set -uo pipefail
+          rc=0
+          node scripts/report-global.mjs > "$RUNNER_TEMP/global-report.txt" 2>&1 || rc=$?
+          cat "$RUNNER_TEMP/global-report.txt"
+          {
+            echo '## Global report'
+            echo
+            echo '~~~text'
+            cat "$RUNNER_TEMP/global-report.txt"
+            echo '~~~'
+          } >> "$GITHUB_STEP_SUMMARY"
+          case "$rc" in
+            0) exit 0 ;;
+            2) echo "::warning::the global report is incomplete (exit 2): a part of it cannot be read, and the report names each part"; exit 0 ;;
+            *) echo "::error::scripts/report-global.mjs exited $rc: exit 3 is a usage fault and exit 4 an internal fault of the installed script"; exit "$rc" ;;
+          esac

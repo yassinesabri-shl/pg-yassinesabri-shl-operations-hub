@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "repositories": {
+    "pg-yassinesabri-shl-orders-api": {
+      "url": "https://github.com/yassinesabri-shl/pg-yassinesabri-shl-orders-api.git",
+      "checks": "checks.env",
+      "purpose": "orders-api takes a customer's order for one menu week, freezes each recipe's price from catalogue-api at the moment the order is placed, and moves the order through its states from placed to delivered for the storefront and the warehouse.",
+      "readAt": "14070b378bfa617171d948cef333a67f5b82d554",
+      "trunk": "bcg_main"
+    },
+    "pg-yassinesabri-shl-fulfilment-service": {
+      "url": "https://github.com/yassinesabri-shl/pg-yassinesabri-shl-fulfilment-service.git",
+      "checks": "checks.env",
+      "purpose": "The warehouse service of the Larder meal-kit estate. Every afternoon it builds the pick list for the next dispatch date from the paid orders that made the cut-off, and it ships each packed box with a carrier. It never changes an order's state itself: it asks orders-api for every transition, with an `Idempotency-Key` on each call.",
+      "readAt": "0bc6fc437a9425d7895c0fdbc8efb2a5cf3ef8f1",
+      "trunk": "default"
+    }
+  }
+}

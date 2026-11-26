@@ -1,0 +1,326 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.internal/harness/escalation-record.schema.json",
+  "title": "Escalation record line",
+  "description": "One line of the artefact escalation-record.jsonl on an escalation's [shl-harness] issue in the hub. The file is JSON Lines: one complete object on each line, one line for each event, never edited. scripts/escalation.mjs writes every line and applies the reader rules before it writes. The Node standard library has no JSON Schema validator, so this file is the contract and escalation.mjs is its hand-written reading. A fixture keeps the two in step. A reader refuses a schema_version it does not know.",
+  "type": "object",
+  "required": ["schema_version", "id", "seq", "event", "at", "by"],
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^ESC-.+-[0-9]{2,}$",
+      "description": "One escalation: ESC-, the work item's key (or its slug before keys exist), then a number. Never reused."
+    },
+    "seq": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "The line's place in this escalation, counted from 1. A gap or a repeat means a write was lost or doubled."
+    },
+    "event": {
+      "enum": ["raised", "notified", "reasked", "acknowledged", "handed-over", "resumed", "resolved", "stopped", "withdrawn"]
+    },
+    "at": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+      "description": "UTC, to the second."
+    },
+    "by": {
+      "type": "object",
+      "required": ["kind"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": ["seat", "script", "person"]
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The seat or the script. Required for a seat and a script."
+        },
+        "role": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The role a person acted in."
+        },
+        "login": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The person's forge login, the one GitHub already shows on their comment or command."
+        },
+        "via": {
+          "const": "issue-comment",
+          "description": "A person's line that the sweep wrote from their comment on the escalation's issue."
+        },
+        "comment": {
+          "type": "integer",
+          "description": "The id of that comment, so the sweep answers each comment once."
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "event": {
+            "const": "raised"
+          }
+        }
+      },
+      "then": {
+        "required": ["trigger", "point", "path", "work_item", "slug", "repository", "runner", "route", "parked", "question", "findings", "links", "hub_commit"],
+        "properties": {
+          "trigger": {
+            "enum": ["revision-cap", "blocking-clarification", "contradiction", "control-undefined", "cannot-verify", "incident", "handover", "gate-waiting"]
+          },
+          "point": {
+            "type": "string",
+            "description": "A row of governance/escalation-points.json, such as dev-sprint.code-review-cap."
+          },
+          "path": {
+            "enum": ["merge-waiting", "review-cap", "decision-owed", "check-cannot-run", "incident", "handover"],
+            "description": "The path the point follows. The question path writes no record, because nothing has stopped yet."
+          },
+          "work_item": {
+            "type": ["string", "null"],
+            "pattern": "^[A-Z][A-Z0-9]{1,9}-[0-9]+$",
+            "description": "The story's key, or null before keys exist."
+          },
+          "slug": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+            "description": "The feature's slug. /feature and /decompose stop before any key exists, and the slug names their work."
+          },
+          "repository": {
+            "type": ["string", "null"]
+          },
+          "runner": {
+            "type": ["string", "null"],
+            "minLength": 1,
+            "description": "The person who ran the command, as a forge login. Null where the data officer refuses a stored login."
+          },
+          "route": {
+            "type": "object",
+            "required": ["first", "next"],
+            "additionalProperties": false,
+            "properties": {
+              "first": {
+                "type": "string",
+                "minLength": 1,
+                "description": "The first step, as a role, or runner. Several roles are joined with a comma and a space."
+              },
+              "next": {
+                "type": ["string", "null"],
+                "minLength": 1,
+                "description": "The second step of the ladder. Null where the point has none."
+              }
+            }
+          },
+          "parked": {
+            "type": ["object", "null"],
+            "required": ["ref", "commit"],
+            "additionalProperties": false,
+            "description": "Where the work waits. Null where the run changed nothing.",
+            "properties": {
+              "ref": {
+                "type": ["string", "null"]
+              },
+              "commit": {
+                "type": ["string", "null"],
+                "pattern": "^[0-9a-f]{12}$"
+              }
+            }
+          },
+          "question": {
+            "type": "string",
+            "minLength": 1,
+            "description": "One line."
+          },
+          "findings": {
+            "type": ["string", "null"],
+            "description": "findings.md, the artefact on the same issue. Null on an incident, whose detail never enters the record."
+          },
+          "links": {
+            "type": "object",
+            "required": ["design", "iteration_run"],
+            "additionalProperties": false,
+            "properties": {
+              "design": {
+                "type": ["string", "null"],
+                "description": "The artefact the escalation is about."
+              },
+              "iteration_run": {
+                "type": ["string", "null"]
+              },
+              "tests": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{12}$",
+                "description": "The approved test commit at the stop. A re-run compares it with the one it reads."
+              },
+              "comment": {
+                "type": "string",
+                "description": "The pull-request comment, for an escalation on one comment (pr-review.comment-cap, pr-review.needs-person, pr-review.design-conflict)."
+              },
+              "pr": {
+                "type": "string",
+                "description": "The pull request, where one exists."
+              }
+            }
+          },
+          "hub_commit": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{12}$"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event": {
+            "enum": ["notified", "reasked", "handed-over"]
+          }
+        }
+      },
+      "then": {
+        "required": ["to"],
+        "properties": {
+          "to": {
+            "type": "string",
+            "minLength": 1,
+            "description": "A role, or runner."
+          },
+          "channel": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The channel the writer used. Never the word escalated."
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event": {
+            "enum": ["notified", "reasked"]
+          }
+        }
+      },
+      "then": {
+        "required": ["channel"]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event": {
+            "const": "resumed"
+          }
+        }
+      },
+      "then": {
+        "required": [],
+        "properties": {
+          "upstream": {
+            "type": "object",
+            "required": ["what", "from", "to"],
+            "additionalProperties": false,
+            "properties": {
+              "what": {
+                "enum": ["design", "tests", "clarification", "requirements"]
+              },
+              "from": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{12}$"
+              },
+              "to": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{12}$"
+              },
+              "pr": {
+                "type": "string"
+              }
+            },
+            "description": "What changed upstream since the stop. Required on a review cap, where it proves that the new count of rounds is allowed."
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event": {
+            "const": "resolved"
+          }
+        }
+      },
+      "then": {
+        "required": ["fact"],
+        "properties": {
+          "fact": {
+            "type": "object",
+            "required": ["kind", "value"],
+            "additionalProperties": false,
+            "properties": {
+              "kind": {
+                "enum": ["verdict", "exit", "status", "merge"],
+                "description": "A fact a script read, never a claim."
+              },
+              "value": {
+                "type": "string",
+                "minLength": 1
+              },
+              "round": {
+                "type": "integer",
+                "minimum": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event": {
+            "enum": ["stopped", "withdrawn"]
+          }
+        }
+      },
+      "then": {
+        "required": ["reason"],
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The person's own words. A seat never writes it."
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event": {
+            "enum": ["acknowledged", "stopped", "withdrawn"]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "by": {
+            "properties": {
+              "kind": {
+                "const": "person"
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

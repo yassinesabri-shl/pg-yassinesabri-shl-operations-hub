@@ -1,0 +1,28 @@
+{
+  "note": "The mapping for SHL's Master workflow on a Story, and for its Defect sub-task. `/connect-jira` copies `types` into docs/estate/trackers.json and fills the rest. The harness never moves a ticket past Awaiting Code Review on a Story or In Development on a Defect: Tech, Architect / EM and Director review, CAB, UAT, RAT and Done are human steps.",
+  "types": {
+    "story": {
+      "issue_type": "Story",
+      "moves": {
+        "design-merged": { "route": ["Backlog", "In Analysis", "Ready for Development"] },
+        "started": { "route": ["Ready for Development", "In Development"] },
+        "in-review": { "route": ["In Development", "Awaiting Code Review"] }
+      },
+      "annotations": {
+        "merged": { "label": "shl-merged" },
+        "validated": { "label": "shl-validated" }
+      }
+    },
+    "defect": {
+      "issue_type": "Defect",
+      "parent": "story",
+      "moves": {
+        "started": { "route": ["Backlog", "In Development"] }
+      },
+      "annotations": {
+        "merged": { "label": "shl-merged" },
+        "validated": { "label": "shl-validated" }
+      }
+    }
+  }
+}

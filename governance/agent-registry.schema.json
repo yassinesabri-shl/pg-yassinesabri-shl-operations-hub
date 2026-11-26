@@ -1,0 +1,497 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.internal/harness/agent-registry.schema.json",
+  "title": "Agent registry entry",
+  "description": "One record per agent permitted to operate in a harness. No unregistered agent operates, no exceptions. A registry file is an array of these objects, validated in CI. Roles, never people: resolve owning_role and escalation routes through the organisation directory so this file stays publishable.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "agent_id",
+    "name",
+    "entry_version",
+    "purpose",
+    "role",
+    "status",
+    "owning_role",
+    "runtime",
+    "model",
+    "capability_scope",
+    "escalation",
+    "evaluation",
+    "cost",
+    "data_handling",
+    "review",
+    "retirement",
+    "revocation"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "const": 1
+    },
+    "agent_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "description": "Stable machine identifier. Never reused after retirement."
+    },
+    "name": {
+      "type": "string",
+      "maxLength": 80,
+      "description": "Human-readable name as it appears in run logs and dashboards."
+    },
+    "entry_version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Increments on every re-registration. A scope change is a re-registration."
+    },
+    "purpose": {
+      "type": "string",
+      "maxLength": 240,
+      "description": "One-line charter. If it needs two sentences, the agent does two jobs."
+    },
+    "role": {
+      "enum": ["orchestrator", "worker", "critic", "persona-reviewer", "utility"]
+    },
+    "status": {
+      "enum": ["proposed", "in-review", "active", "suspended", "deprecated", "retired"],
+      "description": "Only 'active' may be dispatched. Deployment is gated on this field."
+    },
+    "owning_role": {
+      "type": "string",
+      "description": "The accountable human role, e.g. 'harness lead, payments platform'. Never a personal name."
+    },
+    "created_on": { "type": "string", "format": "date" },
+    "registered_by_role": { "type": "string" },
+
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["platform", "isolation"],
+      "properties": {
+        "platform": {
+          "type": "string",
+          "description": "Agent runtime the definition is loaded by."
+        },
+        "platform_version": { "type": "string" },
+        "isolation": {
+          "enum": ["subagent-fresh-context", "shared-context", "separate-process", "container", "microvm", "dedicated-vm"],
+          "description": "A critic must not inherit the worker's session. Fresh context is a structural property, not a prompt instruction."
+        },
+        "tool_policy_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Stable identifier of the resolved runtime tool policy. The policy contents remain in capability_scope; run records carry this identifier."
+        },
+        "health_check": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["check_ref", "interval_seconds", "timeout_seconds", "on_failure"],
+          "properties": {
+            "check_ref": {
+              "type": "string",
+              "description": "Repository command reference or managed-runtime health endpoint checked before dispatch."
+            },
+            "interval_seconds": { "type": "integer", "minimum": 1 },
+            "timeout_seconds": { "type": "integer", "minimum": 1 },
+            "on_failure": { "enum": ["refuse-dispatch", "suspend"] }
+          }
+        },
+        "definition_path": {
+          "type": "string",
+          "description": "Repository path of the charter file this entry governs."
+        },
+        "skill_refs": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Skill files loaded just in time. The charter is a launcher; the skill is the depth."
+        }
+      }
+    },
+
+    "model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "pinned_id", "tier"],
+      "properties": {
+        "provider": { "type": "string" },
+        "pinned_id": {
+          "type": "string",
+          "description": "Exact model identifier in force. A pinned name is not a frozen model; the frozen evaluation set is how you detect a provider-side change."
+        },
+        "tier": { "enum": ["frontier", "mid", "light"] },
+        "fallback_pinned_id": { "type": ["string", "null"] },
+        "temperature": { "type": ["number", "null"] },
+        "cross_provider_pair": {
+          "type": ["string", "null"],
+          "description": "agent_id of the second-provider reviewer paired with this agent, where cross-provider review applies."
+        }
+      }
+    },
+
+    "capability_scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tools", "paths", "enforcement"],
+      "properties": {
+        "tools": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["allow", "deny"],
+          "properties": {
+            "allow": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+            "deny": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Explicit denials for tools the runtime would otherwise grant. Deny-by-default means an empty allow list grants nothing; deny entries exist because runtimes leak."
+            }
+          }
+        },
+        "paths": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["read_allow", "write_allow", "write_deny"],
+          "properties": {
+            "read_allow": { "type": "array", "items": { "type": "string" } },
+            "read_deny": { "type": "array", "items": { "type": "string" } },
+            "write_allow": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Globs. An empty array means the agent writes nothing — the correct value for a persona reviewer, and for any reviewer whose output the orchestrator commits. A critic whose verdict file is read by a downstream gate carries exactly one glob, the review path, and nothing else; the conditional clause below constrains that scope."
+            },
+            "write_deny": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "network": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "egress_allow": { "type": "array", "items": { "type": "string" } },
+            "egress_default": { "enum": ["deny"] }
+          }
+        },
+        "side_effects": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "none",
+              "repository-write",
+              "pull-request-open",
+              "tracker-write",
+              "wiki-write",
+              "external-send",
+              "deploy"
+            ]
+          },
+          "description": "Anything with a side effect requires a per-action approval that is never inherited between runs."
+        },
+        "enforcement": {
+          "enum": ["tool-layer", "mixed", "prompt-only"],
+          "description": "Where the scope above is actually imposed. 'prompt-only' is a documented gap, not a control."
+        },
+        "compensating_controls": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 },
+          "description": "Required, and non-empty, when enforcement is not tool-layer. Name the controls that actually catch a breach. An empty array is the failure this clause exists to reject, so minItems is part of the clause, not decoration."
+        }
+      }
+    },
+
+    "escalation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["revision_cap", "targets"],
+      "properties": {
+        "revision_cap": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 6,
+          "description": "Loop bound. On cap, escalate — never extend silently."
+        },
+        "targets": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["condition", "route_role", "response_time_minutes", "fallback"],
+            "properties": {
+              "condition": { "type": "string" },
+              "route_role": { "type": "string" },
+              "response_time_minutes": { "type": "integer", "minimum": 1 },
+              "fallback": {
+                "enum": ["block", "queue", "deny", "rollback"],
+                "description": "Fail-closed by construction. There is deliberately no 'proceed' member: an escalation that times out into proceed is a delay, not a control."
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "evaluation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["case_set_ref", "frozen_set_ref"],
+      "properties": {
+        "case_set_ref": {
+          "type": "string",
+          "description": "Path or URI of the evaluation case set this agent is graded against."
+        },
+        "frozen_set_ref": {
+          "type": ["string", "null"],
+          "description": "Pinned golden set, never edited; null while no frozen set exists. Discriminates model drift from context drift."
+        },
+        "last_run": { "type": ["string", "null"], "format": "date-time" },
+        "pass_rate": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+        "alpha_median": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Median recovery rate over recent iterations. Computed downstream, never self-reported."
+        },
+        "context_fingerprint": {
+          "type": ["string", "null"],
+          "description": "Hash of constitution, rule pack and skills in force at last evaluation."
+        }
+      }
+    },
+
+    "cost": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cost_centre", "budget_month_usd", "alert_at_pct"],
+      "properties": {
+        "cost_centre": { "type": "string" },
+        "budget_run_usd": { "type": ["number", "null"], "minimum": 0 },
+        "budget_month_usd": { "type": "number", "minimum": 0 },
+        "alert_at_pct": { "type": "integer", "minimum": 1, "maximum": 100 },
+        "on_budget_breach": {
+          "enum": ["alert", "suspend"],
+          "description": "'suspend' flips status to suspended. Runaway cost is a named failure mode; a budget without an action is a chart."
+        }
+      }
+    },
+
+    "data_handling": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["classification", "pii_permitted", "log_retention_days", "residency"],
+      "properties": {
+        "classification": { "enum": ["public", "internal", "confidential", "restricted"] },
+        "pii_permitted": { "type": "boolean", "default": false },
+        "pii_justification": { "type": "string" },
+        "assessment_ref": {
+          "type": "string",
+          "description": "Reference to the privacy or risk assessment authorising PII exposure."
+        },
+        "log_retention_days": { "type": "integer", "minimum": 1 },
+        "residency": { "type": "string" },
+        "prompt_logging": { "enum": ["full", "redacted", "metadata-only"] }
+      }
+    },
+
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cadence_days", "next_review", "reviewer_role"],
+      "properties": {
+        "cadence_days": { "type": "integer", "minimum": 7, "maximum": 365 },
+        "last_review": { "type": ["string", "null"], "format": "date" },
+        "next_review": { "type": "string", "format": "date" },
+        "reviewer_role": { "type": "string" },
+        "invocations_since_last_review": { "type": ["integer", "null"], "minimum": 0 }
+      }
+    },
+
+    "retirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["trigger", "decommission_steps"],
+      "properties": {
+        "trigger": {
+          "type": "string",
+          "description": "The observable condition that ends this agent's life. Written at registration, before anyone is attached to it."
+        },
+        "successor_agent_id": { "type": ["string", "null"] },
+        "decommission_steps": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "retired_on": { "type": ["string", "null"], "format": "date" },
+        "evidence_retention_days": { "type": "integer", "minimum": 1 }
+      }
+    },
+
+    "revocation": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "How this agent is stopped. Deny-by-default is the posture you start an agent under; revocation is how you end a run you no longer trust. A registry entry without one describes a fleet nobody can halt.",
+      "required": [
+        "mechanism",
+        "authorising_roles",
+        "invocation",
+        "in_flight",
+        "propagation_target_minutes"
+      ],
+      "properties": {
+        "mechanism": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "registry-status-suspended",
+              "orchestrator-dispatch-block",
+              "credential-revoked-at-tool-server",
+              "runtime-credential-rotation"
+            ]
+          },
+          "contains": {
+            "enum": ["credential-revoked-at-tool-server", "runtime-credential-rotation"]
+          },
+          "description": "The enforcement points actually flipped, in the order they take effect. 'registry-status-suspended' on its own stops the NEXT dispatch; it does not interrupt a run already holding a credential. The in-flight half is therefore not optional, and the 'contains' clause enforces it: at least one of 'credential-revoked-at-tool-server' or 'runtime-credential-rotation' must be present, or this is a stop that lets a live run finish."
+        },
+        "authorising_roles": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 },
+          "description": "Roles that may invoke the suspension without waiting for a change-approval cycle. Roles, never people. At least one must be reachable out of hours: the harness runs when nobody is watching."
+        },
+        "invocation": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The documented path that performs the stop — the command, pipeline or runbook step. A mechanism nobody can name is not available at 02:00."
+        },
+        "in_flight": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["work_items", "worktrees", "open_pull_requests"],
+          "description": "What happens to work already moving. Fail-closed by construction: no member of any enum lets a work item keep advancing on its own, and none of them destroys the evidence. Suspension is not a rollback and it must not become a data-loss event.",
+          "properties": {
+            "work_items": {
+              "enum": ["flag-and-pause", "revert-to-last-human-approved-state", "reassign-to-human"]
+            },
+            "worktrees": {
+              "enum": ["retain-for-evidence"],
+              "description": "One permitted value, because the worktree is evidence. 'discard' was a member and is not any more: a stop that deletes what the agent produced destroys the record of why it was stopped. Single-valued rather than dropped, so the record still states the disposition explicitly."
+            },
+            "open_pull_requests": {
+              "enum": ["convert-to-draft"],
+              "description": "One permitted value. A draft pull request is preserved and cannot merge, which is both halves of the requirement. 'close' was a member and is not any more, because closing discards the review thread that is the evidence of what the agent did."
+            }
+          }
+        },
+        "propagation_target_minutes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1440,
+          "description": "Target elapsed minutes from the authorising role deciding to no further dispatch of this agent. State the target you can meet from the enforcement points above, not the one that sounds decisive."
+        },
+        "last_tested": {
+          "type": ["string", "null"],
+          "format": "date",
+          "description": "Date the stop was last exercised end to end, against this agent, with the evidence retained. Null means the mechanism is written and unproven — which is a gap to disclose, not a control to claim."
+        },
+        "test_cadence_days": { "type": "integer", "minimum": 30, "maximum": 365 }
+      }
+    },
+
+    "change_log": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Append-only. An active entry must carry at least its initial registration; an empty array is not a history.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["date", "entry_version", "change", "approved_by_role"],
+        "properties": {
+          "date": { "type": "string", "format": "date" },
+          "entry_version": { "type": "integer", "minimum": 1 },
+          "change": { "type": "string" },
+          "approved_by_role": { "type": "string" }
+        }
+      }
+    }
+  },
+
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "capability_scope": {
+            "properties": { "enforcement": { "const": "tool-layer" } },
+            "required": ["enforcement"]
+          }
+        },
+        "required": ["capability_scope"]
+      },
+      "else": {
+        "properties": {
+          "capability_scope": { "required": ["compensating_controls"] }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "data_handling": { "properties": { "pii_permitted": { "const": true } } }
+        }
+      },
+      "then": {
+        "properties": {
+          "data_handling": { "required": ["pii_justification", "assessment_ref"] }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "status": { "const": "active" } }, "required": ["status"] },
+      "then": { "required": ["registered_by_role", "change_log"] }
+    },
+    {
+      "if": { "properties": { "status": { "const": "retired" } }, "required": ["status"] },
+      "then": {
+        "properties": {
+          "retirement": {
+            "required": ["retired_on"],
+            "properties": {
+              "retired_on": {
+                "type": "string",
+                "format": "date",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "description": "A retired agent carries a date. 'retired_on': null satisfies a bare required clause, which is why the type is narrowed here rather than left nullable."
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "role": { "enum": ["critic", "persona-reviewer"] } },
+        "required": ["role"]
+      },
+      "then": {
+        "properties": {
+          "capability_scope": {
+            "properties": {
+              "paths": {
+                "properties": {
+                  "write_allow": {
+                    "maxItems": 1,
+                    "items": {
+                      "pattern": "^docs/designs/(\\*|[A-Z][A-Z0-9]{1,9}-\\d+)\\.lld-review\\.md$"
+                    },
+                    "description": "A reviewer writes its verdict file and nothing else. This is a SCOPE constraint, not a cardinality one: ['src/**'] and ['**'] are single-element arrays and are exactly the records this clause exists to reject. The only permitted values are the review glob 'docs/designs/*.lld-review.md' or one concrete review file, 'docs/designs/PROJ-412.lld-review.md'. That one glob is the single exception to a critic's read-only posture, and it exists because the pickup gate reads the verdict file: a verdict nothing persists is not a control. It does not reopen the post-approval mutation race, because the artefact under review stays in write_deny. The agent's Bash grant is for read-only search only, and that limit is charter text, not a tool boundary. The human merge and the diff catch a write to the artefact, and the pickup gate binds the review to the design's blob hash, so a design changed after its review is unapproved. An empty array, which writes nothing, remains valid, and is the right value for a persona reviewer or wherever the orchestrator commits the verdict instead."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

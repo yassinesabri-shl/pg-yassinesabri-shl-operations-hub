@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.internal/harness/trackers.schema.json",
+  "title": "Tracker connections",
+  "description": "How a hub reaches an issue tracker, and what each harness fact does there. One object at the root. Optional: a hub with no `docs/estate/trackers.json` has no tracker, and nothing else changes. Holds no credential, only the names of the environment variables a developer's own credential is read from. Written by `/connect-jira`, never by hand. Read by `check-trackers.mjs` and `jira-sync.mjs`. `check-trackers.mjs` is stricter than this schema where JSON Schema cannot say it: a defect needs `parent: \"story\"` and a story mapping, a story has no parent, `user_env` and `token_env` differ, a route walks only statuses its board lists an id for, a create-field default never names a secret, and `default_board`, `instance` and the like must be own keys of what they name.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "instances", "boards", "default_board", "types"],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "instances": {
+      "type": "object",
+      "description": "Keyed by instance id, which a link file's `ticket` field carries so a later move to another site does not orphan it.",
+      "propertyNames": { "pattern": "^[a-z][a-z0-9-]{0,19}$" },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["kind", "site", "auth"],
+        "properties": {
+          "kind": { "type": "string", "enum": ["jira-cloud"] },
+          "site": { "type": "string", "pattern": "^(?=.{4,253}$)(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\\.)+[A-Za-z]{2,}$", "description": "A bare host name such as `example.atlassian.net`. No scheme, path, port, address, user name or token." },
+          "base_url": { "type": "string", "pattern": "^https://[A-Za-z0-9][A-Za-z0-9./_-]*$", "description": "Only where a scoped token needs the `api.atlassian.com/ex/jira/<cloudId>` form, and always for `oauth`. Default `https://<site>`. Its host must be this instance's site or api.atlassian.com, with no `..`, no `//` and no trailing `/`. For `oauth` it is exactly `https://api.atlassian.com/ex/jira/<cloudId>`, with the site's cloud id." },
+          "auth": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["method", "token_env"],
+            "description": "`api-token`: an Atlassian API token, sent as HTTP basic with the account in `user_env`. `oauth`: an OAuth 2.0 access token, sent as a bearer header, with no `user_env` because the token says who it is.",
+            "properties": {
+              "method": { "type": "string", "enum": ["api-token", "oauth"] },
+              "user_env": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]{0,63}$" },
+              "token_env": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]{0,63}$" }
+            },
+            "allOf": [
+              { "if": { "properties": { "method": { "const": "api-token" } } }, "then": { "required": ["user_env"] } },
+              { "if": { "properties": { "method": { "const": "oauth" } } }, "then": { "not": { "required": ["user_env"] } } }
+            ]
+          }
+        },
+        "allOf": [
+          {
+            "if": { "properties": { "auth": { "properties": { "method": { "const": "oauth" } }, "required": ["method"] } }, "required": ["auth"] },
+            "then": {
+              "required": ["base_url"],
+              "properties": { "base_url": { "pattern": "^https://api\\.atlassian\\.com/ex/jira/[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$" } }
+            }
+          }
+        ]
+      }
+    },
+    "boards": {
+      "type": "object",
+      "propertyNames": { "pattern": "^[a-z][a-z0-9-]{0,29}$" },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["instance", "project", "board", "sprint", "epics"],
+        "properties": {
+          "instance": { "type": "string" },
+          "project": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]{1,9}$" },
+          "board": { "type": "integer", "minimum": 1 },
+          "sprint": { "type": "string", "enum": ["report", "add"], "description": "`report` says whether a ticket is in the board's active sprint; `add` puts it there. Opt-in." },
+          "sprint_field": { "type": "string", "pattern": "^customfield_[0-9]+$", "description": "Discovered, never assumed." },
+          "epics": { "type": "string", "enum": ["ask", "none"], "description": "No Epic key is stored here: `ask` has `/decompose` ask which Epic per decomposition." },
+          "status_ids": {
+            "type": "object",
+            "description": "Status name to status id, so a renamed status is noticed.",
+            "additionalProperties": { "type": "string", "pattern": "^[0-9]+$" }
+          }
+        }
+      }
+    },
+    "default_board": { "type": "string" },
+    "types": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "story": { "$ref": "#/$defs/type" },
+        "defect": { "$ref": "#/$defs/type" }
+      }
+    }
+  },
+  "$defs": {
+    "type": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["issue_type", "moves", "annotations"],
+      "properties": {
+        "issue_type": { "type": "string", "minLength": 1 },
+        "parent": { "type": "string", "enum": ["story"], "description": "A sub-task type: created under the story's ticket." },
+        "fields": { "type": "object", "description": "Defaults for required create fields." },
+        "moves": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "design-merged": { "$ref": "#/$defs/move" },
+            "started": { "$ref": "#/$defs/move" },
+            "in-review": { "$ref": "#/$defs/move" }
+          }
+        },
+        "annotations": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "merged": { "$ref": "#/$defs/annotation" },
+            "validated": { "$ref": "#/$defs/annotation" }
+          }
+        }
+      }
+    },
+    "move": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["route"],
+      "properties": {
+        "route": { "type": "array", "minItems": 2, "uniqueItems": true, "items": { "type": "string", "minLength": 1 }, "description": "The ordered statuses from where the move may start to its target." }
+      }
+    },
+    "annotation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["label"],
+      "properties": {
+        "label": { "type": "string", "pattern": "^[A-Za-z0-9_-]+$" }
+      }
+    }
+  }
+}

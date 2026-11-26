@@ -1,0 +1,100 @@
+name: pickup-gate
+on:
+  push:
+    branches: [main]           # post-merge: the only ref the gate can read
+    paths:
+      - 'docs/designs/**'
+  workflow_dispatch:              # on demand, before pickup
+    inputs:
+      key:
+        description: 'Work-item key, e.g. PROJ-412'
+        required: false
+permissions:
+  contents: read                  # a check-only job needs nothing else
+jobs:
+  gate:
+    name: pickup-gate             # the forge shows the job name, not the file name
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # the gate reads history; a shallow clone exits 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      # The same step, word for word, as fan-in's. Here it lets the gate read the
+      # global context repository that docs/estate/global.json names, for a
+      # global Context: entry, with the credential this hub gives git for its
+      # spokes; the token covers that repository too. A hub without the file
+      # reads no other repository. INTEGRATION POINT, the platform lead's.
+      - name: Let git read private spokes
+        env:
+          SPOKE_TOKEN: ${{ secrets.HARNESS_SPOKE_READ_TOKEN }}
+        run: |
+          set -uo pipefail
+          if [ -z "${SPOKE_TOKEN:-}" ]; then
+            echo "::notice::hub secret HARNESS_SPOKE_READ_TOKEN is not set; a private spoke will report 'cannot reach' (exit 2). See docs/04-creating-a-hub.md in the harness repository."
+            exit 0
+          fi
+          git config --global url."https://x-access-token:${SPOKE_TOKEN}@github.com/".insteadOf "https://github.com/"
+          git config --global --add url."https://x-access-token:${SPOKE_TOKEN}@github.com/".insteadOf "git@github.com:"
+      # Every work item whose design or review landed in this push, gated against
+      # the trunk it landed on.
+      #
+      # Never interpolate ${{ ... }} into a run block. A workflow_dispatch input is
+      # attacker-controlled free text, and inline interpolation makes it shell. Pass
+      # it through env and read it as a variable, then validate it before use.
+      - name: Run the pickup gate
+        env:
+          HARNESS_TRUNK: main    # the gate defaults to `main`; on any other trunk
+                                    # it exits 2 at every invocation without this
+          INPUT_KEY: ${{ inputs.key }}
+          BEFORE_SHA: ${{ github.event.before }}
+          AFTER_SHA: ${{ github.sha }}
+        run: |
+          set -uo pipefail
+
+          if [ -n "${INPUT_KEY:-}" ]; then
+            # A conservative prefilter, not the grammar itself: this pattern accepts
+            # some keys the gate will reject. The gate enforces
+            # ^[A-Z][A-Z0-9]{1,9}-\d+$ and returns exit 3 on anything else, which the
+            # `worst` loop below propagates. The point here is to keep untrusted free
+            # text out of the shell, not to duplicate the gate's regular expression.
+            case "$INPUT_KEY" in
+              [A-Z][A-Z0-9]*-[0-9]*) keys="$INPUT_KEY" ;;
+              *) echo "::error::invalid key '$INPUT_KEY' (expected e.g. PROJ-412)"; exit 3 ;;
+            esac
+          else
+            # github.event.before is all-zeros on a branch's first push and after a
+            # force-push. Diffing from it fails, and a failed diff must not look like
+            # "nothing changed" -- fall back to gating every design on the trunk.
+            if [ -z "${BEFORE_SHA:-}" ] || [ "${BEFORE_SHA//0/}" = "" ]; then
+              range=""
+            elif git cat-file -e "${BEFORE_SHA}^{commit}" 2>/dev/null; then
+              range="$BEFORE_SHA $AFTER_SHA"
+            else
+              range=""
+            fi
+            if [ -n "$range" ]; then
+              changed=$(git diff --name-only $range -- docs/designs) || {
+                echo "::error::could not diff $range"; exit 4; }
+            else
+              echo "::notice::no usable diff base; gating every design on the trunk"
+              changed=$(git ls-tree -r --name-only "$AFTER_SHA" -- docs/designs)
+            fi
+            # All three suffixes, for the reason given in design-gate. A push that
+            # carries only PROJ-412.lld-review.md or PROJ-412.discovery.md changes
+            # what the gate reads.
+            keys=$(printf '%s\n' "$changed" \
+                   | sed -nE 's#.*/([A-Z][A-Z0-9]{1,9}-[0-9]+)\.(lld(-review)?|discovery)\.md$#\1#p' | sort -u)
+          fi
+
+          [ -z "$keys" ] && { echo "no design, review or discovery map changes"; exit 0; }
+          worst=0
+          for k in $keys; do
+            node scripts/check-dev-ready.js "$k" || rc=$?
+            rc=${rc:-0}
+            [ "$rc" -gt "$worst" ] && worst=$rc
+            unset rc
+          done
+          exit "$worst"

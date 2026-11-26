@@ -1,0 +1,64 @@
+name: validation-gate
+on:
+  pull_request:                   # no `paths:` filter — the script decides "nothing to check"
+permissions:
+  contents: read
+jobs:
+  validation:
+    name: validation-gate         # branch protection names the job, not the file
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # the check reads history: the Design line names a commit,
+                                  # and a shallow clone that lacks it exits 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check the validation reports changed in this pull request
+        env:
+          HARNESS_TRUNK: main
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -uo pipefail
+
+          if git cat-file -e "${BASE_SHA}^{commit}" 2>/dev/null; then
+            changed=$(git diff --name-only "$BASE_SHA" HEAD -- docs/designs) || {
+              echo "::error::could not diff $BASE_SHA..HEAD"; exit 4; }
+          else
+            echo "::notice::base commit unavailable; checking every validation report in this branch"
+            changed=$(git ls-tree -r --name-only HEAD -- docs/designs)
+          fi
+
+          # A commit that touches the DESIGN a report validates also changes what the
+          # report has to agree with, so both suffixes select a key. A design changed
+          # after its report was written is exactly the case the Design line catches.
+          keys=$(printf '%s\n' "$changed" \
+                 | sed -nE 's#.*/([A-Z][A-Z0-9]{1,9}-[0-9]+)\.(validation|lld)\.md$#\1#p' | sort -u)
+
+          [ -z "$keys" ] && { echo "no validation report or design changes"; exit 0; }
+
+          candidate="$RUNNER_TEMP/candidate-trunk.git"
+          {
+            git init --bare --quiet --initial-branch="$HARNESS_TRUNK" "$candidate" &&
+            git push --quiet "$candidate" "HEAD:refs/heads/$HARNESS_TRUNK" &&
+            git clone --quiet "$candidate" "$RUNNER_TEMP/candidate" &&
+            cd "$RUNNER_TEMP/candidate"
+          } || { echo "::error::could not build the candidate trunk"; exit 4; }
+
+          # A design pull request has no report yet, and that is not a finding here:
+          # a key with no report on the candidate trunk is skipped with a line saying so.
+          # A key WITH a report is checked, and "the design changed after it was
+          # validated" is what a later design edit fails on.
+          worst=0
+          for k in $keys; do
+            if ! git ls-tree -r --name-only HEAD -- docs/designs | grep -qx "docs/designs/$k.validation.md"; then
+              echo "$k: no validation report on this branch; nothing to check"
+              continue
+            fi
+            node scripts/check-validation.js "$k" || rc=$?
+            rc=${rc:-0}
+            [ "$rc" -gt "$worst" ] && worst=$rc
+            unset rc
+          done
+          exit "$worst"

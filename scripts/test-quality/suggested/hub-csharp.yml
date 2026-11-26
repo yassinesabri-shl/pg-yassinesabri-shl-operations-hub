@@ -1,0 +1,42 @@
+# Part of the harness asset library c6f3b4427d58f7c3 (see VERSION.json) · 2026-10-21
+#
+# A suggested ruleset, off until a hub adopts it: C# tests with xUnit, NUnit and MSTest.
+# `/add-repo` offers it when a spoke holds C# tests the library has no rules for; adopting it
+# copies this file to rules/ and its fixture to tests/test-quality/fixtures/csharp/, in a pull request
+# a person merges. After that it is the hub's own rule, judged like the library's. Fixtures:
+# tests/test-quality/fixtures-suggested/csharp/. ERROR is a clear violation.
+# Attributes are matched as text: Semgrep's C# parser does not take every attribute list.
+rules:
+  - id: hub-csharp-skipped
+    languages: [csharp]
+    severity: ERROR
+    message: "A skipped or ignored test never runs, so it proves nothing. Enable it, or delete it with the criterion it covered."
+    paths:
+      include: ["*Test.cs", "*Tests.cs"]
+    pattern-either:
+      - pattern-regex: '(?m)^[ \t]*\[[^\]\n]*\b(Fact|Theory)\b[^\]\n]*\bSkip\s*='
+      - pattern-regex: '(?m)^[ \t]*\[[^\]\n]*\bIgnore\b'
+
+  - id: hub-csharp-tautology
+    languages: [csharp]
+    severity: ERROR
+    message: "This assertion cannot fail: it compares a value with itself or asserts a constant. Assert the behaviour under test."
+    paths:
+      include: ["*Test.cs", "*Tests.cs"]
+    pattern-either:
+      - pattern: Assert.True(true)
+      - pattern: Assert.True(true, ...)
+      - pattern: Assert.False(false)
+      - pattern: Assert.IsTrue(true)
+      - pattern: Assert.IsFalse(false)
+      - pattern: Assert.Equal($X, $X)
+      - pattern: Assert.AreEqual($X, $X)
+      - pattern: Assert.Same($X, $X)
+
+  - id: hub-csharp-empty-test
+    languages: [csharp]
+    severity: ERROR
+    message: "This test has an empty body: it always passes."
+    paths:
+      include: ["*Test.cs", "*Tests.cs"]
+    pattern-regex: '(?m)^[ \t]*\[[^\]\n]*\b(Fact|Theory|Test|TestMethod|TestCase)\b[^\]\n]*\][ \t]*\r?\n(?:[ \t]*\[[^\]\n]*\][ \t]*\r?\n)*[ \t]*(?:public\s+)?(?:async\s+)?(?:void|Task)\s+\w+\s*\([^)]*\)\s*\{\s*\}'

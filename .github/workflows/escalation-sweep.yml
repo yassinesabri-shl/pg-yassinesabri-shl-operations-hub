@@ -1,0 +1,58 @@
+name: escalation-sweep
+on:
+  schedule:
+    - cron: '*/15 * * * *'        # the ladder; the team may choose another interval
+    - cron: '0 7 * * 1-5'         # the standing sweep, each weekday at 07:00 UTC
+  issue_comment:
+    types: [created]              # a person's /ack, /stop or /withdraw on a [shl-harness] issue
+  issues:
+    types: [closed]               # a [shl-harness] issue a person closed while it is open reopens
+  workflow_dispatch:
+    inputs:
+      standing:
+        description: 'Run as a standing sweep'
+        type: boolean
+        default: false
+permissions:
+  contents: read                  # the trunk: the stop list and the upstream state
+  issues: write                   # the record: issues, comments, labels and artefacts
+  pull-requests: read             # the gate scan reads the hub's pull requests
+concurrency:
+  group: escalation-sweep         # two sweeps never write the record at once
+  cancel-in-progress: false
+jobs:
+  escalation-sweep:
+    name: escalation-sweep        # the forge shows the job name, not the file name
+    # An issue event starts it only for a [shl-harness] issue, a comment only when it is a command
+    # such as /ack, and never the job's own comment or close.
+    if: >-
+      (github.event_name != 'issue_comment' && github.event_name != 'issues') ||
+      (startsWith(github.event.issue.title, '[shl-harness] ') && github.event.sender.login != 'github-actions[bot]' &&
+       (github.event_name == 'issues' || startsWith(github.event.comment.body, '/')))
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # the script reads the trunk at the commit each escalation was raised on
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Sweep the escalations
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HARNESS_TRUNK: main               # the script defaults to `main`
+          HARNESS_ESCALATION_TZ: UTC           # the hub's time zone, an IANA name such as Europe/Paris
+          HARNESS_ESCALATION_DAY_END: '17:00'
+        run: |
+          set -uo pipefail
+          standing=''
+          if [ "${{ github.event.schedule }}" = '0 7 * * 1-5' ] || [ "${{ inputs.standing }}" = 'true' ]; then standing='--standing'; fi
+          rc=0
+          node scripts/escalation.mjs sweep --gates $standing > "$RUNNER_TEMP/escalation-sweep.txt" 2>&1 || rc=$?
+          cat "$RUNNER_TEMP/escalation-sweep.txt"
+          case "$rc" in
+            0) exit 0 ;;
+            1) echo "::error::the escalation record breaks a reader rule (exit 1). The report names the file and the line"; exit 1 ;;
+            2) echo "::warning::the escalation sweep is incomplete (exit 2): a part of the record or the pull request list cannot be read, and the report names it"; exit 0 ;;
+            *) echo "::error::scripts/escalation.mjs exited $rc: exit 3 is a usage fault and exit 4 an internal fault of the installed script"; exit "$rc" ;;
+          esac
