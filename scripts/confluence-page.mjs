@@ -449,6 +449,19 @@ function standardRule(line) {
 
 /* ------------------------------------------------------------------ the summary (§7.1) */
 
+/**
+ * A table cell set inside a sentence ("Not X, because Y."): its first letter is lowered only when the
+ * cell reads as an ordinary phrase, so "Keep every engine" becomes "keep every engine". A first word
+ * with another capital (MySQL, AWS) keeps its case, and so does a cell of one word, which is most often
+ * a name (Kafka).
+ */
+export function inSentence(cell) {
+  const words = String(cell).trim().split(/\s+/);
+  const [first, second] = words;
+  if (!first || !second || !first.match(/^[A-Z][a-z]+[,;:]?$/) || !second.match(/^[a-z]/)) return String(cell).trim();
+  return first[0].toLowerCase() + String(cell).trim().slice(1);
+}
+
 /** The value the summary's origin key holds: the page URL and the page id (R-04). */
 export const originOf = (url, pageId) => `${url} (Confluence page ${pageId})`;
 
@@ -491,7 +504,7 @@ export function summaryOf(judged, page, status) {
     const options = [];
     for (const b of parts.sections.get('Options considered') || []) {
       if (b.type !== 'table') continue;
-      for (const [opt, why] of rows(b).slice(1)) if (opt) options.push(`- Not ${opt.replace(/[.]$/, '')}, because ${String(why || '').replace(/[.]$/, '')}.`);
+      for (const [opt, why] of rows(b).slice(1)) if (opt) options.push(`- Not ${inSentence(opt.replace(/[.]$/, ''))}, because ${inSentence(String(why || '').replace(/[.]$/, ''))}.`);
     }
     const rejected = options.length ? options.join('\n') : sec('Options considered');
     return [

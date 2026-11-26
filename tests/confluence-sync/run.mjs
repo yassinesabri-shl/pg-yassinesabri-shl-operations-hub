@@ -27,7 +27,7 @@
  */
 
 import { execFileSync, spawn } from 'node:child_process';
-import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -279,10 +279,13 @@ const FIXTURES = [
       if (!t.includes('(Confluence page 101)')) p.push('the origin does not name the page id');
       if (!t.includes(`description: ${DECISION}`)) p.push('the description is not the first Decision sentence');
       if (!t.includes('globs: ["services/orders/**","libs/db/**"]')) p.push('Applies to did not become the globs');
-      if (!t.includes('- Not Keep every engine, because Three sets of backups to run.')) p.push('an option did not become a Rejected line');
+      if (!t.includes('- Not keep every engine, because three sets of backups to run.')) p.push('an option did not become a Rejected line');
       if (!r.result.changed) p.push('changed is false');
       if (!body(r).includes('Ada Author')) p.push('the pull request does not name the author of the page version');
       if (body(r).trim().split('\n').pop() !== WATERMARK) p.push('the pull request description does not end with the watermark');
+      const top = body(r).split('\n').filter(Boolean);
+      if (!top[0].startsWith('**Confluence:** ') || !top[0].includes(' · **Space:** TEST · **Folder:** Key decisions > global · **Level:** global')) p.push(`the description does not open with the bold source line: ${top[0]}`);
+      if (top[1] !== '**1 created**') p.push(`the counts are not one bold line: ${top[1]}`);
       if (byId(r, 'ADR-999') || w.fake.state.requests.some((q) => q.path.includes('/folders/13') || q.path.includes('/folders/14'))) p.push('the run read the templates folder');
       return p;
     } },
@@ -574,7 +577,7 @@ const FIXTURES = [
       const t = w.wrote(r, ADR_101_PATH) || '';
       const p = [...expectAction(r, 'ADR-101', 'created'), ...wellFormed(t, ADR_101_PATH)];
       if (!t.includes('globs: ["services/orders/**","libs/db/**"]')) p.push('"applies to" did not give the globs');
-      if (!t.includes('- Not Keep every engine, because Three sets of backups to run.')) p.push('"Options Considered" did not give Rejected');
+      if (!t.includes('- Not keep every engine, because three sets of backups to run.')) p.push('"Options Considered" did not give Rejected');
       if (!t.includes('Each team picks its own database today.')) p.push('"context" did not give Why');
       return p;
     } },
@@ -651,6 +654,44 @@ const FIXTURES = [
     level: 'global', nodes: [ADR_101()],
     run: (w) => runLogged(w, { NODE_OPTIONS: '--use-system-ca' }),
     check: (w, r) => [...expectAction(r, 'ADR-101', 'created'), ...(r.starts.length === 1 ? [] : [`Node started ${r.starts.length} time(s), expected 1`])] },
+  { n: 57, name: 'a second apply while an earlier run\'s worktree still holds the branch stops with exit 1, names the folder, and removes nothing', exit: 1,
+    level: 'global', nodes: [ADR_101()],
+    run: async (w) => {
+      const r1 = await w.run();
+      if (r1.status !== 0) throw new Error(`the first apply exited ${r1.status}: ${r1.stderr}`);
+      const r2 = await w.run();
+      return { ...r2, first: r1 };
+    },
+    check: (w, r) => {
+      const left = realpathSync(r.first.result.worktree);
+      const p = [];
+      if (!r.stderr.includes(`checked out in ${left}`)) p.push(`the message does not name the earlier worktree: ${r.stderr.trim().split('\n').slice(-2).join(' | ')}`);
+      if (!r.stderr.includes('git worktree remove')) p.push('the message does not say how to remove it');
+      if (r.stderr.includes('could not be reached')) p.push('the message still blames Confluence');
+      if (!existsSync(left)) p.push('the earlier worktree was removed');
+      return p;
+    } },
+  { n: 58, name: 'an earlier run\'s worktree whose folder is gone is pruned, and the next apply works', exit: 0,
+    level: 'global', nodes: [ADR_101()],
+    run: async (w) => {
+      const r1 = await w.run();
+      if (r1.status !== 0) throw new Error(`the first apply exited ${r1.status}: ${r1.stderr}`);
+      rmSync(r1.result.worktree, { recursive: true, force: true });
+      return w.run();
+    },
+    check: (w, r) => expectAction(r, 'ADR-101', 'created') },
+  { n: 59, name: 'the pull request shows a path only for a file that exists, and each reason starts as a sentence', exit: 0,
+    level: 'global', nodes: [ADR_101(), page(103, G_ADRS, 'ADR-103: A record without its Rules', adrPage({ omit: ['Rules'] })), page(104, G_ADRS, 'ADR-104: One claim', adrPage()), page(105, G_ADRS, 'ADR-104: A second claim', adrPage())],
+    check: (w, r) => {
+      const b = body(r);
+      const line = (id) => b.split('\n').find((l) => l.startsWith(`- ${id} `)) || '';
+      const p = [];
+      if (!line('ADR-101').includes(`→ \`${ADR_101_PATH}\``)) p.push('the created record lost its path');
+      if (line('ADR-103').includes('→')) p.push(`a record that needs reformatting shows a path: ${line('ADR-103')}`);
+      if (line('ADR-104').includes('→')) p.push(`a duplicate shows a path: ${line('ADR-104')}`);
+      if (!line('ADR-101').includes('. Status Approved')) p.push(`the reason does not start with a capital: ${line('ADR-101')}`);
+      return p;
+    } },
 ];
 
 /* ----------------------------------------------------------------------- the runner */

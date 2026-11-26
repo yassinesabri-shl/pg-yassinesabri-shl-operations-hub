@@ -20,8 +20,8 @@
 |---|---|
 | Library hash | <the upstreamLibraryHash from VERSION.json> |
 | Library file count | <the fileCount from VERSION.json> |
-| Library content hash | 9ac31d2af63c449c79315aaca420f5ed09c586187aaa0fefb55fb43c92c2ad5b |
-| Library commit | d43c2c7fc6484d00eab4552abeeb8a54a8966a66 |
+| Library content hash | 61c62dc7b024c4679642728037e052a8918b7ed32428d88085065cfaa7b6673e |
+| Library commit | 278c1069c0c15b00c4089306a0e54373fcd3e5d6 |
 | Generated on | 2026-11-26 |
 | Interviewed role | <the role that sat the interview — a role, never a named individual> |
 | Primary runtime | <the primary agent runtime> |
@@ -100,3 +100,4 @@ original as `<name>.shl-new` and is listed in §4 until a person merges or delet
 | Date | From library commit | To library commit | Replaced | Merged | Proposed (`.shl-new`) | Pull request |
 |---|---|---|---|---|---|---|
 | <date> | <12 hex> | <12 hex> | <count of verbatim files replaced> | <count of adapted files merged clean> | <count, each listed in §4> | <reference> |
+| 2026-11-26 | d43c2c7fc648 | 278c1069c0c1 | 3 | 0 | 0 | `harness/upgrade-278c1069c0c1` |
