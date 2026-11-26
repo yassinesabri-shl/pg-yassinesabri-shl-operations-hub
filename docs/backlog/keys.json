@@ -1,6 +1,8 @@
 {
   "schema_version": 1,
   "prefix": "OPS",
-  "next": 1,
-  "blocks": []
+  "next": 3,
+  "blocks": [
+    { "from": 1, "to": 2, "taken_by": "decomposition", "slug": "paid-at-cut-off" }
+  ]
 }
