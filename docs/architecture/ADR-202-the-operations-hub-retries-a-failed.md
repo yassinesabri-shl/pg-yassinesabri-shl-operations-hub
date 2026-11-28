@@ -1,12 +1,12 @@
 ---
 name: ADR-202
 description: The operations hub retries a failed job three times, then parks it.
-globs: ["internal/**"]
+globs: ["internal/**","jobs/**"]
 alwaysApply: false
 kind: adr
 status: Accepted
 owner: Platform architect
-revision: 1
+revision: 2
 origin: https://shl.atlassian.net/wiki/spaces/~71202058c67a3fe34f4165a8b8c49dc509cd2f/pages/474843503/ADR-202+The+operations+hub+retries+a+failed+job+three+times (Confluence page 474843503)
 ---
 
